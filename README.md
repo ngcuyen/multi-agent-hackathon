@@ -2,8 +2,20 @@
 
 A complete guide to set up WireGuard VPN server on AWS EC2 (Ubuntu) with Docker and connect from local machines (Ubuntu/Windows).
 
+## 🚀 Quick Start
+
+For automated setup, run the installation script:
+
+```bash
+# Download and run the automated setup script
+curl -sSL https://raw.githubusercontent.com/vanhoangkha/WireGuard-EC2/master/setup.sh | bash
+```
+
+Or follow the manual setup guide below.
+
 ## 📋 Table of Contents
 
+- [Quick Start](#quick-start)
 - [Prerequisites](#prerequisites)
 - [EC2 Setup](#ec2-setup)
 - [WireGuard Installation](#wireguard-installation)
@@ -14,6 +26,7 @@ A complete guide to set up WireGuard VPN server on AWS EC2 (Ubuntu) with Docker 
 - [Testing Connection](#testing-connection)
 - [Troubleshooting](#troubleshooting)
 - [Security Considerations](#security-considerations)
+- [Additional Documentation](#additional-documentation)
 
 ## 🚀 Prerequisites
 
@@ -488,6 +501,27 @@ sudo docker-compose up -d
 - **Check WireGuard UI "Status" tab** regularly
 - **Monitor unusual connection patterns**
 - **Review client configurations** periodically
+
+## 📚 Additional Documentation
+
+- **[DETAILED_SETUP.md](DETAILED_SETUP.md)** - Comprehensive step-by-step setup guide with advanced configuration
+- **[AWS_SECURITY_SETUP.md](AWS_SECURITY_SETUP.md)** - Complete AWS Security Group configuration guide
+- **[QUICK_TEST.md](QUICK_TEST.md)** - Quick testing and verification guide
+- **[setup.sh](setup.sh)** - Automated installation script
+
+### Setup Options:
+
+1. **Automated Setup** (Recommended for beginners):
+   ```bash
+   curl -sSL https://raw.githubusercontent.com/vanhoangkha/WireGuard-EC2/master/setup.sh | bash
+   ```
+
+2. **Manual Setup** (For advanced users):
+   - Follow this README for basic setup
+   - Use [DETAILED_SETUP.md](DETAILED_SETUP.md) for comprehensive guide
+
+3. **AWS Security Configuration**:
+   - [AWS_SECURITY_SETUP.md](AWS_SECURITY_SETUP.md) covers Console, CLI, and Terraform methods
 
 ## 📚 Additional Resources
 
