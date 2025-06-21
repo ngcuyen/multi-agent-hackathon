@@ -1,0 +1,47 @@
+# Python Cache
+__pycache__/
+*.py[cod]
+docker/
+
+# Virtual Environment
+venv/
+env/
+env.bak/
+venv.bak/
+.venv/
+
+# Packaging
+*.egg-info/
+dist/
+build/
+
+# IDE and Editor settings
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Test output
+.coverage
+*.log
+htmlcov/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# Pytest
+.cache
+pytestdebug.log
+
+# Miscellaneous
+*.DS_Store
+*.pdb
+*.sqlite3
+*.db
+
+# Local environment variable files
+.env
+.env.local
+.env.production
+.env_dev
+ngrok.py

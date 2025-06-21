@@ -1,0 +1,17 @@
+services:
+  themovie:
+    image: themovie:0.0.1
+    container_name: themovie
+    build:
+      context: .
+      dockerfile: app/themovie/Dockerfile
+    volumes:
+      - .:/app
+    working_dir: /app
+    env_file:
+      - ./app/themovie/.env
+    ports:
+      - "8080:8080"
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
