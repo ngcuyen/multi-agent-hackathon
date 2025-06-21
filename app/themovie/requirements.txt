@@ -12,8 +12,8 @@ SQLAlchemy-Utils==0.41.2
 langgraph==0.2.74
 langchain==0.3.19
 langchain-community==0.3.18
-pydantic==2.9.2
-pydantic_core==2.23.4
+pydantic==2.11.7
+pydantic_core==2.33.2
 boto3==1.36.25
 botocore==1.36.25
 langchain_aws==0.2.13
@@ -24,8 +24,4 @@ psycopg2==2.9.10
 pillow==11.1.0
 beanie==1.29.0
 fastapi-pagination==0.12.34
-torch==2.2.0
-torchvision==0.17.0
-torchaudio==2.2.0
-torch-geometric==2.4.0
 pandas==2.2.0

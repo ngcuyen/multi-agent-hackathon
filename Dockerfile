@@ -1,18 +1,20 @@
-FROM nvidia/cuda:12.1.1-cudnn8-runtime-ubuntu22.04
+# Base image
+FROM python:3.12
 
-RUN apt update && apt install -y python3 python3-pip python3-dev && \
-    ln -s /usr/bin/python3 /usr/bin/python
-
+# Set the working directory in the container
 WORKDIR /app
 
+# Copy the requirements file
 COPY app/themovie/requirements.txt .
+
+# Install the requirements
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy toàn bộ project
+# Copy the whole FastAPI app
 COPY . .
 
-# Mở cổng
+# Expose the port the app runs on
 EXPOSE 8080
 
-# Chạy Uvicorn (vì bạn dùng reload nên dùng uvicorn thay vì gunicorn)
+# Command to run the app
 CMD ["uvicorn", "app.themovie.main:app", "--host", "0.0.0.0", "--port", "8080", "--workers", "4", "--timeout-keep-alive", "100", "--reload"]
