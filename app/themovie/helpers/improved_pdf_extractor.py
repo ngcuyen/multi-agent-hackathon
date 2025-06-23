@@ -242,21 +242,21 @@ Gợi ý giải pháp:
                 
                 # Try OCR extraction
                 try:
-                    from app.themovie.helpers.ocr_extractor import OCRExtractor
+                    from app.themovie.helpers.lightweight_ocr import LightweightOCR
                     
-                    ocr_extractor = OCRExtractor()
+                    ocr_extractor = LightweightOCR()
                     ocr_result = ocr_extractor.extract_text_from_pdf(file_content)
                     
                     if ocr_result['success'] and ocr_result['text'].strip():
-                        logger.info(f"✅ OCR successful with {ocr_result['engine_used']}: {len(ocr_result['text'])} characters")
+                        logger.info(f"✅ Lightweight OCR successful with {ocr_result['engine_used']}: {len(ocr_result['text'])} characters")
                         return ocr_result['text']
                     else:
-                        logger.warning(f"OCR failed: {ocr_result.get('error', 'Unknown error')}")
+                        logger.warning(f"Lightweight OCR failed: {ocr_result.get('error', 'Unknown error')}")
                         
                 except ImportError:
-                    logger.warning("OCR extractor not available")
+                    logger.warning("Lightweight OCR not available")
                 except Exception as e:
-                    logger.warning(f"OCR extraction failed: {str(e)}")
+                    logger.warning(f"Lightweight OCR extraction failed: {str(e)}")
                 
                 # Fallback message if OCR fails
                 return f"""[PDF chứa hình ảnh - cần OCR]
