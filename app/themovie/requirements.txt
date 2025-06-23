@@ -19,9 +19,22 @@ botocore==1.36.25
 langchain_aws==0.2.13
 langchain_openai==0.3.6
 langgraph-checkpoint-mongodb==0.1.0
-psycopg2-binary==2.9.3
-psycopg2==2.9.10
+psycopg2-binary==2.9.10
 pillow==11.1.0
 beanie==1.29.0
 fastapi-pagination==0.12.34
 pandas==2.2.0
+PyPDF2==3.0.1
+python-docx==1.1.2
+beautifulsoup4==4.12.3
+aiohttp==3.10.11
+requests==2.32.3
+python-multipart==0.0.9
+# OCR dependencies
+easyocr==1.7.1
+pdf2image==1.17.0
+# Optional: pytesseract (requires tesseract-ocr system package)
+# pytesseract==0.3.10
+# Optional: paddleocr (larger but good accuracy)
+# paddlepaddle==2.6.1
+# paddleocr==2.7.3

@@ -39,4 +39,27 @@
     ```sh
     docker-compose down
     ```
-test
+## New Features
+
+### Document Summarization API
+
+The application now includes a comprehensive document summarization API with the following endpoints:
+
+- **POST** `/api/v1/text/summary/text` - Tóm tắt văn bản trực tiếp
+- **POST** `/api/v1/text/summary/document` - Tóm tắt tài liệu từ file upload
+- **POST** `/api/v1/text/summary/url` - Tóm tắt nội dung từ URL
+- **GET** `/api/v1/text/summary/types` - Lấy danh sách loại tóm tắt
+
+#### Features:
+- Hỗ trợ nhiều định dạng file: PDF, DOCX, TXT
+- Nhiều loại tóm tắt: general, bullet_points, key_insights, executive_summary, detailed
+- Hỗ trợ tiếng Việt và tiếng Anh
+- Tích hợp với OpenAI và AWS Bedrock
+- Trích xuất nội dung từ URL
+
+#### Quick Test:
+```bash
+python test_summary_api.py
+```
+
+Xem chi tiết trong [SUMMARY_API_DOCS.md](SUMMARY_API_DOCS.md)

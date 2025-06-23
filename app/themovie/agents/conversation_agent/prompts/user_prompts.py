@@ -1,16 +1,17 @@
 def user_prompt_chat_node(user_input) -> str:
     return f"""
-        {user_input}
+        NGƯỜI DÙNG YÊU CẦU:
+        "{user_input.strip()}"
+        
+        Vui lòng phân tích và xác định ý định của người dùng để chọn tính năng phù hợp.
     """
 
-
-def user_prompt_chat_recommendation_node(movie_data, user_input) -> str:
-    return f"""THÔNG TIN PHIM KHUYẾN NGHỊ:
-{movie_data}
-
-QUAN TRỌNG: Danh sách phim trên đã được sắp xếp theo thứ tự ưu tiên khuyến nghị từ cao đến thấp. KHÔNG ĐƯỢC thay đổi thứ tự này trong câu trả lời.
+def user_prompt_document_analysis_node(file_data_summary, user_input) -> str:
+    return f"""DỮ LIỆU TÀI LIỆU:
+{file_data_summary}
 
 CÂU HỎI CỦA NGƯỜI DÙNG:
 "{user_input.strip()}"
 
-Hãy trả lời câu hỏi dựa trên thông tin phim được cung cấp, giữ nguyên thứ tự ưu tiên và giải thích tại sao các bộ phim này phù hợp."""
+NHIỆM VỤ:
+Phân tích tài liệu và trích xuất thông tin cần thiết để trả lời câu hỏi hoặc tạo tóm tắt/báo cáo theo yêu cầu của người dùng. Đảm bảo chỉ sử dụng dữ liệu đã được cung cấp trong tài liệu."""

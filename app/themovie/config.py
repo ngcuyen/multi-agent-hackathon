@@ -67,3 +67,4 @@ PG_PASSWORD = os.getenv("PG_PASSWORD")
 PG_PORT = os.getenv("PG_PORT")
 
 KNOWLEDGEBASE_ID = os.getenv("KNOWLEDGEBASE_ID")
+S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME")

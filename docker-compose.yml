@@ -1,17 +1,32 @@
 services:
   themovie:
     image: themovie:0.0.1
-    container_name: themovie
+    container_name: themovie-app
     build:
       context: .
       dockerfile: app/themovie/Dockerfile
-    volumes:
-      - .:/app
-    working_dir: /app
+    ports:
+      - '8080:8080'
     env_file:
       - ./app/themovie/.env
-    ports:
-      - "8080:8080"
-    runtime: nvidia
-    environment:
-      - NVIDIA_VISIBLE_DEVICES=all
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'curl',
+          '-f',
+          'http://localhost:8080/themovie/public/api/health',
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - themovie-network
+
+networks:
+  themovie-network:
+    driver: bridge
