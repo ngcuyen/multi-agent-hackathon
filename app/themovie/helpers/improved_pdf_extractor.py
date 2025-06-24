@@ -39,23 +39,83 @@ class ImprovedPDFExtractor:
         """
         errors = []
         
-        for i, method in enumerate(self.extraction_methods, 1):
+    def extract_text_from_pdf(self, file_content: bytes) -> str:
+        """
+        Extract text from PDF with multiple fallback methods
+        
+        Args:
+            file_content: PDF file content as bytes
+            
+        Returns:
+            Extracted text string
+            
+        Raises:
+            ValueError: If no text could be extracted
+        """
+        errors = []
+        
+        # FORCE OCR FIRST for better results
+        logger.info("🔍 Trying OCR first for better text extraction")
+        try:
+            ocr_text = self._extract_with_basic_ocr_fallback(file_content)
+            if ocr_text and len(ocr_text.strip()) > 100 and not self._is_metadata_only(ocr_text):
+                logger.info(f"✅ OCR successful: {len(ocr_text)} characters")
+                return self._clean_extracted_text(ocr_text)
+            else:
+                logger.warning("OCR returned insufficient text, trying PyPDF2 methods...")
+        except Exception as e:
+            logger.warning(f"OCR failed: {e}, trying PyPDF2 methods...")
+        
+        for i, method in enumerate(self.extraction_methods[:-1], 1):  # Skip OCR method since we tried it first
             try:
-                logger.info(f"Trying extraction method {i}/{len(self.extraction_methods)}")
+                logger.info(f"Trying extraction method {i}/{len(self.extraction_methods)-1}")
                 text = method(file_content)
                 
-                if text and len(text.strip()) > 0:
+                # Check if we got meaningful text (more than 100 characters and not just metadata)
+                if text and len(text.strip()) > 100 and not self._is_metadata_only(text):
                     logger.info(f"✅ Successfully extracted text using method {i}: {len(text)} characters")
                     return self._clean_extracted_text(text)
                 else:
-                    error_msg = f"Method {i} returned empty text"
-                    logger.warning(error_msg)
-                    errors.append(error_msg)
+                    if text:
+                        logger.warning(f"❌ Method {i} returned insufficient/metadata text: {len(text.strip())} characters")
+                    else:
+                        logger.warning(f"❌ Method {i} returned empty text")
+                    errors.append(f"Method {i}: Insufficient text ({len(text.strip()) if text else 0} chars)")
                     
             except Exception as e:
                 error_msg = f"Method {i} failed: {str(e)}"
                 logger.warning(error_msg)
                 errors.append(error_msg)
+        
+        # If all methods failed, raise detailed error
+        error_summary = "Không thể trích xuất text từ PDF. Chi tiết lỗi:\\n" + "\\n".join(errors)
+        
+        # Add additional diagnostic info
+        try:
+            pdf_file = BytesIO(file_content)
+            pdf_reader = PyPDF2.PdfReader(pdf_file, strict=False)
+            
+            diagnostic_info = f"""
+Thông tin chẩn đoán PDF:
+- Số trang: {len(pdf_reader.pages)}
+- Kích thước file: {len(file_content):,} bytes
+- Mã hóa: {'Có' if pdf_reader.is_encrypted else 'Không'}
+
+Khả năng nguyên nhân:
+1. PDF được tạo từ scan/hình ảnh (cần OCR)
+2. PDF sử dụng font đặc biệt hoặc encoding không hỗ trợ
+3. PDF có cấu trúc phức tạp (form, table đặc biệt)
+
+Gợi ý giải pháp:
+- Thử chuyển đổi PDF sang định dạng khác (Word, Text)
+- Sử dụng công cụ OCR nếu là PDF scan
+- Kiểm tra PDF có mở được bình thường không
+"""
+            
+            raise ValueError(error_summary + diagnostic_info)
+            
+        except Exception:
+            raise ValueError(error_summary)
         
         # If all methods failed, raise detailed error
         error_summary = "Không thể trích xuất text từ PDF. Chi tiết lỗi:\n" + "\n".join(errors)
@@ -70,139 +130,112 @@ Thông tin chẩn đoán PDF:
 - Số trang: {len(pdf_reader.pages)}
 - Kích thước file: {len(file_content):,} bytes
 - Mã hóa: {'Có' if pdf_reader.is_encrypted else 'Không'}
-- Metadata: {pdf_reader.metadata}
 
 Khả năng nguyên nhân:
 1. PDF được tạo từ scan/hình ảnh (cần OCR)
 2. PDF sử dụng font đặc biệt hoặc encoding không hỗ trợ
 3. PDF có cấu trúc phức tạp (form, table đặc biệt)
-4. PDF bị hỏng hoặc có bảo vệ đặc biệt
 
 Gợi ý giải pháp:
 - Thử chuyển đổi PDF sang định dạng khác (Word, Text)
 - Sử dụng công cụ OCR nếu là PDF scan
 - Kiểm tra PDF có mở được bình thường không
 """
-            error_summary += diagnostic_info
             
-        except Exception as diag_error:
-            error_summary += f"\nKhông thể chẩn đoán PDF: {str(diag_error)}"
-        
-        logger.error(error_summary)
-        raise ValueError(error_summary)
+            raise ValueError(error_summary + diagnostic_info)
+            
+        except Exception:
+            raise ValueError(error_summary)
     
     def _extract_with_pypdf2_strict(self, file_content: bytes) -> str:
         """Method 1: Standard PyPDF2 extraction with strict mode"""
-        pdf_file = BytesIO(file_content)
-        pdf_reader = PyPDF2.PdfReader(pdf_file, strict=True)
-        
-        text = ""
-        for page_num, page in enumerate(pdf_reader.pages):
-            page_text = page.extract_text()
-            text += page_text + "\n"
-            logger.debug(f"Page {page_num + 1}: {len(page_text)} characters")
-        
-        return text
+        try:
+            pdf_file = BytesIO(file_content)
+            pdf_reader = PyPDF2.PdfReader(pdf_file, strict=True)
+            
+            text = ""
+            for page in pdf_reader.pages:
+                text += page.extract_text()
+            
+            return text
+            
+        except Exception as e:
+            logger.debug(f"Strict PyPDF2 extraction failed: {e}")
+            raise
     
     def _extract_with_pypdf2_warnings_ignored(self, file_content: bytes) -> str:
-        """Method 2: PyPDF2 extraction with warnings ignored"""
-        pdf_file = BytesIO(file_content)
-        pdf_reader = PyPDF2.PdfReader(pdf_file, strict=False)
-        
-        text = ""
-        for page_num, page in enumerate(pdf_reader.pages):
-            try:
-                page_text = page.extract_text()
-                text += page_text + "\n"
-                logger.debug(f"Page {page_num + 1}: {len(page_text)} characters")
-            except Exception as e:
-                logger.warning(f"Failed to extract page {page_num + 1}: {e}")
-                continue
-        
-        return text
-    
-    def _extract_with_pypdf2_page_by_page(self, file_content: bytes) -> str:
-        """Method 3: Extract page by page with individual error handling"""
-        pdf_file = BytesIO(file_content)
-        pdf_reader = PyPDF2.PdfReader(pdf_file)
-        
-        text = ""
-        successful_pages = 0
-        
-        for page_num, page in enumerate(pdf_reader.pages):
-            try:
-                # Try different extraction methods for each page
-                page_text = ""
-                
-                # Try standard extraction
-                try:
-                    page_text = page.extract_text()
-                except:
-                    # Try alternative extraction methods
-                    try:
-                        # Method: Extract text with different parameters
-                        page_text = page.extract_text(extraction_mode="layout")
-                    except:
-                        try:
-                            # Method: Extract text with visitor pattern
-                            def visitor_body(text, cm, tm, fontDict, fontSize):
-                                return text
-                            
-                            page_text = page.extract_text(visitor_text=visitor_body)
-                        except:
-                            logger.warning(f"All extraction methods failed for page {page_num + 1}")
-                            continue
-                
-                if page_text and len(page_text.strip()) > 0:
-                    text += page_text + "\n"
-                    successful_pages += 1
-                    logger.debug(f"Page {page_num + 1}: {len(page_text)} characters")
-                
-            except Exception as e:
-                logger.warning(f"Error extracting page {page_num + 1}: {e}")
-                continue
-        
-        logger.info(f"Successfully extracted {successful_pages}/{len(pdf_reader.pages)} pages")
-        return text
-    
-    def _extract_with_pypdf2_alternative_reader(self, file_content: bytes) -> str:
-        """Method 4: Alternative PyPDF2 reader configuration"""
-        pdf_file = BytesIO(file_content)
-        
-        # Try with different reader configurations
+        """Method 2: PyPDF2 extraction ignoring warnings"""
         try:
-            # Configuration 1: Disable strict mode and warnings
+            pdf_file = BytesIO(file_content)
             pdf_reader = PyPDF2.PdfReader(pdf_file, strict=False)
             
             text = ""
             for page in pdf_reader.pages:
                 try:
-                    # Try to extract text with different approaches
                     page_text = page.extract_text()
-                    
-                    # If empty, try extracting from content stream directly
-                    if not page_text.strip():
-                        try:
-                            # Alternative: try to get text from page object
-                            if '/Contents' in page:
-                                content = page['/Contents']
-                                if hasattr(content, 'get_data'):
-                                    raw_content = content.get_data()
-                                    # Basic text extraction from content stream
-                                    page_text = self._extract_text_from_content_stream(raw_content)
-                        except:
-                            pass
-                    
-                    text += page_text + "\n"
-                    
+                    text += page_text
                 except Exception as e:
-                    logger.warning(f"Error in alternative extraction: {e}")
+                    logger.debug(f"Warning ignored for page: {e}")
                     continue
             
             return text
             
         except Exception as e:
-            logger.error(f"Alternative reader failed: {e}")
+            logger.debug(f"Warnings-ignored PyPDF2 extraction failed: {e}")
+            raise
+    
+    def _extract_with_pypdf2_page_by_page(self, file_content: bytes) -> str:
+        """Method 3: Page-by-page extraction with error handling"""
+        try:
+            pdf_file = BytesIO(file_content)
+            pdf_reader = PyPDF2.PdfReader(pdf_file, strict=False)
+            
+            text = ""
+            successful_pages = 0
+            
+            for page_num, page in enumerate(pdf_reader.pages):
+                try:
+                    page_text = page.extract_text()
+                    if page_text:
+                        text += page_text + "\n"
+                        successful_pages += 1
+                except Exception as e:
+                    logger.debug(f"Failed to extract page {page_num}: {e}")
+                    continue
+            
+            if successful_pages == 0:
+                raise ValueError("No pages could be extracted")
+            
+            logger.info(f"Successfully extracted {successful_pages}/{len(pdf_reader.pages)} pages")
+            return text
+            
+        except Exception as e:
+            logger.debug(f"Page-by-page extraction failed: {e}")
+            raise
+    
+    def _extract_with_pypdf2_alternative_reader(self, file_content: bytes) -> str:
+        """Method 4: Alternative PyPDF2 reader approach"""
+        try:
+            pdf_file = BytesIO(file_content)
+            
+            # Try with different parameters
+            pdf_reader = PyPDF2.PdfReader(pdf_file)
+            
+            text = ""
+            for page in pdf_reader.pages:
+                try:
+                    # Only use extract_text(), don't use get_contents() as it returns raw PDF data
+                    page_text = page.extract_text()
+                    if page_text and len(page_text.strip()) > 0:
+                        text += page_text
+                except Exception as e:
+                    logger.debug(f"Alternative reader page extraction failed: {e}")
+                    continue
+            
+            return text
+            
+        except Exception as e:
+            logger.debug(f"Alternative reader extraction failed: {e}")
             raise
     
     def _extract_with_basic_ocr_fallback(self, file_content: bytes) -> str:
@@ -237,8 +270,9 @@ Gợi ý giải pháp:
                     logger.debug(f"Error checking page {page_num}: {e}")
                     continue
             
-            if has_images and not has_text:
-                logger.info("Detected image-based PDF - attempting OCR")
+            # Try OCR if we have images or very little meaningful text
+            if has_images or not has_text:
+                logger.info(f"Detected PDF needing OCR - has_images: {has_images}, has_text: {has_text}")
                 
                 # Try OCR extraction
                 try:
@@ -284,145 +318,58 @@ Gợi ý:
             logger.warning(f"OCR fallback detection failed: {e}")
             return ""
     
-    def _extract_text_from_content_stream(self, content_data: bytes) -> str:
-        """
-        Basic text extraction from PDF content stream
-        This is a simple fallback method
-        """
-        try:
-            # Convert bytes to string and look for text patterns
-            content_str = content_data.decode('latin-1', errors='ignore')
-            
-            # Look for text between BT and ET operators
-            text_pattern = r'BT\s+(.*?)\s+ET'
-            matches = re.findall(text_pattern, content_str, re.DOTALL)
-            
-            extracted_text = ""
-            for match in matches:
-                # Extract text from Tj and TJ operators
-                text_ops = re.findall(r'\((.*?)\)\s*Tj', match)
-                text_ops.extend(re.findall(r'\[(.*?)\]\s*TJ', match))
-                
-                for text_op in text_ops:
-                    # Clean up the text
-                    clean_text = text_op.replace('\\(', '(').replace('\\)', ')')
-                    extracted_text += clean_text + " "
-            
-            return extracted_text.strip()
-            
-        except Exception as e:
-            logger.warning(f"Content stream extraction failed: {e}")
-            return ""
+    def _is_metadata_only(self, text: str) -> bool:
+        """Check if extracted text is just PDF metadata/filters"""
+        if not text:
+            return True
+        
+        text_lower = text.lower().strip()
+        
+        # Common PDF metadata patterns
+        metadata_patterns = [
+            'filter:',
+            'flatedecode',
+            'flatdecodefilter',
+            'dctdecode',
+            'ascii85decode',
+            'lzwdecode',
+            'runlengthdecode',
+            '/filter',
+            '/length',
+            '/type',
+            'stream',
+            'endstream',
+            'obj',
+            'endobj'
+        ]
+        
+        # Count how much of the text is metadata
+        metadata_chars = 0
+        for pattern in metadata_patterns:
+            metadata_chars += text_lower.count(pattern) * len(pattern)
+        
+        # If more than 70% is metadata, consider it metadata-only
+        metadata_ratio = metadata_chars / len(text)
+        
+        logger.debug(f"Metadata detection: {metadata_ratio:.2%} metadata content")
+        
+        return metadata_ratio > 0.7
     
     def _clean_extracted_text(self, text: str) -> str:
-        """
-        Clean and normalize extracted text
-        
-        Args:
-            text: Raw extracted text
-            
-        Returns:
-            Cleaned text
-        """
+        """Clean and normalize extracted text"""
         if not text:
             return ""
         
         # Remove excessive whitespace
         text = re.sub(r'\s+', ' ', text)
         
-        # Remove control characters but keep Vietnamese characters
-        text = re.sub(r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]', '', text)
+        # Remove null characters and other problematic characters
+        text = text.replace('\x00', '').replace('\ufffd', '')
         
-        # Remove excessive newlines
-        text = re.sub(r'\n\s*\n\s*\n', '\n\n', text)
+        # Normalize line breaks
+        text = re.sub(r'\r\n|\r|\n', '\n', text)
+        
+        # Remove excessive line breaks
+        text = re.sub(r'\n{3,}', '\n\n', text)
         
         return text.strip()
-    
-    def get_pdf_info(self, file_content: bytes) -> Dict[str, Any]:
-        """
-        Get PDF metadata and basic information
-        
-        Args:
-            file_content: PDF file content as bytes
-            
-        Returns:
-            Dictionary with PDF information
-        """
-        try:
-            pdf_file = BytesIO(file_content)
-            pdf_reader = PyPDF2.PdfReader(pdf_file, strict=False)
-            
-            metadata = pdf_reader.metadata or {}
-            
-            info = {
-                'num_pages': len(pdf_reader.pages),
-                'file_size_bytes': len(file_content),
-                'metadata': {
-                    'title': metadata.get('/Title', 'N/A'),
-                    'author': metadata.get('/Author', 'N/A'),
-                    'subject': metadata.get('/Subject', 'N/A'),
-                    'creator': metadata.get('/Creator', 'N/A'),
-                    'producer': metadata.get('/Producer', 'N/A'),
-                    'creation_date': str(metadata.get('/CreationDate', 'N/A')),
-                    'modification_date': str(metadata.get('/ModDate', 'N/A'))
-                },
-                'is_encrypted': pdf_reader.is_encrypted,
-                'extraction_possible': True
-            }
-            
-            # Test if text extraction is possible
-            try:
-                if len(pdf_reader.pages) > 0:
-                    test_text = pdf_reader.pages[0].extract_text()
-                    info['has_extractable_text'] = len(test_text.strip()) > 0
-                else:
-                    info['has_extractable_text'] = False
-            except:
-                info['has_extractable_text'] = False
-                info['extraction_possible'] = False
-            
-            return info
-            
-        except Exception as e:
-            return {
-                'error': str(e),
-                'extraction_possible': False,
-                'has_extractable_text': False
-            }
-
-
-# Test function
-def test_pdf_extraction(file_path: str):
-    """Test the improved PDF extractor"""
-    extractor = ImprovedPDFExtractor()
-    
-    try:
-        with open(file_path, 'rb') as f:
-            file_content = f.read()
-        
-        print(f"Testing PDF extraction for: {file_path}")
-        print(f"File size: {len(file_content)} bytes")
-        
-        # Get PDF info
-        info = extractor.get_pdf_info(file_content)
-        print(f"PDF Info: {info}")
-        
-        # Extract text
-        text = extractor.extract_text_from_pdf(file_content)
-        print(f"Extracted text length: {len(text)} characters")
-        print(f"First 200 characters: {text[:200]}...")
-        
-        return text
-        
-    except Exception as e:
-        print(f"Error: {e}")
-        return None
-
-
-if __name__ == "__main__":
-    # Example usage
-    import sys
-    if len(sys.argv) > 1:
-        test_pdf_extraction(sys.argv[1])
-    else:
-        print("Usage: python improved_pdf_extractor.py <pdf_file_path>")
