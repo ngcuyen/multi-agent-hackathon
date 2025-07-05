@@ -1,20 +1,26 @@
 # Base image
 FROM python:3.12
 
-# Set the working directory in the container
+# Install system dependencies for lightweight OCR
+RUN apt-get update && apt-get install -y \
+    zlib1g-dev \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+
+# Set the working directory
 WORKDIR /app
 
-# Copy the requirements file
-COPY app/themovie/requirements.txt .
+# Copy requirements file first to leverage Docker cache
+COPY app/riskassessment/requirements.txt .
 
-# Install the requirements
-RUN pip install --no-cache-dir -r requirements.txt
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt -i https://pypi.org/simple
 
-# Copy the whole FastAPI app
+# Copy application code
 COPY . .
 
-# Expose the port the app runs on
+# Expose application port
 EXPOSE 8080
 
-# Command to run the app
-CMD ["uvicorn", "app.themovie.main:app", "--host", "0.0.0.0", "--port", "8080", "--workers", "4", "--timeout-keep-alive", "100", "--reload"]
+# Start the FastAPI application
+CMD ["uvicorn", "app.riskassessment.main:app", "--host", "0.0.0.0", "--port", "8080", "--workers", "4", "--timeout-keep-alive", "100", "--reload"]

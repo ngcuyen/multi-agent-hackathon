@@ -1,17 +1,32 @@
 services:
-  themovie:
-    image: themovie:0.0.1
-    container_name: themovie
+  riskassessment:
+    image: riskassessment:0.0.1
+    container_name: riskassessment-app
     build:
       context: .
-      dockerfile: app/themovie/Dockerfile
-    volumes:
-      - .:/app
-    working_dir: /app
-    env_file:
-      - ./app/themovie/.env
+      dockerfile: app/riskassessment/Dockerfile
     ports:
-      - "8080:8080"
-    runtime: nvidia
-    environment:
-      - NVIDIA_VISIBLE_DEVICES=all
+      - '8080:8080'
+    env_file:
+      - ./app/riskassessment/.env
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'curl',
+          '-f',
+          'http://localhost:8080/riskassessment/public/api/v1/health-check/health',
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - riskassessment-network
+
+networks:
+  riskassessment-network:
+    driver: bridge
