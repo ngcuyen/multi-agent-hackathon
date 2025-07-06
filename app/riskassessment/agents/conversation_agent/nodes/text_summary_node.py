@@ -66,8 +66,7 @@ async def text_summary_node(
         # Save to database
         await _save_message_to_db(conversation_id, response, MessageTypes.AI)
         
-        # Update state
-        state.messages.append(response)
+        # Update state (không append response để tránh duplicate)
         state.node_name = "text_summary_node"
         
         logger.info(f"[TEXT_SUMMARY] Completed for conversation {conversation_id}")
@@ -86,7 +85,7 @@ async def text_summary_node(
         )
         await _save_message_to_db(conversation_id, error_response, MessageTypes.AI)
         
-        state.messages.append(error_response)
+        # Không append error response để tránh duplicate
         return state
 
 
