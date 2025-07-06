@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
+import json
 
 
 class ConversationState(BaseModel):
@@ -21,24 +22,27 @@ class ConversationState(BaseModel):
         # Enable LangGraph compatibility
         arbitrary_types_allowed = True
     
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert to dict for DynamoDB serialization"""
-        return {
-            "type": self.type,
-            "messages": self.messages,
-            "node_name": self.node_name,
-            "conversation_id": self.conversation_id,
-            "user_id": self.user_id,
-            "next_node": self.next_node,
-            "routing_info": self.routing_info,
-            "conversation_context": self.conversation_context,
-        }
+    def __reduce_ex__(self, protocol):
+        """Custom serialization for DynamoDB"""
+        return (
+            self.__class__.from_dict,
+            (self.dict(),)
+        )
     
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "ConversationState":
-        """Create from dict for DynamoDB deserialization"""
+        """Create from dict"""
         return cls(**data)
     
-    def __reduce__(self):
-        """Support for pickle serialization"""
-        return (self.from_dict, (self.to_dict(),))
+    def to_dynamodb_item(self) -> Dict[str, Any]:
+        """Convert to DynamoDB compatible format"""
+        return {
+            'type': {'S': self.type},
+            'messages': {'L': [{'S': msg} for msg in self.messages]},
+            'node_name': {'S': self.node_name},
+            'conversation_id': {'S': self.conversation_id},
+            'user_id': {'S': self.user_id},
+            'next_node': {'S': self.next_node},
+            'routing_info': {'S': json.dumps(self.routing_info) if self.routing_info else ''},
+            'conversation_context': {'S': json.dumps(self.conversation_context) if self.conversation_context else ''},
+        }
