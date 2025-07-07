@@ -67,7 +67,7 @@ async def stream_chat(
                     },
                 }
 
-                yield f"data: {json.dumps(data_response)}\n\n"
+                yield f"data: {json.dumps(data_response, ensure_ascii=False)}\n\n"
                 await asyncio.sleep(0.01)
 
         # Save message to DynamoDB (no session needed)

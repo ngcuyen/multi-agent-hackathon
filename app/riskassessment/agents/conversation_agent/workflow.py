@@ -147,7 +147,7 @@ def get_conversation_graph(state: ConversationState, checkpointer: Any):
     conversation_workflow.add_edge("chat_knowledgebase_node", END)
     
     conversation_graph = conversation_workflow.get_graph()
-    return conversation_graph.compile(checkpointer=checkpointer)
+    return conversation_graph.compile(checkpointer=None)  # Disable DynamoDB checkpointer
 
 
 def route_from_chat_node(state: ConversationState) -> str:
