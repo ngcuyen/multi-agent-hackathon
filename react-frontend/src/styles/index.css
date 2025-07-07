@@ -27,8 +27,9 @@ code {
   margin-bottom: 20px;
 }
 
+/* Chat Interface Styles */
 .chat-container {
-  height: 500px;
+  height: 600px;
   display: flex;
   flex-direction: column;
 }
@@ -41,14 +42,16 @@ code {
   border-radius: 8px;
   margin-bottom: 16px;
   border: 1px solid #d5dbdb;
+  max-height: 500px;
 }
 
 .chat-message {
-  margin-bottom: 12px;
-  padding: 12px;
+  margin-bottom: 16px;
+  padding: 16px;
   border-radius: 8px;
-  max-width: 80%;
+  max-width: 85%;
   word-wrap: break-word;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .chat-message.user {
@@ -64,9 +67,15 @@ code {
   margin-right: auto;
 }
 
+.chat-message.ai.error {
+  background: #fef7f7;
+  border-color: #d91515;
+}
+
 .chat-message strong {
   display: block;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
+  font-size: 14px;
 }
 
 .typing-indicator {
@@ -93,6 +102,7 @@ code {
   }
 }
 
+/* File Upload Styles */
 .file-drop-zone {
   border: 2px dashed #879596;
   border-radius: 8px;
@@ -101,17 +111,29 @@ code {
   background: #fafbfc;
   transition: all 0.3s ease;
   cursor: pointer;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .file-drop-zone:hover,
 .file-drop-zone.dragover {
   border-color: #0073bb;
   background: #f1f8ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 115, 187, 0.15);
+}
+
+.file-drop-zone.error {
+  border-color: #d91515;
+  background: #fef7f7;
 }
 
 .file-drop-zone h3 {
   margin: 16px 0 8px 0;
   color: #232f3e;
+  font-size: 1.2em;
 }
 
 .file-drop-zone p {
@@ -119,32 +141,72 @@ code {
   color: #5f6b7a;
 }
 
+/* Summary Output Styles */
 .summary-output {
   background: white;
   border: 1px solid #d5dbdb;
   border-radius: 8px;
-  padding: 16px;
-  min-height: 200px;
+  padding: 20px;
+  min-height: 250px;
   white-space: pre-wrap;
   font-family: inherit;
-  line-height: 1.5;
+  line-height: 1.6;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.summary-output h2,
+.summary-output h3,
+.summary-output h4 {
+  color: #0073bb;
+  margin-top: 20px;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.summary-output h2 {
+  font-size: 1.5em;
+  border-bottom: 2px solid #e9ecef;
+  padding-bottom: 8px;
 }
 
 .summary-output h3 {
-  color: #0073bb;
-  margin: 16px 0 8px 0;
+  font-size: 1.3em;
+}
+
+.summary-output h4 {
+  font-size: 1.1em;
 }
 
 .summary-output strong {
   font-weight: 600;
+  color: #232f3e;
 }
 
 .summary-output li {
-  margin: 4px 0;
+  margin: 6px 0;
   list-style-type: disc;
   margin-left: 20px;
+  line-height: 1.5;
 }
 
+.summary-output pre {
+  background: #f5f5f5;
+  padding: 12px;
+  border-radius: 4px;
+  margin: 12px 0;
+  overflow-x: auto;
+  border-left: 4px solid #0073bb;
+}
+
+.summary-output code {
+  background: #f5f5f5;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+}
+
+/* Statistics Grid */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -156,22 +218,32 @@ code {
   background: white;
   border: 1px solid #d5dbdb;
   border-radius: 8px;
-  padding: 16px;
+  padding: 20px;
   text-align: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .stat-value {
-  font-size: 24px;
+  font-size: 28px;
   font-weight: bold;
   color: #0073bb;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
+  line-height: 1.2;
 }
 
 .stat-label {
   font-size: 14px;
   color: #5f6b7a;
+  font-weight: 500;
 }
 
+/* Loading Overlay */
 .loading-overlay {
   position: fixed;
   top: 0;
@@ -194,6 +266,17 @@ code {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
+.loading-content h3 {
+  margin: 16px 0 8px 0;
+  color: #232f3e;
+}
+
+.loading-content p {
+  margin: 8px 0;
+  color: #5f6b7a;
+}
+
+/* Custom Spinner */
 .spinner {
   border: 3px solid #f3f3f3;
   border-top: 3px solid #0073bb;
@@ -209,6 +292,71 @@ code {
   100% { transform: rotate(360deg); }
 }
 
+/* Flash message positioning */
+.flash-messages {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1001;
+  max-width: 400px;
+}
+
+/* Progress Bar Enhancements */
+.awsui-progress-bar {
+  margin: 16px 0;
+}
+
+/* Alert Enhancements */
+.awsui-alert {
+  margin: 16px 0;
+}
+
+.awsui-alert .awsui-alert__content {
+  line-height: 1.5;
+}
+
+/* Button Enhancements */
+.awsui-button {
+  transition: all 0.2s ease;
+}
+
+.awsui-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Form Field Enhancements */
+.awsui-form-field {
+  margin-bottom: 20px;
+}
+
+.awsui-form-field__label {
+  font-weight: 600;
+  color: #232f3e;
+}
+
+.awsui-form-field__description {
+  color: #5f6b7a;
+  font-size: 14px;
+}
+
+/* Container Enhancements */
+.awsui-container {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+/* Header Enhancements */
+.awsui-header h1 {
+  color: #232f3e;
+  font-weight: 700;
+}
+
+.awsui-header__description {
+  color: #5f6b7a;
+  line-height: 1.5;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .main-content {
@@ -220,7 +368,53 @@ code {
   }
   
   .chat-message {
-    max-width: 90%;
+    max-width: 95%;
+  }
+  
+  .chat-container {
+    height: 500px;
+  }
+  
+  .file-drop-zone {
+    padding: 20px;
+    min-height: 150px;
+  }
+  
+  .file-drop-zone h3 {
+    font-size: 1.1em;
+  }
+  
+  .stat-value {
+    font-size: 24px;
+  }
+  
+  .flash-messages {
+    right: 10px;
+    left: 10px;
+    max-width: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding: 5px;
+  }
+  
+  .chat-container {
+    height: 400px;
+  }
+  
+  .file-drop-zone {
+    padding: 15px;
+    min-height: 120px;
+  }
+  
+  .stat-card {
+    padding: 15px;
+  }
+  
+  .stat-value {
+    font-size: 20px;
   }
 }
 
@@ -234,11 +428,50 @@ code {
   margin-bottom: 16px;
 }
 
-/* Flash message positioning */
-.flash-messages {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 1001;
-  max-width: 400px;
+/* Dark mode support (optional) */
+@media (prefers-color-scheme: dark) {
+  .summary-output {
+    background: #1e1e1e;
+    color: #ffffff;
+    border-color: #404040;
+  }
+  
+  .stat-card {
+    background: #1e1e1e;
+    color: #ffffff;
+    border-color: #404040;
+  }
+  
+  .chat-message.ai {
+    background: #1e1e1e;
+    color: #ffffff;
+    border-color: #404040;
+  }
+  
+  .file-drop-zone {
+    background: #1e1e1e;
+    color: #ffffff;
+    border-color: #404040;
+  }
+}
+
+/* Accessibility improvements */
+.awsui-button:focus,
+.file-drop-zone:focus {
+  outline: 2px solid #0073bb;
+  outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+  .flash-messages,
+  .loading-overlay,
+  .awsui-button {
+    display: none !important;
+  }
+  
+  .summary-output {
+    border: 1px solid #000;
+    box-shadow: none;
+  }
 }
