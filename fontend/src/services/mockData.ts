@@ -14,6 +14,7 @@ export const mockAgents: Agent[] = [
     capabilities: ['code-analysis', 'debugging', 'programming'],
     avatar: '/avatars/code-assistant.png',
     createdAt: new Date(),
+    updatedAt: new Date(),
   },
   {
     id: 'agent-2',
@@ -27,6 +28,7 @@ export const mockAgents: Agent[] = [
     capabilities: ['research', 'data-analysis', 'information-gathering'],
     avatar: '/avatars/research-assistant.png',
     createdAt: new Date(),
+    updatedAt: new Date(),
   },
   {
     id: 'agent-3',
@@ -40,6 +42,7 @@ export const mockAgents: Agent[] = [
     capabilities: ['creative-writing', 'storytelling', 'content-creation'],
     avatar: '/avatars/creative-writer.png',
     createdAt: new Date(),
+    updatedAt: new Date(),
   },
   {
     id: 'agent-4',
@@ -53,6 +56,7 @@ export const mockAgents: Agent[] = [
     capabilities: ['data-analysis', 'statistics', 'visualization'],
     avatar: '/avatars/data-analyst.png',
     createdAt: new Date(),
+    updatedAt: new Date(),
   },
 ];
 
