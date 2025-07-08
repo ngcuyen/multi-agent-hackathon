@@ -6,13 +6,13 @@ export interface Agent {
   name: string;
   description: string;
   status: 'active' | 'inactive';
-  model?: string;
-  temperature?: number;
-  maxTokens?: number;
-  capabilities?: string[];
-  systemPrompt?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
+  model: string;
+  temperature: number;
+  maxTokens: number;
+  capabilities: string[];
+  systemPrompt: string;
+  createdAt: Date;
+  updatedAt: Date;
   avatar?: string;
 }
 

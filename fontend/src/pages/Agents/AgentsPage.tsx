@@ -64,12 +64,12 @@ const AgentsPage: React.FC<AgentsPageProps> = ({ agents, setAgents, onShowSnackb
     setFormData({
       name: agent.name,
       description: agent.description,
-      model: agent.model || 'claude-3-sonnet',
-      temperature: agent.temperature || 0.7,
-      maxTokens: agent.maxTokens || 8192,
+      model: agent.model,
+      temperature: agent.temperature,
+      maxTokens: agent.maxTokens,
       status: agent.status,
-      systemPrompt: agent.systemPrompt || '',
-      capabilities: agent.capabilities || []
+      systemPrompt: agent.systemPrompt,
+      capabilities: agent.capabilities
     });
     setModalVisible(true);
   };
@@ -81,6 +81,7 @@ const AgentsPage: React.FC<AgentsPageProps> = ({ agents, setAgents, onShowSnackb
       model: 'claude-3-sonnet',
       temperature: 0.7,
       maxTokens: 8192,
+      status: 'active' as const,
       systemPrompt: '',
       capabilities: []
     });
@@ -111,13 +112,20 @@ const AgentsPage: React.FC<AgentsPageProps> = ({ agents, setAgents, onShowSnackb
         if (response.success && response.data) {
           onShowSnackbar('Agent created successfully', 'success');
           // Add new agent to the list
-          setAgents(prevAgents => [...prevAgents, {
-            ...response.data,
-            id: Date.now().toString(), // Generate temporary ID
-            status: 'active',
+          const newAgent: Agent = {
+            id: Date.now().toString(),
+            name: formData.name,
+            description: formData.description,
+            model: formData.model,
+            temperature: formData.temperature,
+            maxTokens: formData.maxTokens,
+            status: 'active' as const,
+            systemPrompt: formData.systemPrompt,
+            capabilities: formData.capabilities,
             createdAt: new Date(),
             updatedAt: new Date()
-          }]);
+          };
+          setAgents(prevAgents => [...prevAgents, newAgent]);
         } else {
           throw new Error('Creation failed');
         }
