@@ -74,6 +74,19 @@ const AgentsPage: React.FC<AgentsPageProps> = ({ agents, setAgents, onShowSnackb
     setModalVisible(true);
   };
 
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      description: '',
+      model: 'claude-3-sonnet',
+      temperature: 0.7,
+      maxTokens: 8192,
+      systemPrompt: '',
+      capabilities: []
+    });
+    setEditingAgent(null);
+  };
+
   const handleSaveAgent = async () => {
     try {
       if (editingAgent) {
@@ -81,21 +94,37 @@ const AgentsPage: React.FC<AgentsPageProps> = ({ agents, setAgents, onShowSnackb
         const response = await agentAPI.updateAgent(editingAgent.id, formData);
         if (response.success) {
           onShowSnackbar('Agent updated successfully', 'success');
+          // Update the agent in the list
+          setAgents(prevAgents => 
+            prevAgents.map(agent => 
+              agent.id === editingAgent.id 
+                ? { ...agent, ...formData, updatedAt: new Date() }
+                : agent
+            )
+          );
         } else {
           throw new Error('Update failed');
         }
       } else {
         // Create new agent
         const response = await agentAPI.createAgent(formData);
-        if (response.success) {
+        if (response.success && response.data) {
           onShowSnackbar('Agent created successfully', 'success');
+          // Add new agent to the list
+          setAgents(prevAgents => [...prevAgents, {
+            ...response.data,
+            id: Date.now().toString(), // Generate temporary ID
+            status: 'active',
+            createdAt: new Date(),
+            updatedAt: new Date()
+          }]);
         } else {
           throw new Error('Creation failed');
         }
       }
       
       setModalVisible(false);
-      onAgentsChange();
+      resetForm();
     } catch (error) {
       console.error('Failed to save agent:', error);
       onShowSnackbar('Failed to save agent', 'error');
@@ -107,7 +136,8 @@ const AgentsPage: React.FC<AgentsPageProps> = ({ agents, setAgents, onShowSnackb
       const response = await agentAPI.deleteAgent(agentId);
       if (response.success) {
         onShowSnackbar('Agent deleted successfully', 'success');
-        onAgentsChange();
+        // Update agents list by removing the deleted agent
+        setAgents(prevAgents => prevAgents.filter(agent => agent.id !== agentId));
       } else {
         throw new Error('Delete failed');
       }
