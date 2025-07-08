@@ -1,41 +1,40 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Box,
-  Paper,
-  TextField,
-  IconButton,
-  Typography,
-  Avatar,
-  Chip,
-  CircularProgress,
-  Divider,
-} from '@mui/material';
-import {
-  Send as SendIcon,
-  AttachFile as AttachFileIcon,
-  SmartToy as BotIcon,
-  Person as PersonIcon,
-} from '@mui/icons-material';
-import { Message, Agent } from '../../types';
+  Container,
+  Header,
+  Input,
+  Button,
+  SpaceBetween,
+  Badge,
+  Spinner,
+  TextContent,
+  ColumnLayout
+} from '@cloudscape-design/components';
+import { Message, Agent, ChatSession, ConversationRequest } from '../../types';
 import { chatAPI } from '../../services/api';
 import MessageBubble from './MessageBubble';
 import TypingIndicator from './TypingIndicator';
 
 interface ChatInterfaceProps {
   agent: Agent;
-  sessionId?: string;
-  onNewSession?: (sessionId: string) => void;
+  session?: ChatSession | null;
+  onShowSnackbar: (message: string, severity: 'error' | 'success' | 'info' | 'warning') => void;
+  onSessionUpdate?: () => void;
 }
 
 const ChatInterface: React.FC<ChatInterfaceProps> = ({
   agent,
-  sessionId,
-  onNewSession,
+  session,
+  onShowSnackbar,
+  onSessionUpdate,
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const [currentConversationId, setCurrentConversationId] = useState<string | null>(session?.id || null);
+  const [userId] = useState('user-' + Date.now()); // Generate user ID
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -47,181 +46,177 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   }, [messages]);
 
   useEffect(() => {
-    if (sessionId) {
-      loadChatHistory();
+    if (session?.id) {
+      setCurrentConversationId(session.id);
+      // In real implementation, load messages from backend
+      setMessages([]);
+    } else {
+      setMessages([]);
+      setCurrentConversationId(null);
     }
-  }, [sessionId]);
+  }, [session]);
 
-  const loadChatHistory = async () => {
-    if (!sessionId) return;
-    
-    try {
-      const response = await chatAPI.getChatHistory(sessionId);
-      if (response.success && response.data) {
-        setMessages(response.data);
-      }
-    } catch (error) {
-      console.error('Failed to load chat history:', error);
-    }
-  };
-
-  const sendMessage = async () => {
+  const handleSendMessage = async () => {
     if (!inputMessage.trim() || isLoading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
       content: inputMessage,
-      role: 'user',
+      sender: 'user',
       timestamp: new Date(),
+      agentId: agent.id,
+      conversationId: currentConversationId || undefined,
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const messageToSend = inputMessage;
     setInputMessage('');
     setIsLoading(true);
     setIsTyping(true);
 
     try {
-      const response = await chatAPI.sendMessage(agent.id, inputMessage, sessionId);
-      
-      if (response.success && response.data) {
-        setMessages(prev => [...prev, response.data!]);
-        
-        // If this is a new session, notify parent
-        if (!sessionId && onNewSession) {
-          // Assume the API returns session ID in metadata
-          const newSessionId = response.data.metadata?.sessionId;
-          if (newSessionId) {
-            onNewSession(newSessionId);
-          }
-        }
+      const request: ConversationRequest = {
+        user_id: userId,
+        message: messageToSend,
+        conversation_id: currentConversationId || undefined,
+      };
+
+      const response = await chatAPI.sendMessage(request);
+
+      if (response.status === 'success' && response.data) {
+        // If response.data is a ConversationResponse, create a Message object
+        const aiMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          content: response.data.response || '',
+          sender: 'bot',
+          timestamp: new Date(),
+          agentId: agent.id,
+          conversationId: response.data.conversation_id,
+          type: 'ai',
+        };
+        setMessages([...messages, aiMessage]);
+      } else {
+        throw new Error(response.message || 'Failed to send message');
       }
     } catch (error) {
       console.error('Failed to send message:', error);
-      // Add error message
-      const errorMessage: Message = {
-        id: Date.now().toString(),
-        content: 'Sorry, I encountered an error. Please try again.',
-        role: 'assistant',
-        timestamp: new Date(),
-        agentId: agent.id,
-      };
-      setMessages(prev => [...prev, errorMessage]);
+      onShowSnackbar('Không thể gửi tin nhắn. Vui lòng thử lại.', 'error');
+      
+      // Remove the user message if sending failed
+      setMessages(prev => prev.filter(msg => msg.id !== userMessage.id));
     } finally {
       setIsLoading(false);
       setIsTyping(false);
     }
   };
 
-  const handleKeyPress = (event: React.KeyboardEvent) => {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault();
-      sendMessage();
-    }
-  };
-
   return (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      {/* Chat Header */}
-      <Paper elevation={1} sx={{ p: 2, borderRadius: 0 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Avatar sx={{ bgcolor: 'primary.main' }}>
-            <BotIcon />
-          </Avatar>
-          <Box>
-            <Typography variant="h6">{agent.name}</Typography>
-            <Typography variant="body2" color="text.secondary">
-              {agent.description}
-            </Typography>
-          </Box>
-          <Box sx={{ ml: 'auto' }}>
-            <Chip
-              label={agent.model}
-              size="small"
-              color="primary"
-              variant="outlined"
-            />
-          </Box>
-        </Box>
-      </Paper>
-
-      <Divider />
-
-      {/* Messages Area */}
-      <Box
-        sx={{
-          flex: 1,
-          overflow: 'auto',
-          p: 2,
-          backgroundColor: '#f5f5f5',
-        }}
-      >
-        {messages.length === 0 ? (
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              height: '100%',
-              textAlign: 'center',
-            }}
+    <Container>
+      <SpaceBetween direction="vertical" size="l">
+        {/* Chat Header */}
+        <Box>
+          <Header
+            variant="h2"
+            description={agent.description}
+            info={
+              <Badge color={agent.status === 'active' ? 'green' : 'grey'}>
+                {agent.status}
+              </Badge>
+            }
           >
-            <Avatar sx={{ width: 64, height: 64, mb: 2, bgcolor: 'primary.main' }}>
-              <BotIcon sx={{ fontSize: 32 }} />
-            </Avatar>
-            <Typography variant="h6" gutterBottom>
-              Start a conversation with {agent.name}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {agent.description}
-            </Typography>
-          </Box>
-        ) : (
-          <>
-            {messages.map((message) => (
-              <MessageBubble key={message.id} message={message} agent={agent} />
-            ))}
-            {isTyping && <TypingIndicator agent={agent} />}
-            <div ref={messagesEndRef} />
-          </>
-        )}
-      </Box>
-
-      {/* Input Area */}
-      <Paper elevation={3} sx={{ p: 2 }}>
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-end' }}>
-          <IconButton size="small" disabled={isLoading}>
-            <AttachFileIcon />
-          </IconButton>
-          
-          <TextField
-            fullWidth
-            multiline
-            maxRows={4}
-            placeholder={`Message ${agent.name}...`}
-            value={inputMessage}
-            onChange={(e) => setInputMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
-            disabled={isLoading}
-            variant="outlined"
-            size="small"
-          />
-          
-          <IconButton
-            color="primary"
-            onClick={sendMessage}
-            disabled={!inputMessage.trim() || isLoading}
-            sx={{ mb: 0.5 }}
-          >
-            {isLoading ? (
-              <CircularProgress size={24} />
-            ) : (
-              <SendIcon />
-            )}
-          </IconButton>
+            {agent.name}
+          </Header>
         </Box>
-      </Paper>
-    </Box>
+
+        {/* Messages Container */}
+        <div 
+          style={{ 
+            height: '500px', 
+            overflowY: 'auto', 
+            border: '1px solid #e9ebed', 
+            borderRadius: '8px',
+            backgroundColor: '#fafbfc',
+            padding: '12px'
+          }}
+        >
+          {isLoading && messages.length === 0 ? (
+            <Box textAlign="center" padding="l">
+              <Spinner size="large" />
+              <TextContent>
+                <p>Loading chat history...</p>
+              </TextContent>
+            </Box>
+          ) : (
+            <SpaceBetween direction="vertical" size="s">
+              {messages.length === 0 ? (
+                <Box textAlign="center" padding="l">
+                  <TextContent>
+                    <p>Start a conversation with {agent.name}!</p>
+                    <p style={{ fontSize: '14px', color: '#5f6b7a' }}>
+                      {agent.description}
+                    </p>
+                  </TextContent>
+                </Box>
+              ) : (
+                messages.map((message) => (
+                  <MessageBubble key={message.id} message={message} agent={agent} />
+                ))
+              )}
+              
+              {isTyping && <TypingIndicator agent={agent} />}
+              <div ref={messagesEndRef} />
+            </SpaceBetween>
+          )}
+        </div>
+
+        {/* Input Area */}
+        <Box>
+          <SpaceBetween direction="horizontal" size="s">
+            <div style={{ flex: 1 }}>
+              <Input
+                value={inputMessage}
+                onChange={({ detail }) => setInputMessage(detail.value)}
+                onKeyDown={(event) => {
+                  if (event.detail.key === 'Enter' && !event.detail.shiftKey) {
+                    event.preventDefault();
+                    handleSendMessage();
+                  }
+                }}
+                placeholder={`Message ${agent.name}...`}
+                disabled={isLoading}
+              />
+            </div>
+            <Button
+              variant="primary"
+              iconName="send"
+              onClick={handleSendMessage}
+              disabled={!inputMessage.trim() || isLoading}
+              loading={isLoading}
+            >
+              Send
+            </Button>
+          </SpaceBetween>
+        </Box>
+
+        {/* Agent Info */}
+        <Box>
+          <ColumnLayout columns={3} variant="text-grid">
+            <div>
+              <Box variant="awsui-key-label">Model</Box>
+              <div>{agent.model || 'Claude 3.7 Sonnet'}</div>
+            </div>
+            <div>
+              <Box variant="awsui-key-label">Temperature</Box>
+              <div>{agent.temperature || '0.7'}</div>
+            </div>
+            <div>
+              <Box variant="awsui-key-label">Max Tokens</Box>
+              <div>{agent.maxTokens || '8192'}</div>
+            </div>
+          </ColumnLayout>
+        </Box>
+      </SpaceBetween>
+    </Container>
   );
 };
 

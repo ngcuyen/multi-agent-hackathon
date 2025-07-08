@@ -1,32 +1,18 @@
 import React from 'react';
 import {
-  Box,
   Container,
-  Typography,
-  Grid2 as Grid,
-  Card,
-  CardContent,
-  CardActions,
+  Header,
+  Grid,
+  Box,
+  Cards,
   Button,
-  Avatar,
-  Chip,
-  LinearProgress,
-  Paper,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-} from "@mui/material";
-import {
-  Chat as ChatIcon,
-  SmartToy as AgentIcon,
-  Dashboard as DashboardIcon,
-  Settings as SettingsIcon,
-  TrendingUp as TrendingUpIcon,
-  Speed as SpeedIcon,
-  Security as SecurityIcon,
-  CloudUpload as CloudUploadIcon,
-} from '@mui/icons-material';
+  Badge,
+  ProgressBar,
+  SpaceBetween,
+  TextContent,
+  ColumnLayout,
+  StatusIndicator
+} from "@cloudscape-design/components";
 import { useNavigate } from 'react-router-dom';
 import { Agent } from '../../types';
 
@@ -40,195 +26,155 @@ const HomePage: React.FC<HomePageProps> = ({ agents, loading }) => {
 
   const features = [
     {
-      icon: <ChatIcon color="primary" />,
-      title: 'Multi-Agent Chat',
-      description: 'Interact with multiple AI agents simultaneously for complex problem solving.',
+      title: '📄 Tóm tắt văn bản & Tài liệu',
+      description: 'Sử dụng AI để tóm tắt văn bản và tài liệu với nhiều định dạng khác nhau (PDF, DOCX, TXT).',
+      action: () => navigate('/text-summary'),
+      buttonText: 'Bắt đầu tóm tắt'
+    },
+    {
+      title: '💬 Chat với AI Agent',
+      description: 'Trò chuyện với các AI Agent chuyên về phân tích rủi ro và xử lý tài liệu.',
       action: () => navigate('/chat'),
+      buttonText: 'Bắt đầu chat'
     },
     {
-      icon: <AgentIcon color="secondary" />,
-      title: 'Agent Management',
-      description: 'Create, configure, and manage your AI agents with custom capabilities.',
-      action: () => navigate('/agents'),
-    },
-    {
-      icon: <DashboardIcon color="success" />,
-      title: 'Analytics Dashboard',
-      description: 'Monitor usage, performance, and costs across all your AI interactions.',
+      title: '📊 Dashboard phân tích',
+      description: 'Theo dõi hiệu suất, thống kê sử dụng và các chỉ số sức khỏe hệ thống.',
       action: () => navigate('/dashboard'),
+      buttonText: 'Xem Dashboard'
     },
     {
-      icon: <SettingsIcon color="warning" />,
-      title: 'Configuration',
-      description: 'Customize models, API keys, and system preferences.',
-      action: () => navigate('/settings'),
-    },
+      title: '🤖 Quản lý Agent',
+      description: 'Tạo, cấu hình và quản lý các AI Agent với khả năng tùy chỉnh.',
+      action: () => navigate('/agents'),
+      buttonText: 'Quản lý Agent'
+    }
   ];
 
-  const capabilities = [
-    { icon: <TrendingUpIcon />, text: 'Real-time Analytics' },
-    { icon: <SpeedIcon />, text: 'High Performance' },
-    { icon: <SecurityIcon />, text: 'Secure & Private' },
-    { icon: <CloudUploadIcon />, text: 'File Processing' },
+  const systemStats = [
+    {
+      title: 'AI Agents hoạt động',
+      value: agents.length.toString(),
+      status: agents.length > 0 ? 'success' : 'warning' as const
+    },
+    {
+      title: 'Trạng thái hệ thống',
+      value: 'Hoạt động tốt',
+      status: 'success' as const
+    },
+    {
+      title: 'Thời gian phản hồi',
+      value: '< 3s',
+      status: 'success' as const
+    },
+    {
+      title: 'Uptime',
+      value: '99.9%',
+      status: 'success' as const
+    }
   ];
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      {/* Hero Section */}
-      <Box textAlign="center" mb={6}>
-        <Typography variant="h2" component="h1" gutterBottom color="primary">
-          GenAI Multi-Agent Platform
-        </Typography>
-        <Typography variant="h5" color="text.secondary" paragraph>
-          Harness the power of multiple AI agents working together to solve complex problems
-        </Typography>
-        <Button
-          variant="contained"
-          size="large"
-          startIcon={<ChatIcon />}
-          onClick={() => navigate('/chat')}
-          sx={{ mt: 2, px: 4, py: 1.5 }}
+    <Container>
+      <SpaceBetween direction="vertical" size="l">
+        <Header
+          variant="h1"
+          description="Hệ thống đánh giá rủi ro AI với khả năng tóm tắt tài liệu, trò chuyện AI và kiến trúc đa agent sử dụng AWS Bedrock (Claude 3.7)."
         >
-          Start Chatting
-        </Button>
-      </Box>
+          🤖 Hệ thống đánh giá rủi ro AI đa Agent
+        </Header>
 
-      {/* Agent Status */}
-      <Paper elevation={2} sx={{ p: 3, mb: 4 }}>
-        <Typography variant="h5" gutterBottom>
-          Agent Status
-        </Typography>
-        {loading ? (
+        {/* System Status Cards */}
+        <Box>
+          <Header variant="h2">Tổng quan hệ thống</Header>
+          <ColumnLayout columns={4} variant="text-grid">
+            {systemStats.map((stat, index) => (
+              <div key={index}>
+                <Box variant="awsui-key-label">{stat.title}</Box>
+                <SpaceBetween direction="horizontal" size="xs">
+                  <div style={{ fontSize: '24px', fontWeight: 'bold' }}>
+                    {stat.value}
+                  </div>
+                  <StatusIndicator type={stat.status as any} />
+                </SpaceBetween>
+              </div>
+            ))}
+          </ColumnLayout>
+        </Box>
+
+        {/* Quick Actions */}
+        <Box>
+          <Header variant="h2">Tính năng chính</Header>
+          <ColumnLayout columns={2}>
+            {features.map((feature, index) => (
+              <div key={index} style={{ border: '1px solid #e9ebed', borderRadius: '8px' }}>
+                <Box padding="l">
+                  <SpaceBetween direction="vertical" size="m">
+                    <Header variant="h3">{feature.title}</Header>
+                    <TextContent>
+                      <p>{feature.description}</p>
+                    </TextContent>
+                    <Button variant="primary" onClick={feature.action}>
+                      {feature.buttonText}
+                    </Button>
+                  </SpaceBetween>
+                </Box>
+              </div>
+            ))}
+          </ColumnLayout>
+        </Box>
+
+        {/* Features Overview */}
+        <Box>
+          <Header variant="h2">Key Features</Header>
+          <ColumnLayout columns={1}>
+            <div style={{ border: '1px solid #e9ebed', borderRadius: '8px' }}>
+              <Box padding="l">
+                <SpaceBetween direction="vertical" size="m">
+                  <Header variant="h3">🤖 Multi-Agent System</Header>
+                  <TextContent>
+                    <p>Orchestrate multiple AI agents for collaborative risk assessment and document analysis.</p>
+                  </TextContent>
+                </SpaceBetween>
+              </Box>
+            </div>
+
+            <div style={{ border: '1px solid #e9ebed', borderRadius: '8px' }}>
+              <Box padding="l">
+                <SpaceBetween direction="vertical" size="m">
+                  <Header variant="h3">📄 Document Processing</Header>
+                  <TextContent>
+                    <p>Summarize, extract, and analyze documents in Vietnamese and English.</p>
+                  </TextContent>
+                </SpaceBetween>
+              </Box>
+            </div>
+
+            <div style={{ border: '1px solid #e9ebed', borderRadius: '8px' }}>
+              <Box padding="l">
+                <SpaceBetween direction="vertical" size="m">
+                  <Header variant="h3">💬 Conversational AI</Header>
+                  <TextContent>
+                    <p>Chat with AI agents for real-time insights and support.</p>
+                  </TextContent>
+                </SpaceBetween>
+              </Box>
+            </div>
+          </ColumnLayout>
+        </Box>
+
+        {/* Loading State */}
+        {loading && (
           <Box>
-            <Typography variant="body2" color="text.secondary" mb={1}>
-              Loading agents...
-            </Typography>
-            <LinearProgress />
-          </Box>
-        ) : (
-          <Box>
-            <Typography variant="body1" gutterBottom>
-              <strong>{agents.length}</strong> agents available
-            </Typography>
-            <Box display="flex" flexWrap="wrap" gap={1} mt={2}>
-              {agents.slice(0, 6).map((agent) => (
-                <Chip
-                  key={agent.id}
-                  avatar={<Avatar src={agent.avatar}>{agent.name[0]}</Avatar>}
-                  label={agent.name}
-                  color={agent.isActive ? 'success' : 'default'}
-                  variant={agent.isActive ? 'filled' : 'outlined'}
-                  onClick={() => navigate(`/chat/${agent.id}`)}
-                />
-              ))}
-              {agents.length > 6 && (
-                <Chip
-                  label={`+${agents.length - 6} more`}
-                  variant="outlined"
-                  onClick={() => navigate('/agents')}
-                />
-              )}
-            </Box>
+            <Header variant="h3">Loading System Data...</Header>
+            <ProgressBar 
+              status="in-progress"
+              value={50}
+              additionalInfo="Connecting to backend services..."
+            />
           </Box>
         )}
-      </Paper>
-
-      {/* Features Grid */}
-      <Typography variant="h4" gutterBottom mb={3}>
-        Platform Features
-      </Typography>
-      <Grid container spacing={3} mb={6}>
-        {features.map((feature, index) => (
-          <Grid xs={12} sm={6} md={3} key={index}>
-            <Card 
-              sx={{ 
-                height: '100%', 
-                display: 'flex', 
-                flexDirection: 'column',
-                cursor: 'pointer',
-                transition: 'transform 0.2s, box-shadow 0.2s',
-                '&:hover': {
-                  transform: 'translateY(-4px)',
-                  boxShadow: 4,
-                },
-              }}
-              onClick={feature.action}
-            >
-              <CardContent sx={{ flexGrow: 1, textAlign: 'center' }}>
-                <Box mb={2}>
-                  {feature.icon}
-                </Box>
-                <Typography variant="h6" gutterBottom>
-                  {feature.title}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {feature.description}
-                </Typography>
-              </CardContent>
-              <CardActions sx={{ justifyContent: 'center', pb: 2 }}>
-                <Button size="small" color="primary">
-                  Explore
-                </Button>
-              </CardActions>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
-
-      {/* Capabilities */}
-      <Grid container spacing={4}>
-        <Grid xs={12} md={6}>
-          <Paper elevation={2} sx={{ p: 3 }}>
-            <Typography variant="h5" gutterBottom>
-              Platform Capabilities
-            </Typography>
-            <List>
-              {capabilities.map((capability, index) => (
-                <ListItem key={index}>
-                  <ListItemIcon>
-                    {capability.icon}
-                  </ListItemIcon>
-                  <ListItemText primary={capability.text} />
-                </ListItem>
-              ))}
-            </List>
-          </Paper>
-        </Grid>
-
-        <Grid xs={12} md={6}>
-          <Paper elevation={2} sx={{ p: 3 }}>
-            <Typography variant="h5" gutterBottom>
-              Quick Start
-            </Typography>
-            <List>
-              <ListItem>
-                <ListItemText 
-                  primary="1. Configure your AI models"
-                  secondary="Set up API keys and model preferences in Settings"
-                />
-              </ListItem>
-              <ListItem>
-                <ListItemText 
-                  primary="2. Create or select agents"
-                  secondary="Choose from pre-built agents or create custom ones"
-                />
-              </ListItem>
-              <ListItem>
-                <ListItemText 
-                  primary="3. Start chatting"
-                  secondary="Begin conversations with single or multiple agents"
-                />
-              </ListItem>
-              <ListItem>
-                <ListItemText 
-                  primary="4. Monitor performance"
-                  secondary="Track usage and optimize your AI interactions"
-                />
-              </ListItem>
-            </List>
-          </Paper>
-        </Grid>
-      </Grid>
+      </SpaceBetween>
     </Container>
   );
 };

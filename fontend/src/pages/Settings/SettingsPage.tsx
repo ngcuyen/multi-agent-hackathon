@@ -1,452 +1,361 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Box,
   Container,
-  Typography,
-  Paper,
-  Grid2 as Grid,
-  TextField,
-  Button,
-  FormControl,
-  InputLabel,
+  Header,
+  SpaceBetween,
+  Box,
+  Form,
+  FormField,
+  Input,
   Select,
-  MenuItem,
-  Switch,
-  FormControlLabel,
-  Divider,
+  Toggle,
+  Button,
+  Tabs,
+  ColumnLayout,
   Alert,
-  Card,
-  CardContent,
-  CardHeader,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
-  IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Chip,
-} from "@mui/material";
-import {
-  Save as SaveIcon,
-  Refresh as RefreshIcon,
-  Delete as DeleteIcon,
-  Add as AddIcon,
-  Visibility as VisibilityIcon,
-  VisibilityOff as VisibilityOffIcon,
-} from '@mui/icons-material';
-import { modelAPI } from '../../services/api';
-import { ModelConfig } from '../../types';
+  Cards,
+  Badge,
+  TextContent
+} from '@cloudscape-design/components';
+
+interface Settings {
+  apiKey: string;
+  region: string;
+  model: string;
+  temperature: number;
+  maxTokens: number;
+  theme: string;
+  notifications: boolean;
+  autoSave: boolean;
+  language: string;
+}
 
 const SettingsPage: React.FC = () => {
-  const [settings, setSettings] = useState({
-    apiKeys: {
-      openai: '',
-      anthropic: '',
-      google: '',
-      aws: '',
-    },
-    preferences: {
-      theme: 'light',
-      defaultModel: 'gpt-3.5-turbo',
-      autoSave: true,
-      notifications: true,
-      maxConcurrentChats: 5,
-    },
-    advanced: {
-      debugMode: false,
-      logLevel: 'info',
-      cacheEnabled: true,
-      rateLimitEnabled: true,
-    },
+  const [settings, setSettings] = useState<Settings>({
+    apiKey: '',
+    region: 'us-east-1',
+    model: 'claude-3-sonnet',
+    temperature: 0.7,
+    maxTokens: 8192,
+    theme: 'light',
+    notifications: true,
+    autoSave: true,
+    language: 'english'
   });
-
-  const [models, setModels] = useState<ModelConfig[]>([]);
-  const [showApiKeys, setShowApiKeys] = useState<Record<string, boolean>>({});
-  const [modelDialogOpen, setModelDialogOpen] = useState(false);
-  const [newModel, setNewModel] = useState<Partial<ModelConfig>>({
-    name: '',
-    provider: 'openai',
-    maxTokens: 4096,
-    costPer1kTokens: 0.002,
-    capabilities: ['text'],
-  });
+  const [activeTab, setActiveTab] = useState('general');
+  const [isSaving, setIsSaving] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
-    loadModels();
     loadSettings();
   }, []);
 
-  const loadModels = async () => {
-    try {
-      const response = await modelAPI.getModels();
-      if (response.success && response.data) {
-        setModels(response.data);
-      }
-    } catch (error) {
-      console.error('Failed to load models:', error);
-    }
-  };
-
   const loadSettings = () => {
-    // Load settings from localStorage
-    const savedSettings = localStorage.getItem('app_settings');
+    // Load settings from localStorage or API
+    const savedSettings = localStorage.getItem('appSettings');
     if (savedSettings) {
-      setSettings({ ...settings, ...JSON.parse(savedSettings) });
+      setSettings(JSON.parse(savedSettings));
     }
   };
 
-  const saveSettings = () => {
-    localStorage.setItem('app_settings', JSON.stringify(settings));
-    // Here you would also send to backend if needed
-    alert('Settings saved successfully!');
-  };
-
-  const handleApiKeyChange = (provider: string, value: string) => {
-    setSettings({
-      ...settings,
-      apiKeys: {
-        ...settings.apiKeys,
-        [provider]: value,
-      },
-    });
-  };
-
-  const toggleApiKeyVisibility = (provider: string) => {
-    setShowApiKeys({
-      ...showApiKeys,
-      [provider]: !showApiKeys[provider],
-    });
-  };
-
-  const testModel = async (modelId: string) => {
+  const handleSaveSettings = async () => {
+    setIsSaving(true);
     try {
-      const response = await modelAPI.testModel(modelId);
-      if (response.success) {
-        alert(`Model test successful! Latency: ${response.data?.latency}ms`);
-      } else {
-        alert('Model test failed');
-      }
+      // Save to localStorage (in real app, save to backend)
+      localStorage.setItem('appSettings', JSON.stringify(settings));
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
     } catch (error) {
-      alert('Model test failed');
+      console.error('Failed to save settings:', error);
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  const addCustomModel = () => {
-    // In a real app, this would call the API
-    const { id: _, ...modelData } = newModel as ModelConfig;
-    const model: ModelConfig = {
-      id: `custom-${Date.now()}`,
-      ...modelData,
-    };
-    setModels([...models, model]);
-    setModelDialogOpen(false);
-    setNewModel({
-      name: '',
-      provider: 'openai',
-      maxTokens: 4096,
-      costPer1kTokens: 0.002,
-      capabilities: ['text'],
+  const handleResetSettings = () => {
+    setSettings({
+      apiKey: '',
+      region: 'us-east-1',
+      model: 'claude-3-sonnet',
+      temperature: 0.7,
+      maxTokens: 8192,
+      theme: 'light',
+      notifications: true,
+      autoSave: true,
+      language: 'english'
     });
   };
+
+  const regionOptions = [
+    { label: 'US East (N. Virginia)', value: 'us-east-1' },
+    { label: 'US West (Oregon)', value: 'us-west-2' },
+    { label: 'Europe (Ireland)', value: 'eu-west-1' },
+    { label: 'Asia Pacific (Singapore)', value: 'ap-southeast-1' }
+  ];
+
+  const modelOptions = [
+    { label: 'Claude 3.5 Sonnet', value: 'claude-3-5-sonnet' },
+    { label: 'Claude 3 Sonnet', value: 'claude-3-sonnet' },
+    { label: 'Claude 3 Haiku', value: 'claude-3-haiku' },
+    { label: 'Claude 3 Opus', value: 'claude-3-opus' }
+  ];
+
+  const languageOptions = [
+    { label: 'English', value: 'english' },
+    { label: 'Vietnamese', value: 'vietnamese' }
+  ];
+
+  const themeOptions = [
+    { label: 'Light', value: 'light' },
+    { label: 'Dark', value: 'dark' },
+    { label: 'Auto', value: 'auto' }
+  ];
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
-        Settings
-      </Typography>
-
-      <Grid container spacing={3}>
-        {/* API Keys Section */}
-        <Grid xs={12}>
-          <Paper elevation={2} sx={{ p: 3 }}>
-            <Typography variant="h5" gutterBottom>
-              API Keys
-            </Typography>
-            <Alert severity="info" sx={{ mb: 3 }}>
-              API keys are stored locally and encrypted. They are required to use AI models.
-            </Alert>
-            
-            <Grid container spacing={2}>
-              {Object.entries(settings.apiKeys).map(([provider, key]) => (
-                <Grid xs={12} sm={6} key={provider}>
-                  <TextField
-                    fullWidth
-                    label={`${provider.charAt(0).toUpperCase() + provider.slice(1)} API Key`}
-                    type={showApiKeys[provider] ? 'text' : 'password'}
-                    value={key}
-                    onChange={(e) => handleApiKeyChange(provider, e.target.value)}
-                    InputProps={{
-                      endAdornment: (
-                        <IconButton
-                          onClick={() => toggleApiKeyVisibility(provider)}
-                          edge="end"
-                        >
-                          {showApiKeys[provider] ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                        </IconButton>
-                      ),
-                    }}
-                  />
-                </Grid>
-              ))}
-            </Grid>
-          </Paper>
-        </Grid>
-
-        {/* General Preferences */}
-        <Grid xs={12} md={6}>
-          <Paper elevation={2} sx={{ p: 3 }}>
-            <Typography variant="h5" gutterBottom>
-              General Preferences
-            </Typography>
-            
-            <FormControl fullWidth margin="normal">
-              <InputLabel>Theme</InputLabel>
-              <Select
-                value={settings.preferences.theme}
-                onChange={(e) => setSettings({
-                  ...settings,
-                  preferences: { ...settings.preferences, theme: e.target.value }
-                })}
-              >
-                <MenuItem value="light">Light</MenuItem>
-                <MenuItem value="dark">Dark</MenuItem>
-                <MenuItem value="auto">Auto</MenuItem>
-              </Select>
-            </FormControl>
-
-            <FormControl fullWidth margin="normal">
-              <InputLabel>Default Model</InputLabel>
-              <Select
-                value={settings.preferences.defaultModel}
-                onChange={(e) => setSettings({
-                  ...settings,
-                  preferences: { ...settings.preferences, defaultModel: e.target.value }
-                })}
-              >
-                {models.map((model) => (
-                  <MenuItem key={model.id} value={model.id}>
-                    {model.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <TextField
-              fullWidth
-              label="Max Concurrent Chats"
-              type="number"
-              value={settings.preferences.maxConcurrentChats}
-              onChange={(e) => setSettings({
-                ...settings,
-                preferences: { ...settings.preferences, maxConcurrentChats: parseInt(e.target.value) }
-              })}
-              margin="normal"
-            />
-
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={settings.preferences.autoSave}
-                  onChange={(e) => setSettings({
-                    ...settings,
-                    preferences: { ...settings.preferences, autoSave: e.target.checked }
-                  })}
-                />
-              }
-              label="Auto-save conversations"
-            />
-
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={settings.preferences.notifications}
-                  onChange={(e) => setSettings({
-                    ...settings,
-                    preferences: { ...settings.preferences, notifications: e.target.checked }
-                  })}
-                />
-              }
-              label="Enable notifications"
-            />
-          </Paper>
-        </Grid>
-
-        {/* Advanced Settings */}
-        <Grid xs={12} md={6}>
-          <Paper elevation={2} sx={{ p: 3 }}>
-            <Typography variant="h5" gutterBottom>
-              Advanced Settings
-            </Typography>
-
-            <FormControl fullWidth margin="normal">
-              <InputLabel>Log Level</InputLabel>
-              <Select
-                value={settings.advanced.logLevel}
-                onChange={(e) => setSettings({
-                  ...settings,
-                  advanced: { ...settings.advanced, logLevel: e.target.value }
-                })}
-              >
-                <MenuItem value="error">Error</MenuItem>
-                <MenuItem value="warn">Warning</MenuItem>
-                <MenuItem value="info">Info</MenuItem>
-                <MenuItem value="debug">Debug</MenuItem>
-              </Select>
-            </FormControl>
-
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={settings.advanced.debugMode}
-                  onChange={(e) => setSettings({
-                    ...settings,
-                    advanced: { ...settings.advanced, debugMode: e.target.checked }
-                  })}
-                />
-              }
-              label="Debug mode"
-            />
-
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={settings.advanced.cacheEnabled}
-                  onChange={(e) => setSettings({
-                    ...settings,
-                    advanced: { ...settings.advanced, cacheEnabled: e.target.checked }
-                  })}
-                />
-              }
-              label="Enable caching"
-            />
-
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={settings.advanced.rateLimitEnabled}
-                  onChange={(e) => setSettings({
-                    ...settings,
-                    advanced: { ...settings.advanced, rateLimitEnabled: e.target.checked }
-                  })}
-                />
-              }
-              label="Rate limiting"
-            />
-          </Paper>
-        </Grid>
-
-        {/* Model Management */}
-        <Grid xs={12}>
-          <Paper elevation={2} sx={{ p: 3 }}>
-            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-              <Typography variant="h5">
-                Model Management
-              </Typography>
-              <Button
-                variant="outlined"
-                startIcon={<AddIcon />}
-                onClick={() => setModelDialogOpen(true)}
-              >
-                Add Custom Model
+    <Container>
+      <SpaceBetween direction="vertical" size="l">
+        <Header
+          variant="h1"
+          description="Configure system preferences, API settings, and application behavior."
+          actions={
+            <SpaceBetween direction="horizontal" size="xs">
+              <Button onClick={handleResetSettings}>
+                Reset to Defaults
               </Button>
-            </Box>
+              <Button 
+                variant="primary" 
+                onClick={handleSaveSettings}
+                loading={isSaving}
+              >
+                Save Settings
+              </Button>
+            </SpaceBetween>
+          }
+        >
+          Settings
+        </Header>
 
-            <List>
-              {models.map((model) => (
-                <ListItem key={model.id} divider>
-                  <ListItemText
-                    primary={model.name}
-                    secondary={
-                      <Box>
-                        <Typography variant="body2" color="text.secondary">
-                          Provider: {model.provider} | Max Tokens: {model.maxTokens} | 
-                          Cost: ${model.costPer1kTokens}/1k tokens
-                        </Typography>
-                        <Box mt={1}>
-                          {model.capabilities.map((cap) => (
-                            <Chip key={cap} label={cap} size="small" sx={{ mr: 0.5 }} />
-                          ))}
-                        </Box>
-                      </Box>
-                    }
-                  />
-                  <ListItemSecondaryAction>
-                    <IconButton onClick={() => testModel(model.id)}>
-                      <RefreshIcon />
-                    </IconButton>
-                  </ListItemSecondaryAction>
-                </ListItem>
-              ))}
-            </List>
-          </Paper>
-        </Grid>
+        {showSuccess && (
+          <Alert type="success" dismissible onDismiss={() => setShowSuccess(false)}>
+            Settings saved successfully!
+          </Alert>
+        )}
 
-        {/* Save Button */}
-        <Grid xs={12}>
-          <Box display="flex" justifyContent="center">
-            <Button
-              variant="contained"
-              size="large"
-              startIcon={<SaveIcon />}
-              onClick={saveSettings}
-              sx={{ px: 4 }}
-            >
-              Save Settings
-            </Button>
-          </Box>
-        </Grid>
-      </Grid>
+        <Tabs
+          activeTabId={activeTab}
+          onChange={({ detail }) => setActiveTab(detail.activeTabId)}
+          tabs={[
+            {
+              id: 'general',
+              label: 'General',
+              content: (
+                <SpaceBetween direction="vertical" size="l">
+                  <Box>
+                    <Header variant="h2">Application Settings</Header>
+                    <Form>
+                      <SpaceBetween direction="vertical" size="l">
+                        <ColumnLayout columns={2}>
+                          <FormField label="Theme" description="Choose your preferred theme">
+                            <Select
+                              selectedOption={themeOptions.find(opt => opt.value === settings.theme)}
+                              onChange={({ detail }) => setSettings({ ...settings, theme: detail.selectedOption.value! })}
+                              options={themeOptions}
+                            />
+                          </FormField>
 
-      {/* Add Custom Model Dialog */}
-      <Dialog open={modelDialogOpen} onClose={() => setModelDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Add Custom Model</DialogTitle>
-        <DialogContent>
-          <TextField
-            fullWidth
-            label="Model Name"
-            value={newModel.name}
-            onChange={(e) => setNewModel({ ...newModel, name: e.target.value })}
-            margin="normal"
-          />
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Provider</InputLabel>
-            <Select
-              value={newModel.provider}
-              onChange={(e) => setNewModel({ ...newModel, provider: e.target.value as any })}
-            >
-              <MenuItem value="openai">OpenAI</MenuItem>
-              <MenuItem value="anthropic">Anthropic</MenuItem>
-              <MenuItem value="google">Google</MenuItem>
-              <MenuItem value="aws">AWS</MenuItem>
-              <MenuItem value="local">Local</MenuItem>
-            </Select>
-          </FormControl>
-          <TextField
-            fullWidth
-            label="Max Tokens"
-            type="number"
-            value={newModel.maxTokens}
-            onChange={(e) => setNewModel({ ...newModel, maxTokens: parseInt(e.target.value) })}
-            margin="normal"
-          />
-          <TextField
-            fullWidth
-            label="Cost per 1k Tokens"
-            type="number"
-            inputProps={{ step: "0.001" }}
-            value={newModel.costPer1kTokens}
-            onChange={(e) => setNewModel({ ...newModel, costPer1kTokens: parseFloat(e.target.value) })}
-            margin="normal"
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setModelDialogOpen(false)}>Cancel</Button>
-          <Button onClick={addCustomModel} variant="contained">Add Model</Button>
-        </DialogActions>
-      </Dialog>
+                          <FormField label="Language" description="Default language for responses">
+                            <Select
+                              selectedOption={languageOptions.find(opt => opt.value === settings.language)}
+                              onChange={({ detail }) => setSettings({ ...settings, language: detail.selectedOption.value! })}
+                              options={languageOptions}
+                            />
+                          </FormField>
+                        </ColumnLayout>
+
+                        <ColumnLayout columns={2}>
+                          <FormField label="Notifications">
+                            <Toggle
+                              checked={settings.notifications}
+                              onChange={({ detail }) => setSettings({ ...settings, notifications: detail.checked })}
+                            >
+                              Enable notifications
+                            </Toggle>
+                          </FormField>
+
+                          <FormField label="Auto Save">
+                            <Toggle
+                              checked={settings.autoSave}
+                              onChange={({ detail }) => setSettings({ ...settings, autoSave: detail.checked })}
+                            >
+                              Auto-save conversations
+                            </Toggle>
+                          </FormField>
+                        </ColumnLayout>
+                      </SpaceBetween>
+                    </Form>
+                  </Box>
+                </SpaceBetween>
+              )
+            },
+            {
+              id: 'aws',
+              label: 'AWS Configuration',
+              content: (
+                <SpaceBetween direction="vertical" size="l">
+                  <Alert type="info">
+                    Configure your AWS credentials and Bedrock settings. These settings are stored locally and used for API calls.
+                  </Alert>
+
+                  <Box>
+                    <Header variant="h2">AWS Bedrock Settings</Header>
+                    <Form>
+                      <SpaceBetween direction="vertical" size="l">
+                        <FormField 
+                          label="AWS Region" 
+                          description="Select the AWS region for Bedrock API calls"
+                        >
+                          <Select
+                            selectedOption={regionOptions.find(opt => opt.value === settings.region)}
+                            onChange={({ detail }) => setSettings({ ...settings, region: detail.selectedOption.value! })}
+                            options={regionOptions}
+                          />
+                        </FormField>
+
+                        <FormField 
+                          label="API Key" 
+                          description="Your AWS access key (stored locally)"
+                          constraintText="This will be stored in your browser's local storage"
+                        >
+                          <Input
+                            type="password"
+                            value={settings.apiKey}
+                            onChange={({ detail }) => setSettings({ ...settings, apiKey: detail.value })}
+                            placeholder="Enter your AWS access key"
+                          />
+                        </FormField>
+                      </SpaceBetween>
+                    </Form>
+                  </Box>
+                </SpaceBetween>
+              )
+            },
+            {
+              id: 'model',
+              label: 'Model Configuration',
+              content: (
+                <SpaceBetween direction="vertical" size="l">
+                  <Box>
+                    <Header variant="h2">Default Model Settings</Header>
+                    <Form>
+                      <SpaceBetween direction="vertical" size="l">
+                        <FormField label="Default Model" description="Choose the default AI model for new agents">
+                          <Select
+                            selectedOption={modelOptions.find(opt => opt.value === settings.model)}
+                            onChange={({ detail }) => setSettings({ ...settings, model: detail.selectedOption.value! })}
+                            options={modelOptions}
+                          />
+                        </FormField>
+
+                        <ColumnLayout columns={2}>
+                          <FormField 
+                            label="Temperature" 
+                            description="Controls randomness (0.0 = deterministic, 1.0 = creative)"
+                          >
+                            <Input
+                              type="number"
+                              value={settings.temperature.toString()}
+                              onChange={({ detail }) => setSettings({ ...settings, temperature: parseFloat(detail.value) || 0.7 })}
+                              step={0.1}
+                            />
+                          </FormField>
+
+                          <FormField 
+                            label="Max Tokens" 
+                            description="Maximum length of model responses"
+                          >
+                            <Input
+                              type="number"
+                              value={settings.maxTokens.toString()}
+                              onChange={({ detail }) => setSettings({ ...settings, maxTokens: parseInt(detail.value) || 8192 })}
+                            />
+                          </FormField>
+                        </ColumnLayout>
+                      </SpaceBetween>
+                    </Form>
+                  </Box>
+                </SpaceBetween>
+              )
+            },
+            {
+              id: 'about',
+              label: 'About',
+              content: (
+                <SpaceBetween direction="vertical" size="l">
+                  <Box>
+                    <Header variant="h2">🤖 Multi-Agent AI Risk Assessment System</Header>
+                    <TextContent>
+                      <p>
+                        AI-powered risk assessment system with document summarization, 
+                        conversational AI, and multi-agent architecture using AWS Bedrock (Claude 3.7).
+                      </p>
+                    </TextContent>
+                  </Box>
+
+                  <ColumnLayout columns={2}>
+                    <Box>
+                      <Header variant="h3">System Information</Header>
+                      <SpaceBetween direction="vertical" size="s">
+                        <div>
+                          <Box variant="awsui-key-label">Version</Box>
+                          <div>1.0.0</div>
+                        </div>
+                        <div>
+                          <Box variant="awsui-key-label">Backend API</Box>
+                          <div>FastAPI 0.115.2</div>
+                        </div>
+                        <div>
+                          <Box variant="awsui-key-label">Frontend</Box>
+                          <div>React 18.2.0</div>
+                        </div>
+                        <div>
+                          <Box variant="awsui-key-label">UI Framework</Box>
+                          <div>AWS CloudScape</div>
+                        </div>
+                      </SpaceBetween>
+                    </Box>
+
+                    <Box>
+                      <Header variant="h3">Features</Header>
+                      <SpaceBetween direction="vertical" size="xs">
+                        <Badge color="green">Multi-Agent System</Badge>
+                        <Badge color="blue">Document Processing</Badge>
+                        <Badge color="blue">Conversational AI</Badge>
+                        <Badge color="red">Real-time Chat</Badge>
+                        <Badge color="red">AWS Bedrock Integration</Badge>
+                      </SpaceBetween>
+                    </Box>
+                  </ColumnLayout>
+
+                  <Box>
+                    <Header variant="h3">Links</Header>
+                    <SpaceBetween direction="horizontal" size="s">
+                      <Button href="/health" iconName="status-positive">
+                        Health Check
+                      </Button>
+                      <Button href="http://localhost:8080/docs" iconName="external" target="_blank">
+                        API Documentation
+                      </Button>
+                      <Button href="https://github.com/ngcuyen/multi-agent-hackathon" iconName="external" target="_blank">
+                        GitHub Repository
+                      </Button>
+                    </SpaceBetween>
+                  </Box>
+                </SpaceBetween>
+              )
+            }
+          ]}
+        />
+      </SpaceBetween>
     </Container>
   );
 };

@@ -1,6 +1,5 @@
 import React from 'react';
-import { Box, Paper, Avatar, Typography } from '@mui/material';
-import { SmartToy as BotIcon } from '@mui/icons-material';
+import { Box, SpaceBetween, Badge, Spinner } from '@cloudscape-design/components';
 import { Agent } from '../../types';
 
 interface TypingIndicatorProps {
@@ -9,61 +8,28 @@ interface TypingIndicatorProps {
 
 const TypingIndicator: React.FC<TypingIndicatorProps> = ({ agent }) => {
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        justifyContent: 'flex-start',
-        mb: 2,
-        alignItems: 'flex-start',
-        gap: 1,
+    <div
+      style={{
+        padding: '12px',
+        marginRight: '20%',
+        backgroundColor: '#f5f5f5',
+        borderRadius: '12px',
+        border: '1px solid #e9ebed',
+        marginBottom: '8px'
       }}
     >
-      <Avatar sx={{ bgcolor: 'primary.main', width: 32, height: 32 }}>
-        <BotIcon sx={{ fontSize: 18 }} />
-      </Avatar>
-
-      <Paper
-        elevation={1}
-        sx={{
-          p: 2,
-          backgroundColor: 'background.paper',
-          borderRadius: 2,
-          borderTopLeftRadius: 0,
-          minWidth: '100px',
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography variant="body2" color="text.secondary">
-            {agent.name} is typing
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 0.5 }}>
-            {[0, 1, 2].map((i) => (
-              <Box
-                key={i}
-                sx={{
-                  width: 6,
-                  height: 6,
-                  borderRadius: '50%',
-                  backgroundColor: 'primary.main',
-                  animation: 'typing 1.4s infinite',
-                  animationDelay: `${i * 0.2}s`,
-                  '@keyframes typing': {
-                    '0%, 60%, 100%': {
-                      transform: 'translateY(0)',
-                      opacity: 0.5,
-                    },
-                    '30%': {
-                      transform: 'translateY(-10px)',
-                      opacity: 1,
-                    },
-                  },
-                }}
-              />
-            ))}
-          </Box>
-        </Box>
-      </Paper>
-    </Box>
+      <SpaceBetween direction="horizontal" size="s" alignItems="center">
+        <Badge color="green">🤖 {agent.name}</Badge>
+        <Spinner size="normal" />
+        <span style={{ 
+          fontSize: '14px', 
+          color: '#5f6b7a',
+          fontStyle: 'italic'
+        }}>
+          is typing...
+        </span>
+      </SpaceBetween>
+    </div>
   );
 };
 

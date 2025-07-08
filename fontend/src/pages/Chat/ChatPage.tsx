@@ -1,33 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
+  AppLayout,
+  SideNavigation,
+  Header,
+  Button,
+  SpaceBetween,
   Box,
-  Drawer,
-  AppBar,
-  Toolbar,
-  Typography,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
-  ListItemIcon,
-  IconButton,
-  Divider,
-  Fab,
-  useTheme,
-  useMediaQuery,
-} from '@mui/material';
-import {
-  Menu as MenuIcon,
-  Chat as ChatIcon,
-  Add as AddIcon,
-  History as HistoryIcon,
-} from '@mui/icons-material';
+  Container
+} from '@cloudscape-design/components';
 import ChatInterface from '../../components/Chat/ChatInterface';
 import AgentSelector from '../../components/Agent/AgentSelector';
 import { Agent, ChatSession } from '../../types';
 import { chatAPI } from '../../services/api';
-
-const DRAWER_WIDTH = 300;
 
 interface ChatPageProps {
   agents: Agent[];
@@ -36,250 +20,139 @@ interface ChatPageProps {
 }
 
 const ChatPage: React.FC<ChatPageProps> = ({ agents, loading, onShowSnackbar }) => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const [currentSession, setCurrentSession] = useState<ChatSession | null>(null);
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
-  const [mobileOpen, setMobileOpen] = useState(false);
   const [showAgentSelector, setShowAgentSelector] = useState(false);
 
-  useEffect(() => {
-    loadChatSessions();
-  }, []);
-
-  const loadChatSessions = async () => {
+  const loadChatSessions = useCallback(async () => {
     try {
-      const response = await chatAPI.getSessions();
+      const response = await chatAPI.getChatSessions();
       if (response.success && response.data) {
         setChatSessions(response.data);
       }
     } catch (error) {
       console.error('Failed to load chat sessions:', error);
+      onShowSnackbar('Failed to load chat sessions', 'error');
     }
-  };
+  }, [onShowSnackbar]);
 
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
+  useEffect(() => {
+    loadChatSessions();
+  }, [loadChatSessions]);
 
   const handleNewChat = () => {
-    setCurrentSession(null);
     setShowAgentSelector(true);
-  };
-
-  const handleSessionSelect = (session: ChatSession) => {
-    setCurrentSession(session);
-    setShowAgentSelector(false);
-    if (isMobile) {
-      setMobileOpen(false);
-    }
   };
 
   const handleAgentSelect = (agent: Agent) => {
     setSelectedAgent(agent);
+    setCurrentSession(null);
     setShowAgentSelector(false);
   };
 
-  const handleNewSession = async (sessionId: string) => {
-    // Reload sessions to include the new one
-    await loadChatSessions();
-    
-    // Find and select the new session
-    const newSession = chatSessions.find(s => s.id === sessionId);
-    if (newSession) {
-      setCurrentSession(newSession);
+  const handleSessionSelect = (session: ChatSession) => {
+    setCurrentSession(session);
+    const agent = agents.find(a => a.id === session.agentId);
+    if (agent) {
+      setSelectedAgent(agent);
     }
   };
 
-  const formatSessionTitle = (session: ChatSession) => {
-    return session.title || `Chat ${new Date(session.createdAt).toLocaleDateString()}`;
+  const navigationItems = [
+    {
+      type: 'section' as const,
+      text: 'Chat Sessions',
+      items: [
+        {
+          type: 'link' as const,
+          text: 'New Chat',
+          href: '#new-chat',
+          info: <Button variant="icon" iconName="add-plus" onClick={handleNewChat} />
+        },
+        ...chatSessions.map(session => ({
+          type: 'link' as const,
+          text: session.title || `Chat ${session.id.slice(0, 8)}`,
+          href: `#session-${session.id}`,
+          info: session.agentId ? agents.find(a => a.id === session.agentId)?.name : 'Unknown Agent'
+        }))
+      ]
+    }
+  ];
+
+  const handleNavigationChange = (event: any) => {
+    const href = event.detail.href;
+    if (href === '#new-chat') {
+      handleNewChat();
+    } else if (href.startsWith('#session-')) {
+      const sessionId = href.replace('#session-', '');
+      const session = chatSessions.find(s => s.id === sessionId);
+      if (session) {
+        handleSessionSelect(session);
+      }
+    }
   };
 
-  const drawer = (
-    <Box>
-      <Toolbar>
-        <Typography variant="h6" noWrap component="div">
-          GenAI Chat
-        </Typography>
-      </Toolbar>
-      <Divider />
-      
-      <List>
-        <ListItem>
-          <ListItemButton onClick={handleNewChat}>
-            <ListItemIcon>
-              <AddIcon />
-            </ListItemIcon>
-            <ListItemText primary="New Chat" />
-          </ListItemButton>
-        </ListItem>
-      </List>
-      
-      <Divider />
-      
-      <Box sx={{ px: 2, py: 1 }}>
-        <Typography variant="subtitle2" color="text.secondary">
-          Recent Chats
-        </Typography>
-      </Box>
-      
-      <List>
-        {chatSessions.map((session) => (
-          <ListItem key={session.id} disablePadding>
-            <ListItemButton
-              selected={currentSession?.id === session.id}
-              onClick={() => handleSessionSelect(session)}
-            >
-              <ListItemIcon>
-                <ChatIcon />
-              </ListItemIcon>
-              <ListItemText
-                primary={formatSessionTitle(session)}
-                secondary={new Date(session.updatedAt).toLocaleDateString()}
-              />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
-      
-      {chatSessions.length === 0 && (
-        <Box sx={{ p: 2, textAlign: 'center' }}>
-          <HistoryIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 1 }} />
-          <Typography variant="body2" color="text.secondary">
-            No chat history yet
-          </Typography>
-        </Box>
-      )}
-    </Box>
-  );
-
   return (
-    <Box sx={{ display: 'flex', height: '100vh' }}>
-      {/* App Bar */}
-      <AppBar
-        position="fixed"
-        sx={{
-          width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
-          ml: { md: `${DRAWER_WIDTH}px` },
-        }}
-      >
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            edge="start"
-            onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { md: 'none' } }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" noWrap component="div">
-            {showAgentSelector
-              ? 'Select an Agent'
-              : selectedAgent
-              ? `Chat with ${selectedAgent.name}`
-              : 'GenAI Chat'
-            }
-          </Typography>
-        </Toolbar>
-      </AppBar>
-
-      {/* Sidebar */}
-      <Box
-        component="nav"
-        sx={{ width: { md: DRAWER_WIDTH }, flexShrink: { md: 0 } }}
-      >
-        <Drawer
-          variant="temporary"
-          open={mobileOpen}
-          onClose={handleDrawerToggle}
-          ModalProps={{
-            keepMounted: true, // Better open performance on mobile.
-          }}
-          sx={{
-            display: { xs: 'block', md: 'none' },
-            '& .MuiDrawer-paper': {
-              boxSizing: 'border-box',
-              width: DRAWER_WIDTH,
-            },
-          }}
-        >
-          {drawer}
-        </Drawer>
-        <Drawer
-          variant="permanent"
-          sx={{
-            display: { xs: 'none', md: 'block' },
-            '& .MuiDrawer-paper': {
-              boxSizing: 'border-box',
-              width: DRAWER_WIDTH,
-            },
-          }}
-          open
-        >
-          {drawer}
-        </Drawer>
-      </Box>
-
-      {/* Main Content */}
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
-          height: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      >
-        <Toolbar />
-        
-        <Box sx={{ flex: 1, overflow: 'hidden' }}>
-          {showAgentSelector ? (
-            <Box sx={{ p: 3, height: '100%', overflow: 'auto' }}>
-              <AgentSelector
-                selectedAgent={selectedAgent || undefined}
-                onAgentSelect={handleAgentSelect}
-              />
-            </Box>
-          ) : selectedAgent ? (
-            <ChatInterface
-              agent={selectedAgent}
-              sessionId={currentSession?.id}
-              onNewSession={handleNewSession}
-            />
-          ) : (
-            <Box
-              sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                height: '100%',
-                textAlign: 'center',
-                p: 3,
-              }}
-            >
-              <Typography variant="h4" gutterBottom>
-                Welcome to GenAI Chat
-              </Typography>
-              <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-                Select an agent to start chatting or create a new conversation
-              </Typography>
-              <Fab
-                color="primary"
-                aria-label="new chat"
-                onClick={handleNewChat}
+    <>
+      <AppLayout
+        navigation={
+          <SideNavigation
+            header={{
+              href: '#',
+              text: 'Chat Sessions'
+            }}
+            items={navigationItems}
+            onFollow={handleNavigationChange}
+          />
+        }
+        content={
+          <Container>
+            <SpaceBetween direction="vertical" size="l">
+              <Header
+                variant="h1"
+                actions={
+                  <Button variant="primary" iconName="add-plus" onClick={handleNewChat}>
+                    New Chat
+                  </Button>
+                }
               >
-                <AddIcon />
-              </Fab>
-            </Box>
-          )}
-        </Box>
-      </Box>
-    </Box>
+                Multi-Agent Chat
+              </Header>
+
+              {selectedAgent ? (
+                <ChatInterface
+                  agent={selectedAgent}
+                  session={currentSession}
+                  onShowSnackbar={onShowSnackbar}
+                  onSessionUpdate={loadChatSessions}
+                />
+              ) : (
+                <Box textAlign="center" padding="xxl">
+                  <SpaceBetween direction="vertical" size="m">
+                    <Header variant="h2">Welcome to Multi-Agent Chat</Header>
+                    <p>Select an agent to start a conversation or create a new chat session.</p>
+                    <Button variant="primary" onClick={handleNewChat}>
+                      Choose an Agent
+                    </Button>
+                  </SpaceBetween>
+                </Box>
+              )}
+            </SpaceBetween>
+          </Container>
+        }
+        toolsHide
+        navigationHide={false}
+      />
+
+      {/* Agent Selector Modal */}
+      <AgentSelector
+        agents={agents}
+        open={showAgentSelector}
+        onClose={() => setShowAgentSelector(false)}
+        onSelect={handleAgentSelect}
+      />
+    </>
   );
 };
 

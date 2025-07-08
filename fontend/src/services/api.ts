@@ -1,299 +1,267 @@
-import axios from 'axios';
-import { Message, Agent, ChatSession, ModelConfig, APIResponse } from '../types';
-import { mockAgents, mockModels, mockMessages, mockChatSessions, mockUsageStats, mockAgentMetrics } from './mockData';
+// API Service for Multi-Agent AI Risk Assessment System
+// Updated to match actual backend endpoints
 
-// API Base Configuration
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
-const USE_MOCK_DATA = process.env.REACT_APP_USE_MOCK_DATA === 'true' || false;
+// Use relative URL to leverage proxy
+const API_BASE_URL = process.env.NODE_ENV === 'production' 
+  ? (process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080')
+  : ''; // Use proxy in development
+const API_PREFIX = '/riskassessment/api/v1';
+const PUBLIC_PREFIX = '/riskassessment/public/api/v1';
 
-const apiClient = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  timeout: 5000, // 5 second timeout
-});
+// Types matching backend schemas
+export interface ApiResponse<T = any> {
+  status: 'success' | 'error';
+  data?: T;
+  message?: string;
+}
 
-// Request interceptor for auth
-apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('auth_token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+export interface SummaryRequest {
+  text: string;
+  summary_type?: 'general' | 'bullet_points' | 'key_insights' | 'executive_summary' | 'detailed';
+  max_length?: number;
+  language?: 'vietnamese' | 'english';
+}
 
-// Response interceptor for error handling
-apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    console.error('API Error:', error);
-    return Promise.reject(error);
-  }
-);
-
-// Helper function to simulate API delay
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-// Helper function to create mock response
-const createMockResponse = <T>(data: T): APIResponse<T> => ({
-  success: true,
-  data,
-  message: 'Success',
-});
-
-// Helper function to handle API calls with fallback to mock data
-const apiCallWithFallback = async <T>(
-  apiCall: () => Promise<any>,
-  mockData: T,
-  errorMessage: string = 'API call failed'
-): Promise<APIResponse<T>> => {
-  if (USE_MOCK_DATA) {
-    await delay(300 + Math.random() * 700); // Simulate network delay
-    return createMockResponse(mockData);
-  }
-
-  try {
-    const response = await apiCall();
-    return response.data;
-  } catch (error) {
-    console.warn(`${errorMessage}, falling back to mock data:`, error);
-    await delay(300 + Math.random() * 700); // Simulate network delay
-    return createMockResponse(mockData);
-  }
-};
-
-// Chat API
-export const chatAPI = {
-  // Send message to agent
-  sendMessage: async (agentId: string, message: string, sessionId?: string): Promise<APIResponse<Message>> => {
-    const mockMessage: Message = {
-      id: `msg-${Date.now()}`,
-      content: `This is a mock response to: "${message}". In a real implementation, this would be processed by agent ${agentId}.`,
-      role: 'assistant',
-      timestamp: new Date(),
-      agentId,
-      metadata: {
-        model: 'gpt-3.5-turbo',
-        tokens: Math.floor(Math.random() * 100) + 20,
-        cost: Math.random() * 0.01,
-      },
+export interface SummaryResponse {
+  summary: string;
+  summary_type: string;
+  language: string;
+  original_length: number;
+  summary_length: number;
+  compression_ratio: number;
+  word_count: {
+    original: number;
+    summary: number;
+  };
+  processing_time: number;
+  model_used: string;
+  document_analysis: {
+    document_category: string;
+    recommendations: {
+      suggested_types: string[];
+      note: string;
     };
+  };
+}
 
-    return apiCallWithFallback(
-      () => apiClient.post('/riskassessment/api/v1/conversation/chat', { 
-        message, 
-        conversation_id: sessionId,
-        agent_id: agentId 
+export interface ConversationRequest {
+  user_id: string;
+  message?: string;
+  conversation_id?: string;
+}
+
+export interface ConversationResponse {
+  conversation_id: string;
+  message?: string;
+  response?: string;
+}
+
+export interface HealthCheckResponse {
+  status: string;
+  service: string;
+  timestamp: number;
+  version: string;
+  features: {
+    text_summary: boolean;
+    s3_integration: boolean;
+    knowledge_base: boolean;
+  };
+}
+
+// API Client Class
+class ApiClient {
+  private async request<T>(
+    endpoint: string,
+    options: RequestInit = {}
+  ): Promise<ApiResponse<T>> {
+    try {
+      const url = `${API_BASE_URL}${endpoint}`;
+      
+      // Create AbortController for timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 seconds timeout
+      
+      const response = await fetch(url, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...options.headers,
+        },
+        signal: controller.signal,
+        ...options,
+      });
+      
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('API request failed:', error);
+      return {
+        status: 'error',
+        message: error instanceof Error ? error.message : 'Unknown error occurred'
+      };
+    }
+  }
+
+  // Health Check API
+  async checkHealth(): Promise<ApiResponse<HealthCheckResponse>> {
+    return this.request<HealthCheckResponse>(`${PUBLIC_PREFIX}/health-check/health`);
+  }
+
+  // Text Summarization APIs
+  async summarizeText(request: SummaryRequest): Promise<ApiResponse<SummaryResponse>> {
+    return this.request<SummaryResponse>(`${API_PREFIX}/text/summary/text`, {
+      method: 'POST',
+      body: JSON.stringify(request),
+    });
+  }
+
+  async summarizeDocument(
+    file: File,
+    summaryType: string = 'general',
+    language: string = 'vietnamese'
+  ): Promise<ApiResponse<SummaryResponse>> {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('summary_type', summaryType);
+    formData.append('language', language);
+
+    try {
+      const url = `${API_BASE_URL}${API_PREFIX}/text/summary/document`;
+      console.log('Sending request to:', url);
+      
+      const response = await fetch(url, {
+        method: 'POST',
+        body: formData,
+      });
+      
+      console.log('Response status:', response.status);
+      console.log('Response ok:', response.ok);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Response error:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Response data:', data);
+      
+      // Backend returns: {"status": "success", "data": {...}, "message": "..."}
+      // We return it as-is since it's already in the correct ApiResponse format
+      return data;
+    } catch (error) {
+      console.error('Document summarization failed:', error);
+      return {
+        status: 'error',
+        message: error instanceof Error ? error.message : 'Unknown error occurred'
+      };
+    }
+  }
+
+  async getSummaryTypes(): Promise<ApiResponse<string[]>> {
+    return this.request<string[]>(`${API_PREFIX}/text/summary/types`);
+  }
+
+  // Conversation APIs
+  async startConversation(userId: string): Promise<ApiResponse<ConversationResponse>> {
+    return this.request<ConversationResponse>(`${API_PREFIX}/conversation/chat`, {
+      method: 'POST',
+      body: JSON.stringify({
+        user_id: userId,
       }),
-      mockMessage,
-      'Failed to send message'
-    );
-  },
+    });
+  }
 
-  // Get chat history
-  getChatHistory: async (sessionId: string): Promise<APIResponse<Message[]>> => {
-    return apiCallWithFallback(
-      () => apiClient.get(`/chat/history/${sessionId}`),
-      mockMessages,
-      'Failed to get chat history'
-    );
-  },
+  async sendMessage(request: ConversationRequest): Promise<ApiResponse<ConversationResponse>> {
+    return this.request<ConversationResponse>(`${API_PREFIX}/conversation/chat`, {
+      method: 'POST',
+      body: JSON.stringify(request),
+    });
+  }
 
-  // Create new chat session
-  createSession: async (agentId: string, title?: string): Promise<APIResponse<ChatSession>> => {
-    const mockSession: ChatSession = {
-      id: `session-${Date.now()}`,
-      title: title || 'New Chat',
-      messages: [],
-      agentId,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    return apiCallWithFallback(
-      () => apiClient.post('/chat/session', { agentId, title }),
-      mockSession,
-      'Failed to create session'
-    );
-  },
-
-  // Get all chat sessions
-  getSessions: async (): Promise<APIResponse<ChatSession[]>> => {
-    return apiCallWithFallback(
-      () => apiClient.get('/chat/sessions'),
-      mockChatSessions,
-      'Failed to get sessions'
-    );
-  },
-};
-
-// Agent API
-export const agentAPI = {
-  // Get all agents
-  getAgents: async (): Promise<APIResponse<Agent[]>> => {
-    return apiCallWithFallback(
-      () => apiClient.get('/agents'),
-      mockAgents,
-      'Failed to get agents'
-    );
-  },
-
-  // Get agent by ID
-  getAgent: async (id: string): Promise<APIResponse<Agent>> => {
-    const mockAgent = mockAgents.find(agent => agent.id === id) || mockAgents[0];
-    
-    return apiCallWithFallback(
-      () => apiClient.get(`/agents/${id}`),
-      mockAgent,
-      'Failed to get agent'
-    );
-  },
-
-  // Create new agent
-  createAgent: async (agent: Omit<Agent, 'id'>): Promise<APIResponse<Agent>> => {
-    const mockAgent: Agent = {
-      ...agent,
-      id: `agent-${Date.now()}`,
-    };
-
-    return apiCallWithFallback(
-      () => apiClient.post('/agents', agent),
-      mockAgent,
-      'Failed to create agent'
-    );
-  },
-
-  // Update agent
-  updateAgent: async (id: string, agent: Partial<Agent>): Promise<APIResponse<Agent>> => {
-    const existingAgent = mockAgents.find(a => a.id === id) || mockAgents[0];
-    const mockAgent: Agent = { ...existingAgent, ...agent };
-
-    return apiCallWithFallback(
-      () => apiClient.put(`/agents/${id}`, agent),
-      mockAgent,
-      'Failed to update agent'
-    );
-  },
-
-  // Delete agent
-  deleteAgent: async (id: string): Promise<APIResponse<void>> => {
-    return apiCallWithFallback(
-      () => apiClient.delete(`/agents/${id}`),
-      undefined,
-      'Failed to delete agent'
-    );
-  },
-};
-
-// Model API
-export const modelAPI = {
-  // Get available models
-  getModels: async (): Promise<APIResponse<ModelConfig[]>> => {
-    return apiCallWithFallback(
-      () => apiClient.get('/models'),
-      mockModels,
-      'Failed to get models'
-    );
-  },
-
-  // Test model connection
-  testModel: async (modelId: string): Promise<APIResponse<{ status: string; latency: number }>> => {
-    const mockTestResult = {
-      status: 'success',
-      latency: Math.floor(Math.random() * 500) + 100,
-    };
-
-    return apiCallWithFallback(
-      () => apiClient.post(`/models/${modelId}/test`),
-      mockTestResult,
-      'Failed to test model'
-    );
-  },
-};
-
-// File API
-export const fileAPI = {
-  // Upload file
-  uploadFile: async (file: File): Promise<APIResponse<{ id: string; extractedText?: string }>> => {
-    const mockUploadResult = {
-      id: `file-${Date.now()}`,
-      extractedText: `Mock extracted text from ${file.name}`,
-    };
-
-    return apiCallWithFallback(
-      () => {
-        const formData = new FormData();
-        formData.append('file', file);
-        return apiClient.post('/files/upload', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
+  // Streaming chat (for future implementation)
+  async streamChat(request: ConversationRequest): Promise<ReadableStream> {
+    const url = `${API_BASE_URL}${API_PREFIX}/conversation/chat`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'text/event-stream',
       },
-      mockUploadResult,
-      'Failed to upload file'
-    );
-  },
+      body: JSON.stringify(request),
+    });
 
-  // Process document
-  processDocument: async (fileId: string, options?: { extractText?: boolean; summarize?: boolean }): Promise<APIResponse<{ extractedText?: string; summary?: string }>> => {
-    const mockProcessResult = {
-      extractedText: options?.extractText ? 'Mock extracted text content...' : undefined,
-      summary: options?.summarize ? 'Mock document summary...' : undefined,
-    };
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
 
-    return apiCallWithFallback(
-      () => apiClient.post(`/files/${fileId}/process`, options),
-      mockProcessResult,
-      'Failed to process document'
-    );
-  },
-};
+    return response.body!;
+  }
+}
 
-// Analytics API
-export const analyticsAPI = {
-  // Get usage statistics
-  getUsageStats: async (timeRange?: string): Promise<APIResponse<{
-    totalMessages: number;
-    totalTokens: number;
-    totalCost: number;
-    agentUsage: Record<string, number>;
-  }>> => {
-    return apiCallWithFallback(
-      () => apiClient.get('/analytics/usage', { params: { timeRange } }),
-      mockUsageStats,
-      'Failed to get usage stats'
-    );
-  },
+// Export singleton instance
+export const apiClient = new ApiClient();
 
-  // Get agent metrics
-  getAgentMetrics: async (agentId: string): Promise<APIResponse<{
-    responseTime: number[];
-    successRate: number;
-    tokenUsage: number[];
-  }>> => {
-    return apiCallWithFallback(
-      () => apiClient.get(`/analytics/agents/${agentId}`),
-      mockAgentMetrics,
-      'Failed to get agent metrics'
-    );
-  },
-};
-
-// Health Check API
+// Legacy exports for backward compatibility
 export const healthAPI = {
-  // Check backend health
-  checkHealth: async (): Promise<APIResponse<{ status: string; timestamp: string }>> => {
-    const mockHealthResult = {
-      status: 'healthy',
-      timestamp: new Date().toISOString(),
-    };
+  checkHealth: () => apiClient.checkHealth(),
+};
 
-    return apiCallWithFallback(
-      () => apiClient.get('/riskassessment/public/api/v1/health-check/health'),
-      mockHealthResult,
-      'Failed to check backend health'
-    );
-  },
+export const textAPI = {
+  summarizeText: (request: SummaryRequest) => apiClient.summarizeText(request),
+  summarizeDocument: (file: File, summaryType?: string, language?: string) => 
+    apiClient.summarizeDocument(file, summaryType, language),
+  getSummaryTypes: () => apiClient.getSummaryTypes(),
+};
+
+export const chatAPI = {
+  startConversation: (userId: string) => apiClient.startConversation(userId),
+  sendMessage: (request: ConversationRequest) => apiClient.sendMessage(request),
+  streamChat: (request: ConversationRequest) => apiClient.streamChat(request),
+  // Legacy methods for compatibility
+  getChatSessions: async () => ({ success: true, data: [] }),
+  getMessages: async (sessionId: string) => ({ success: true, data: [] }),
+};
+
+export const agentAPI = {
+  // Mock agent API for now - backend doesn't have agent management yet
+  getAgents: async () => ({
+    success: true,
+    data: [
+      {
+        id: 'risk-assessment-agent',
+        name: 'Risk Assessment Agent',
+        description: 'Chuyên gia phân tích và đánh giá rủi ro doanh nghiệp',
+        status: 'active' as const,
+        model: 'claude-3-sonnet',
+        temperature: 0.7,
+        maxTokens: 8192,
+        capabilities: ['Risk Analysis', 'Document Processing', 'Vietnamese Support'],
+        systemPrompt: 'Bạn là một chuyên gia phân tích rủi ro doanh nghiệp...',
+        createdAt: new Date(),
+      },
+      {
+        id: 'document-processor',
+        name: 'Document Processor',
+        description: 'Chuyên xử lý và tóm tắt tài liệu',
+        status: 'active' as const,
+        model: 'claude-3-sonnet',
+        temperature: 0.5,
+        maxTokens: 8192,
+        capabilities: ['Document Summarization', 'Text Analysis', 'Multi-language'],
+        systemPrompt: 'Bạn là một chuyên gia xử lý tài liệu...',
+        createdAt: new Date(),
+      },
+    ]
+  }),
+  createAgent: async (agentData: any) => ({ success: true, data: { id: 'new-agent' } }),
+  updateAgent: async (id: string, agentData: any) => ({ success: true }),
+  deleteAgent: async (id: string) => ({ success: true }),
 };
 
 export default apiClient;

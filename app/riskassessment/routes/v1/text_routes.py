@@ -91,6 +91,20 @@ async def summarize_text(request: SummaryRequest):
         )
 
 
+@router.options("/summary/document")
+async def options_document_summary():
+    """Handle CORS preflight for document summary"""
+    return JSONResponse(
+        status_code=200,
+        content={"message": "OK"},
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type",
+        }
+    )
+
+
 @router.post("/summary/document", response_model=dict)
 async def summarize_document(
     file: UploadFile = File(..., description="Document file to summarize"),

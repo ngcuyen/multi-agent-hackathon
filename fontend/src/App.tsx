@@ -1,172 +1,110 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { CssBaseline, Box, Snackbar, Alert } from '@mui/material';
+import '@cloudscape-design/global-styles/index.css';
+import { TopNavigation, Flashbar, FlashbarProps } from '@cloudscape-design/components';
 import ChatPage from './pages/Chat/ChatPage';
 import Dashboard from './components/Dashboard/Dashboard';
 import Navigation from './components/Navigation/Navigation';
 import HomePage from './pages/Home/HomePage';
 import AgentsPage from './pages/Agents/AgentsPage';
 import SettingsPage from './pages/Settings/SettingsPage';
+import TextSummaryPage from './pages/TextSummary/TextSummaryPage';
 import HealthCheck from './components/HealthCheck';
 import { agentAPI } from './services/api';
 import { Agent } from './types';
-
-const theme = createTheme({
-  palette: {
-    mode: 'light',
-    primary: {
-      main: '#1976d2',
-      light: '#42a5f5',
-      dark: '#1565c0',
-    },
-    secondary: {
-      main: '#dc004e',
-      light: '#ff5983',
-      dark: '#9a0036',
-    },
-    background: {
-      default: '#f5f5f5',
-      paper: '#ffffff',
-    },
-    success: {
-      main: '#2e7d32',
-    },
-    warning: {
-      main: '#ed6c02',
-    },
-    error: {
-      main: '#d32f2f',
-    },
-  },
-  typography: {
-    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-    h1: {
-      fontSize: '2.5rem',
-      fontWeight: 600,
-    },
-    h2: {
-      fontSize: '2rem',
-      fontWeight: 600,
-    },
-    h3: {
-      fontSize: '1.75rem',
-      fontWeight: 500,
-    },
-    h4: {
-      fontSize: '1.5rem',
-      fontWeight: 500,
-    },
-    h5: {
-      fontSize: '1.25rem',
-      fontWeight: 500,
-    },
-    h6: {
-      fontSize: '1rem',
-      fontWeight: 500,
-    },
-  },
-  components: {
-    MuiCssBaseline: {
-      styleOverrides: {
-        body: {
-          scrollbarWidth: 'thin',
-          '&::-webkit-scrollbar': {
-            width: '8px',
-          },
-          '&::-webkit-scrollbar-track': {
-            background: '#f1f1f1',
-          },
-          '&::-webkit-scrollbar-thumb': {
-            background: '#c1c1c1',
-            borderRadius: '4px',
-          },
-          '&::-webkit-scrollbar-thumb:hover': {
-            background: '#a8a8a8',
-          },
-        },
-      },
-    },
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          textTransform: 'none',
-          borderRadius: '8px',
-        },
-      },
-    },
-    MuiCard: {
-      styleOverrides: {
-        root: {
-          borderRadius: '12px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        },
-      },
-    },
-  },
-});
 
 function App() {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [snackbar, setSnackbar] = useState<{
-    open: boolean;
-    message: string;
-    severity: 'success' | 'error' | 'warning' | 'info';
-  }>({
-    open: false,
-    message: '',
-    severity: 'info',
-  });
+  const [flashbarItems, setFlashbarItems] = useState<FlashbarProps.MessageDefinition[]>([]);
 
-  // Load agents on app start
-  useEffect(() => {
-    loadAgents();
-  }, []);
-
-  const loadAgents = async () => {
+  const loadAgents = useCallback(async () => {
     try {
       setLoading(true);
       const response = await agentAPI.getAgents();
       if (response.success && response.data) {
         setAgents(response.data);
       } else {
-        throw new Error(response.error || 'Failed to load agents');
+        throw new Error('Failed to load agents');
       }
     } catch (err) {
       console.error('Failed to load agents:', err);
       setError('Failed to connect to backend. Please ensure the API server is running.');
-      showSnackbar('Failed to load agents. Check your connection.', 'error');
+      showFlashbar('Failed to load agents. Check your connection.', 'error');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const showSnackbar = (message: string, severity: 'success' | 'error' | 'warning' | 'info') => {
-    setSnackbar({ open: true, message, severity });
-  };
+  // Load agents on app start
+  useEffect(() => {
+    loadAgents();
+  }, [loadAgents]);
 
-  const handleCloseSnackbar = () => {
-    setSnackbar(prev => ({ ...prev, open: false }));
+  const showFlashbar = (message: string, type: 'success' | 'error' | 'warning' | 'info') => {
+    const id = Date.now().toString();
+    const newItem: FlashbarProps.MessageDefinition = {
+      id,
+      type,
+      content: message,
+      dismissible: true,
+      onDismiss: () => {
+        setFlashbarItems(items => items.filter(item => item.id !== id));
+      }
+    };
+    setFlashbarItems(items => [...items, newItem]);
+
+    // Auto-dismiss after 6 seconds
+    setTimeout(() => {
+      setFlashbarItems(items => items.filter(item => item.id !== id));
+    }, 6000);
   };
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Router>
-        <Box sx={{ display: 'flex', height: '100vh' }}>
+    <Router>
+      <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <TopNavigation
+          identity={{
+            href: "/",
+            title: "🤖 Multi-Agent AI Risk Assessment"
+          }}
+          utilities={[
+            {
+              type: "button",
+              text: "Tóm tắt văn bản",
+              href: "/text-summary"
+            },
+            {
+              type: "button",
+              text: "Kiểm tra hệ thống",
+              href: "/health"
+            },
+            {
+              type: "button", 
+              text: "Cài đặt",
+              href: "/settings"
+            }
+          ]}
+        />
+        
+        <div style={{ flex: 1, display: 'flex' }}>
           <Navigation />
-          <Box component="main" sx={{ flexGrow: 1, overflow: 'hidden' }}>
+          
+          <div style={{ flex: 1, overflow: 'hidden' }}>
             <Routes>
               <Route path="/" element={<HomePage agents={agents} loading={loading} />} />
+              <Route 
+                path="/text-summary" 
+                element={<TextSummaryPage onShowSnackbar={showFlashbar} />} 
+              />
               <Route 
                 path="/chat" 
                 element={
                   <ChatPage 
                     agents={agents} 
                     loading={loading} 
-                    onShowSnackbar={showSnackbar}
+                    onShowSnackbar={showFlashbar}
                   />
                 } 
               />
@@ -176,7 +114,7 @@ function App() {
                   <ChatPage 
                     agents={agents} 
                     loading={loading} 
-                    onShowSnackbar={showSnackbar}
+                    onShowSnackbar={showFlashbar}
                   />
                 } 
               />
@@ -187,7 +125,7 @@ function App() {
                   <AgentsPage 
                     agents={agents} 
                     onAgentsChange={loadAgents}
-                    onShowSnackbar={showSnackbar}
+                    onShowSnackbar={showFlashbar}
                   />
                 } 
               />
@@ -195,43 +133,26 @@ function App() {
               <Route path="/health" element={<HealthCheck />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
-          </Box>
-        </Box>
+          </div>
+        </div>
 
-        {/* Global Snackbar for notifications */}
-        <Snackbar
-          open={snackbar.open}
-          autoHideDuration={6000}
-          onClose={handleCloseSnackbar}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        >
-          <Alert 
-            onClose={handleCloseSnackbar} 
-            severity={snackbar.severity}
-            variant="filled"
-          >
-            {snackbar.message}
-          </Alert>
-        </Snackbar>
+        {/* Global Flashbar for notifications */}
+        <Flashbar items={flashbarItems} />
 
         {/* Connection Error Display */}
         {error && (
-          <Snackbar
-            open={!!error}
-            onClose={() => setError(null)}
-            anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-          >
-            <Alert 
-              onClose={() => setError(null)} 
-              severity="error"
-              variant="filled"
-            >
-              {error}
-            </Alert>
-          </Snackbar>
+          <Flashbar 
+            items={[{
+              id: 'connection-error',
+              type: 'error',
+              content: error,
+              dismissible: true,
+              onDismiss: () => setError(null)
+            }]}
+          />
         )}
-      </Router>
-    </ThemeProvider>
+      </div>
+    </Router>
   );
 }
 
