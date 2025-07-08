@@ -30,20 +30,23 @@ cp app/riskassessment/.env-template app/riskassessment/.env
 ### 3. Start Application
 ```bash
 # Backend only
-./start.sh
+docker-compose up -d
 
-# Backend + Frontend
-./start.sh --with-frontend
+# Frontend (in separate terminal)
+cd fontend
+npm install
+npm start
 ```
 
 ### 4. Access Services
 - **Backend API**: http://localhost:8080
 - **API Documentation**: http://localhost:8080/docs
-- **Frontend UI**: http://localhost:3000 (if started)
+- **Frontend UI**: http://localhost:3000
+- **Health Check**: http://localhost:8080/riskassessment/public/api/v1/health-check/health
 
 ### 5. Stop Application
 ```bash
-./stop.sh
+docker-compose down
 ```
 
 ## 🎯 Features
@@ -58,6 +61,7 @@ cp app/riskassessment/.env-template app/riskassessment/.env
 - **Summary Types**: General, bullet points, key insights, executive, detailed
 - **Languages**: Vietnamese, English
 - **Real-time Processing**: Progress tracking and status updates
+- **OCR Support**: Automatic text extraction from scanned PDFs
 
 ### 💬 **Conversational AI**
 - **Streaming Responses**: Real-time chat interface
@@ -69,6 +73,7 @@ cp app/riskassessment/.env-template app/riskassessment/.env
 - **Responsive Design**: Mobile-first approach
 - **Real-time Validation**: Input validation with live feedback
 - **Accessibility**: Screen reader and keyboard navigation support
+- **CORS Support**: Seamless frontend-backend communication
 
 ## 📊 API Endpoints
 
@@ -144,17 +149,26 @@ Content-Type: application/json
 ### Backend Development
 ```bash
 # Start backend in development mode
-docker-compose -f docker-compose.dev.yml up
+docker-compose up
 
 # View logs
 docker logs riskassessment-app -f
+
+# Restart backend
+docker-compose restart
 ```
 
 ### Frontend Development
 ```bash
-cd react-frontend
+cd fontend
 npm install
 npm start
+
+# Build for production
+npm run build
+
+# Fix TypeScript errors
+npm run fix-errors
 ```
 
 ### Testing
@@ -166,6 +180,12 @@ curl http://localhost:8080/riskassessment/public/api/v1/health-check/health
 curl -X POST "http://localhost:8080/riskassessment/api/v1/text/summary/text" \
   -H "Content-Type: application/json" \
   -d '{"text": "Sample text...", "summary_type": "general", "language": "english"}'
+
+# Test document upload
+curl -X POST "http://localhost:8080/riskassessment/api/v1/text/summary/document" \
+  -F "file=@sample.pdf" \
+  -F "summary_type=general" \
+  -F "language=vietnamese"
 ```
 
 ## 📋 Configuration
@@ -186,6 +206,10 @@ LLM_TEMPERATURE=0.5
 # Database Configuration
 DYNAMODB_REGION=us-east-1
 MONGODB_URI=your_mongodb_connection_string
+
+# Frontend Configuration
+REACT_APP_API_BASE_URL=http://localhost:8080
+REACT_APP_DEBUG=true
 ```
 
 ## 🔧 Troubleshooting
@@ -220,12 +244,40 @@ curl http://localhost:8080/riskassessment/public/api/v1/health-check/health
 "proxy": "http://localhost:8080"
 ```
 
+**CORS Issues:**
+- Backend includes CORS middleware for all origins
+- Frontend uses proxy configuration for development
+- Check browser console for detailed error messages
+
+**Document Processing Slow:**
+- PDF with OCR can take 30-60 seconds
+- Use text files for faster testing
+- Check backend logs for processing status
+
 ## 📈 Performance
 
-- **Response Time**: < 5 seconds for text summarization
+- **Response Time**: 
+  - Text summarization: 3-8 seconds
+  - Document processing: 10-60 seconds (depending on OCR needs)
 - **File Processing**: Up to 10MB documents
 - **Concurrent Users**: Supports multiple simultaneous requests
 - **Scalability**: Docker-based horizontal scaling ready
+
+## 🆕 Recent Updates
+
+### Version 2.0 (Latest)
+- ✅ **Fixed CORS Issues**: Proper middleware configuration
+- ✅ **Enhanced Error Handling**: Detailed error messages and logging
+- ✅ **Improved Frontend**: Better UX with progress indicators
+- ✅ **Document Upload Fix**: Resolved "Failed to fetch" errors
+- ✅ **TypeScript Improvements**: Fixed compilation errors
+- ✅ **Proxy Configuration**: Seamless development experience
+
+### Bug Fixes
+- Fixed "Không thể tóm tắt tài liệu" error
+- Resolved CORS preflight issues
+- Improved API response handling
+- Enhanced error messages in Vietnamese
 
 ## 🤝 Contributing
 
@@ -234,6 +286,13 @@ curl http://localhost:8080/riskassessment/public/api/v1/health-check/health
 3. Commit changes: `git commit -m 'Add amazing feature'`
 4. Push to branch: `git push origin feature/amazing-feature`
 5. Create Pull Request
+
+### Development Guidelines
+- Follow TypeScript best practices
+- Add proper error handling
+- Include Vietnamese language support
+- Test both frontend and backend changes
+- Update documentation for new features
 
 ## 📄 License
 
@@ -245,6 +304,17 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **LangGraph** for multi-agent orchestration
 - **FastAPI** for high-performance API framework
 - **React** and **AWS CloudScape** for modern UI components
+- **Docker** for containerization and deployment
+
+## 📞 Support
+
+If you encounter any issues:
+
+1. **Check the logs**: `docker logs riskassessment-app`
+2. **Verify configuration**: Ensure AWS credentials are correct
+3. **Test endpoints**: Use the provided curl commands
+4. **Check browser console**: For frontend issues
+5. **Create an issue**: On GitHub with detailed error information
 
 ---
 
@@ -255,5 +325,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 [![GitHub stars](https://img.shields.io/github/stars/ngcuyen/multi-agent-hackathon?style=social)](https://github.com/ngcuyen/multi-agent-hackathon/stargazers)
 
 Made with ❤️ by the Multi-Agent Team
+
+**Latest Update**: Fixed CORS and document processing issues ✨
 
 </div>
