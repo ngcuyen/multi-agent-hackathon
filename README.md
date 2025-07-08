@@ -54,7 +54,7 @@ The application now includes a comprehensive document summarization API with the
 - Hỗ trợ nhiều định dạng file: PDF, DOCX, TXT
 - Nhiều loại tóm tắt: general, bullet_points, key_insights, executive_summary, detailed
 - Hỗ trợ tiếng Việt và tiếng Anh
-- Tích hợp với OpenAI và AWS Bedrock
+z- Tích hợp với AWS Bedrock (Claude 3.7)
 - Trích xuất nội dung từ URL
 
 #### Quick Test:

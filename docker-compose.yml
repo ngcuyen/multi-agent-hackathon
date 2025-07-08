@@ -1,14 +1,14 @@
 services:
-  themovie:
-    image: themovie:0.0.1
-    container_name: themovie-app
+  riskassessment:
+    image: riskassessment:0.0.1
+    container_name: riskassessment-app
     build:
       context: .
-      dockerfile: app/themovie/Dockerfile
+      dockerfile: app/riskassessment/Dockerfile
     ports:
       - '8080:8080'
     env_file:
-      - ./app/themovie/.env
+      - ./app/riskassessment/.env
     volumes:
       - ./logs:/app/logs
     restart: unless-stopped
@@ -18,15 +18,15 @@ services:
           'CMD',
           'curl',
           '-f',
-          'http://localhost:8080/themovie/public/api/health',
+          'http://localhost:8080/riskassessment/public/api/v1/health-check/health',
         ]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
     networks:
-      - themovie-network
+      - riskassessment-network
 
 networks:
-  themovie-network:
+  riskassessment-network:
     driver: bridge
