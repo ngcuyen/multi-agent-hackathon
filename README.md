@@ -6,7 +6,7 @@
 [![AWS](https://img.shields.io/badge/AWS-Bedrock-FF9900.svg?style=flat&logo=Amazon-AWS)](https://aws.amazon.com/bedrock/)
 [![Claude](https://img.shields.io/badge/Claude-3.7_Sonnet-FF6B35.svg?style=flat)](https://www.anthropic.com/claude)
 
-> 🏆 **Multi-Agent Hackathon 2024 - Group 181** | Intelligent multi-agent automation platform designed to transform complex banking processes through collaborative AI, addressing critical inefficiencies in VPBank's core operations.
+> 🏆 **Multi-Agent Hackathon 2025 - Group 181** | Intelligent multi-agent automation platform designed to transform complex banking processes through collaborative AI, addressing critical inefficiencies in VPBank's core operations.
 
 ---
 
@@ -437,7 +437,7 @@ agents:
 - **Performance Monitoring**: Real-time dashboards and alerts
 
 ### Business Contact
-- **Team**: Multi-Agent Hackathon Group 181
+- **Team**: Multi-Agent Hackathon 2025 Group 181
 - **Focus**: VPBank banking process automation
 - **Specialization**: Multi-agent AI systems for financial services
 
@@ -445,7 +445,7 @@ agents:
 
 ## 📄 License & Compliance
 
-This project is developed for the Multi-Agent Hackathon 2024 and complies with:
+This project is developed for the Multi-Agent Hackathon 2025 and complies with:
 - Vietnamese banking regulations (SBV)
 - International banking standards (UCP 600, ISBP 821)
 - AWS security and compliance frameworks
@@ -458,7 +458,7 @@ This project is developed for the Multi-Agent Hackathon 2024 and complies with:
 ## 🏆 VPBank K-MULT Agent Studio
 ### Transforming Banking Through Multi-Agent AI
 
-**Built for Multi-Agent Hackathon 2024 - Group 181**
+**Built for Multi-Agent Hackathon 2025 - Group 181**
 
 [![GitHub stars](https://img.shields.io/github/stars/ngcuyen/multi-agent-hackathon?style=social)](https://github.com/ngcuyen/multi-agent-hackathon/stargazers)
 
