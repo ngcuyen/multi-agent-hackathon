@@ -30,7 +30,11 @@ interface Settings {
   language: string;
 }
 
-const SettingsPage: React.FC = () => {
+interface SettingsPageProps {
+  onShowSnackbar: (message: string, severity: 'success' | 'error' | 'warning' | 'info') => void;
+}
+
+const SettingsPage: React.FC<SettingsPageProps> = ({ onShowSnackbar }) => {
   const [settings, setSettings] = useState<Settings>({
     apiKey: '',
     region: 'us-east-1',

@@ -24,11 +24,11 @@ import { agentAPI } from '../../services/api';
 
 interface AgentsPageProps {
   agents: Agent[];
-  onAgentsChange: () => void;
+  setAgents: React.Dispatch<React.SetStateAction<Agent[]>>;
   onShowSnackbar: (message: string, severity: 'success' | 'error' | 'warning' | 'info') => void;
 }
 
-const AgentsPage: React.FC<AgentsPageProps> = ({ agents, onAgentsChange, onShowSnackbar }) => {
+const AgentsPage: React.FC<AgentsPageProps> = ({ agents, setAgents, onShowSnackbar }) => {
   const navigate = useNavigate();
   const [modalVisible, setModalVisible] = useState(false);
   const [editingAgent, setEditingAgent] = useState<Agent | null>(null);
