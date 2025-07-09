@@ -1,16 +1,20 @@
+# VPBank K-MULT Agent Studio - Full Stack Deployment
+
 services:
-  riskassessment:
-    image: riskassessment:0.0.1
-    container_name: riskassessment-app
+  # Backend Multi-Agent Service
+  mutil-agent:
     build:
-      context: .
-      dockerfile: app/riskassessment/Dockerfile
+      context: ./backend
+      dockerfile: docker/Dockerfile
+    image: mutil-agent-backend
+    container_name: vpbank-kmult-backend
     ports:
       - '8080:8080'
     env_file:
-      - ./app/riskassessment/.env
+      - ./backend/app/mutil_agent/.env
     volumes:
-      - ./logs:/app/logs
+      - ./logs/backend:/app/logs
+      - ./data:/app/data
     restart: unless-stopped
     healthcheck:
       test:
@@ -18,15 +22,41 @@ services:
           'CMD',
           'curl',
           '-f',
-          'http://localhost:8080/riskassessment/public/api/v1/health-check/health',
+          'http://localhost:8080/mutil_agent/public/api/v1/health-check/health',
         ]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
     networks:
-      - riskassessment-network
+      - vpbank-kmult-network
+
+  # Frontend React Application
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: mutil-agent-frontend
+    container_name: vpbank-kmult-frontend
+    ports:
+      - '3000:3000'
+    environment:
+      - REACT_APP_API_URL=http://localhost:8080
+      - REACT_APP_ENV=production
+    volumes:
+      - ./logs/frontend:/app/logs
+    restart: unless-stopped
+    depends_on:
+      - mutil-agent
+    networks:
+      - vpbank-kmult-network
 
 networks:
-  riskassessment-network:
+  vpbank-kmult-network:
     driver: bridge
+    name: vpbank-kmult-network
+
+volumes:
+  backend-logs:
+  frontend-logs:
+  app-data:
