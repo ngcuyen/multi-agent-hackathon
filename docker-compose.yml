@@ -5,7 +5,7 @@ services:
   mutil-agent:
     build:
       context: ./backend
-      dockerfile: docker/Dockerfile
+      dockerfile: app/mutil_agent/Dockerfile
     image: mutil-agent-backend
     container_name: vpbank-kmult-backend
     ports:
