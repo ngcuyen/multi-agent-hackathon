@@ -36,30 +36,63 @@ async def call_claude_sonnet(prompt: str) -> str:
         return response.get("completion") or response.get("result") or str(response)
     return str(response)
 
-async def assess_risk(request: RiskAssessmentRequest) -> RiskAssessmentResponse:
-    # Tính toán risk_score, threats, ... (mock demo)
-    score = 72
-    threats = [Threat(type="market_volatility", score=8, description="Thị trường biến động mạnh")]
-    # Prompt tiếng Việt cho Claude Sonnet
-    prompt = (
-        f"Bạn là chuyên gia phân tích rủi ro tài chính. Hãy phân tích rủi ro cho đối tượng sau:\n"
-        f"ID: {request.entity_id}\n"
-        f"Loại đối tượng: {request.entity_type}\n"
-        f"Thông tin tài chính: {json.dumps(request.financials, ensure_ascii=False)}\n"
-        f"Dữ liệu thị trường: {json.dumps(request.market_data, ensure_ascii=False)}\n"
-        f"Yếu tố khác: {json.dumps(request.custom_factors, ensure_ascii=False)}\n"
-        "Hãy nhận diện các rủi ro chính, đánh giá điểm rủi ro tổng thể (0-100), phân tích tác động, liệt kê các mối đe dọa và đề xuất biện pháp giảm thiểu. Trình bày ngắn gọn, rõ ràng bằng tiếng Việt."
-    )
-    ai_report = await call_claude_sonnet(prompt)
-    return RiskAssessmentResponse(
-        status="success",
-        risk_score=score,
-        risk_level="medium",
-        impact_assessment={"liquidity": "low", "market": "medium", "credit": "high"},
-        threats=threats,
-        recommendations=["Giảm tỷ lệ nợ vay", "Theo dõi biến động lãi suất"],
-        ai_report=ai_report
-    )
+async def assess_risk(request: RiskAssessmentRequest) -> dict:
+    # 1. Gọi LLM sinh bản phân tích tổng hợp (ai_report)
+    ai_report_prompt = f'''
+Bạn là chuyên gia phân tích tín dụng ngân hàng. Hãy phân tích hồ sơ tín dụng sau một cách tổng hợp, chi tiết, nhận định rủi ro, điểm mạnh/yếu, và đưa ra lời bình luận, kết luận cuối cùng về khả năng cấp tín dụng. Không trả về JSON, không markdown, không code block, chỉ trả về văn bản tự nhiên.
+
+Dữ liệu hồ sơ:
+- Tên: {request.applicant_name}
+- Loại hình kinh doanh: {request.business_type}
+- Số tiền vay: {request.requested_amount}
+- Loại tiền: {request.currency}
+- Kỳ hạn vay: {request.loan_term}
+- Mục đích vay: {request.loan_purpose}
+- Tài sản đảm bảo: {request.collateral_type}
+- Thông tin tài chính: {json.dumps(request.financials, ensure_ascii=False)}
+- Dữ liệu thị trường: {json.dumps(request.market_data, ensure_ascii=False)}
+- Yếu tố khác: {json.dumps(request.custom_factors, ensure_ascii=False)}
+'''
+    ai_report = await call_claude_sonnet(ai_report_prompt)
+
+    # 2. Gọi LLM sinh recommendations ngắn gọn (max_loan, đề xuất, quyết định)
+    recommendations_prompt = f'''
+Bạn là chuyên gia tín dụng ngân hàng. Dựa trên hồ sơ sau, hãy trả lời thật ngắn gọn (không quá 5 dòng) các ý sau:
+- Hạn mức vay tối đa đề xuất
+- Điều kiện phê duyệt chính (nếu có)
+- Đề xuất quyết định cho vay (duyệt, duyệt có điều kiện, từ chối...)
+- Nhấn mạnh rủi ro chính cần lưu ý
+Chỉ trả về văn bản tự nhiên, không markdown, không code block, không liệt kê.
+
+Dữ liệu hồ sơ:
+- Tên: {request.applicant_name}
+- Loại hình kinh doanh: {request.business_type}
+- Số tiền vay: {request.requested_amount}
+- Loại tiền: {request.currency}
+- Kỳ hạn vay: {request.loan_term}
+- Mục đích vay: {request.loan_purpose}
+- Tài sản đảm bảo: {request.collateral_type}
+- Thông tin tài chính: {json.dumps(request.financials, ensure_ascii=False)}
+- Dữ liệu thị trường: {json.dumps(request.market_data, ensure_ascii=False)}
+- Yếu tố khác: {json.dumps(request.custom_factors, ensure_ascii=False)}
+'''
+    recommendations = await call_claude_sonnet(recommendations_prompt)
+
+    # 3. Sinh threats mẫu dựa trên recommendations (hoặc để rỗng nếu muốn LLM sinh riêng)
+    threats = [
+        {
+            "type": "summary",
+            "score": 0,
+            "description": "Xem trường recommendations để biết các rủi ro chính."
+        }
+    ]
+
+    return {
+        "status": "success",
+        "threats": threats,
+        "ai_report": ai_report.strip(),
+        "recommendations": [recommendations.strip()]
+    }
 
 async def get_monitor_status(entity_id: str) -> RiskMonitorResponse:
     # TODO: Lấy trạng thái giám sát thực tế
