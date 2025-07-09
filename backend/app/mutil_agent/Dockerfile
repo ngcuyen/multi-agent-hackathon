@@ -21,7 +21,7 @@ RUN tesseract --list-langs
 WORKDIR /app
 
 # Copy the requirements file
-COPY app/riskassessment/requirements.txt .
+COPY app/mutil_agent/requirements.txt .
 
 # Install the requirements
 RUN pip install --no-cache-dir -r requirements.txt
@@ -33,4 +33,4 @@ COPY . .
 EXPOSE 8080
 
 # Command to run the app directly
-CMD ["uvicorn", "app.riskassessment.main:app", "--host", "0.0.0.0", "--port", "8080", "--workers", "4", "--timeout-keep-alive", "100", "--reload"]
+CMD ["uvicorn", "app.mutil_agent.main:app", "--host", "0.0.0.0", "--port", "8080", "--workers", "4", "--timeout-keep-alive", "100", "--reload"]
