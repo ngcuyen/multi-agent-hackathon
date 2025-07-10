@@ -1,16 +1,10 @@
 // API Service for Multi-Agent AI Risk Assessment System
 // Updated to match actual backend endpoints
 
-// Use relative URL to leverage proxy
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? '' // Use nginx proxy in production
-  : 'http://localhost:8080'; // Use direct URL for development
-const API_PREFIX = process.env.NODE_ENV === 'production' 
-  ? '/api/v1' // Use nginx proxy path
-  : '/mutil_agent/api/v1'; // Direct backend path
-const PUBLIC_PREFIX = process.env.NODE_ENV === 'production'
-  ? '/public/api/v1' // Use nginx proxy path
-  : '/mutil_agent/public/api/v1'; // Direct backend path
+// Use proxy for both development and production
+export const API_BASE_URL = `http://localhost:8080`; // Always use relative URL to leverage proxy
+export const API_PREFIX = '/mutil_agent/api/v1'; // Backend API path
+export const PUBLIC_PREFIX = '/mutil_agent/public/api/v1'; // Backend public API path
 
 // Types matching backend schemas
 export interface ApiResponse<T = any> {
@@ -80,11 +74,11 @@ class ApiClient {
   ): Promise<ApiResponse<T>> {
     try {
       const url = `${API_BASE_URL}${endpoint}`;
-      
+
       // Create AbortController for timeout
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 seconds timeout
-      
+
       const response = await fetch(url, {
         headers: {
           'Content-Type': 'application/json',
@@ -93,7 +87,7 @@ class ApiClient {
         signal: controller.signal,
         ...options,
       });
-      
+
       clearTimeout(timeoutId);
 
       if (!response.ok) {
@@ -137,12 +131,12 @@ class ApiClient {
     try {
       const url = `${API_BASE_URL}${API_PREFIX}/text/summary/document`;
       console.log('Sending request to:', url);
-      
+
       const response = await fetch(url, {
         method: 'POST',
         body: formData,
       });
-      
+
       console.log('Response status:', response.status);
       console.log('Response ok:', response.ok);
 
@@ -154,7 +148,7 @@ class ApiClient {
 
       const data = await response.json();
       console.log('Response data:', data);
-      
+
       // Backend returns: {"status": "success", "data": {...}, "message": "..."}
       // We return it as-is since it's already in the correct ApiResponse format
       return data;
@@ -218,7 +212,7 @@ export const healthAPI = {
 
 export const textAPI = {
   summarizeText: (request: SummaryRequest) => apiClient.summarizeText(request),
-  summarizeDocument: (file: File, summaryType?: string, language?: string) => 
+  summarizeDocument: (file: File, summaryType?: string, language?: string) =>
     apiClient.summarizeDocument(file, summaryType, language),
   getSummaryTypes: () => apiClient.getSummaryTypes(),
 };
