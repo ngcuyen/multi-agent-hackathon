@@ -75,7 +75,8 @@ class TextSummaryService:
         auto_adjust_length: bool = True
     ) -> Dict[str, Any]:
         """
-        Summarize text using AI models with intelligent chunking for large documents
+        Summarize text using AI models with optimized intelligent chunking for large documents
+        Performance optimized for VPBank K-MULT banking documents
         """
         try:
             # Validate input
@@ -85,7 +86,18 @@ class TextSummaryService:
             # Clean and prepare text
             cleaned_text = self._clean_text(text)
             
-            # Auto-adjust max_length based on document size
+            # Performance optimization: Skip expensive operations for small documents
+            FAST_PROCESSING_THRESHOLD = 10000  # 10K chars - process directly without analysis
+            
+            if len(cleaned_text) < FAST_PROCESSING_THRESHOLD:
+                # Fast path for small documents (most banking documents)
+                logger.info(f"🚀 Fast processing for small document ({len(cleaned_text):,} chars)")
+                return await self._summarize_direct(
+                    cleaned_text, summary_type, max_length, language, None
+                )
+            
+            # Standard processing with analysis for medium documents
+            document_analysis = None
             if auto_adjust_length:
                 optimal_max_length, analysis = DynamicSummaryConfig.calculate_optimal_max_length(
                     cleaned_text, summary_type, max_length
@@ -96,26 +108,23 @@ class TextSummaryService:
                     logger.info(f"Auto-adjusting max_length: {max_length} → {optimal_max_length}")
                     max_length = optimal_max_length
                 
-                # Add analysis to response
                 document_analysis = analysis
-            else:
-                document_analysis = None
             
-            # Import chunking helper
+            # Import chunking helper only when needed
             from app.mutil_agent.helpers.document_chunking_helper import DocumentChunkingHelper
             
             # Initialize chunking helper
             chunking_helper = DocumentChunkingHelper()
             
-            # Check if document needs chunking
+            # Smart chunking decision - now with 100K threshold (doubled from 50K)
             if chunking_helper.should_chunk_document(cleaned_text):
-                logger.info(f"📚 Large document detected ({len(cleaned_text):,} chars), using chunking approach")
+                logger.info(f"📚 Large document detected ({len(cleaned_text):,} chars), using optimized chunking approach")
                 return await self._summarize_with_chunking(
                     cleaned_text, summary_type, max_length, language, 
                     document_analysis, chunking_helper
                 )
             else:
-                logger.info(f"📄 Standard document processing ({len(cleaned_text):,} chars)")
+                logger.info(f"📄 Standard document processing ({len(cleaned_text):,} chars) - skipping chunking")
                 return await self._summarize_direct(
                     cleaned_text, summary_type, max_length, language, document_analysis
                 )
