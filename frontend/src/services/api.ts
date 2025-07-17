@@ -5,13 +5,24 @@
 const PRODUCTION_API_URL = 'http://VPBank-Backe-YzuYPJrF9vGD-169276357.us-east-1.elb.amazonaws.com';
 const DEVELOPMENT_API_URL = 'http://localhost:8080';
 
-// Determine API base URL based on environment
-export const API_BASE_URL = process.env.NODE_ENV === 'production' 
+// Determine API base URL - Force production URL when hosted on S3
+const isS3Hosted = window.location.hostname.includes('s3-website') || window.location.hostname.includes('amazonaws.com');
+const isProduction = process.env.NODE_ENV === 'production' || isS3Hosted;
+
+export const API_BASE_URL = isProduction 
   ? PRODUCTION_API_URL 
   : process.env.REACT_APP_API_BASE_URL || DEVELOPMENT_API_URL;
 
 export const API_PREFIX = '/mutil_agent/api/v1'; // Backend API path
 export const PUBLIC_PREFIX = '/mutil_agent/public/api/v1'; // Backend public API path
+
+console.log('Frontend API Configuration:', {
+  hostname: window.location.hostname,
+  isS3Hosted,
+  isProduction,
+  API_BASE_URL,
+  NODE_ENV: process.env.NODE_ENV
+});
 
 // Types matching backend schemas
 export interface ApiResponse<T = any> {
