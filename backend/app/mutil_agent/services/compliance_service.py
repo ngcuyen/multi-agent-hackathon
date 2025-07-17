@@ -44,6 +44,8 @@ class ComplianceValidationService:
         
         # Get model configuration
         model_name = CONVERSATION_CHAT_MODEL_NAME or "claude-37-sonnet"
+        self.bedrock_model_id = MODEL_MAPPING.get(model_name, MODEL_MAPPING["claude-37-sonnet"])
+        
         temperature = float(CONVERSATION_CHAT_TEMPERATURE or "0.6")
         top_p = float(CONVERSATION_CHAT_TOP_P or "0.6")
         max_tokens = int(LLM_MAX_TOKENS or "8192")
@@ -108,6 +110,12 @@ class ComplianceValidationService:
             
             processing_time = time.time() - start_time
             
+            # Enhance violations with regulation references
+            enhanced_violations = self._enhance_violations_with_references(
+                compliance_result.get("violations", []), 
+                document_type
+            )
+            
             # Prepare enhanced final result with detailed report
             result = {
                 "compliance_status": compliance_result["status"].value,
@@ -116,7 +124,7 @@ class ComplianceValidationService:
                 "is_trade_document": is_trade_document,
                 "extracted_fields": extracted_fields,
                 "ucp_regulations_applied": ucp_regulations.get("regulations_summary", ""),
-                "violations": compliance_result.get("violations", []),
+                "violations": enhanced_violations,  # Use enhanced violations
                 "recommendations": compliance_result.get("recommendations", []),
                 "processing_time": round(processing_time, 2),
                 "timestamp": time.time(),
@@ -248,7 +256,14 @@ class ComplianceValidationService:
                         match = re.search(pattern, text, re.IGNORECASE)
                         if match:
                             # Take the last group (actual content)
-                            field_value = match.group(-1).strip()
+                            #field_value = match.group(-1).strip()
+                            try:
+                                if match.groups():
+                                    field_value = match.groups()[-1].strip()
+                                else:
+                                    field_value = match.group(0).strip()
+                            except IndexError:
+                                field_value = match.group(0).strip()
                             if field_value:
                                 fields[field_name] = field_value
                                 break  # Take first match for each field
@@ -277,7 +292,7 @@ class ComplianceValidationService:
                 retrieveAndGenerateConfiguration={
                     "knowledgeBaseConfiguration": {
                         "knowledgeBaseId": self.knowledge_base_id,
-                        "modelArn": "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-sonnet-20240229-v1:0",
+                        "modelArn": self.bedrock_model_id,
                         "retrievalConfiguration": {
                             "vectorSearchConfiguration": {
                                 "numberOfResults": 10,
@@ -443,7 +458,7 @@ class ComplianceValidationService:
                 retrieveAndGenerateConfiguration={
                     "knowledgeBaseConfiguration": {
                         "knowledgeBaseId": self.knowledge_base_id,
-                        "modelArn": "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-sonnet-20240229-v1:0",
+                        "modelArn": self.bedrock_model_id,
                     },
                     "type": "KNOWLEDGE_BASE",
                 },
@@ -591,6 +606,52 @@ Hãy đánh giá tuân thủ và trả lời theo format JSON:
                 "violations": [],
                 "recommendations": [{"description": "Cần kiểm tra thủ công"}]
             }
+
+    def _format_violation(self, description: str, regulation_ref: str = None, severity: str = 'MEDIUM', suggestion: str = None) -> Dict[str, Any]:
+        """Format violation với regulation reference"""
+        return {
+            'description': description,
+            'regulation_reference': regulation_ref,
+            'severity': severity,
+            'suggestion': suggestion
+        }
+
+    def _enhance_violations_with_references(self, violations: List[Dict], document_type: str) -> List[Dict]:
+        """Enhance violations with regulation references"""
+        enhanced_violations = []
+        
+        for violation in violations:
+            enhanced_violation = violation.copy()
+            
+            # Add regulation reference based on violation type and document type
+            if document_type in ['letter_of_credit', 'standby_letter_of_credit']:
+                if 'missing' in violation.get('description', '').lower():
+                    enhanced_violation['regulation_reference'] = 'UCP 600 Article 14(a) - Document Examination'
+                elif 'discrepancy' in violation.get('description', '').lower():
+                    enhanced_violation['regulation_reference'] = 'UCP 600 Article 16 - Discrepant Documents'
+                elif 'expiry' in violation.get('description', '').lower():
+                    enhanced_violation['regulation_reference'] = 'UCP 600 Article 6 - Availability, Expiry Date'
+                elif 'amount' in violation.get('description', '').lower():
+                    enhanced_violation['regulation_reference'] = 'UCP 600 Article 18 - Commercial Invoice'
+                else:
+                    enhanced_violation['regulation_reference'] = 'UCP 600 - General Compliance'
+            
+            # Add severity if not present
+            if 'severity' not in enhanced_violation:
+                enhanced_violation['severity'] = 'MEDIUM'
+            
+            # Add suggestion based on violation type
+            if not enhanced_violation.get('suggestion'):
+                if 'missing' in violation.get('description', '').lower():
+                    enhanced_violation['suggestion'] = 'Bổ sung thông tin thiếu trong tài liệu'
+                elif 'discrepancy' in violation.get('description', '').lower():
+                    enhanced_violation['suggestion'] = 'Kiểm tra và sửa chữa các sai lệch trong tài liệu'
+                elif 'expiry' in violation.get('description', '').lower():
+                    enhanced_violation['suggestion'] = 'Kiểm tra ngày hết hạn và thời gian trình bày'
+            
+            enhanced_violations.append(enhanced_violation)
+        
+        return enhanced_violations
 
     def _fallback_parse_validation(self, text: str) -> Dict[str, Any]:
         """Fallback validation parsing"""

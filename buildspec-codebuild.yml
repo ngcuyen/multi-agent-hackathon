@@ -1,0 +1,41 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - IMAGE_TAG=github-${COMMIT_HASH:=latest}
+      - echo Build started on `date`
+      - echo Repository URI = $REPOSITORY_URI
+      - echo Image tag = $IMAGE_TAG
+  
+  build:
+    commands:
+      - echo Build phase started on `date`
+      - echo Current directory and contents:
+      - pwd && ls -la
+      - echo Backend directory contents:
+      - ls -la backend/
+      - echo Building Docker image with simplified Dockerfile...
+      - cd backend
+      - docker build -f Dockerfile.codebuild -t $REPOSITORY_URI:$IMAGE_TAG .
+      - docker tag $REPOSITORY_URI:$IMAGE_TAG $REPOSITORY_URI:latest
+      - echo Docker build completed successfully
+      
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing Docker images to ECR...
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - docker push $REPOSITORY_URI:latest
+      - echo Images pushed successfully
+      - printf '[{"name":"web","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+      - echo Image definitions:
+      - cat imagedefinitions.json
+
+artifacts:
+  files:
+    - imagedefinitions.json
