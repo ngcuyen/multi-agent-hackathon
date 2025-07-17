@@ -5,9 +5,10 @@
 const PRODUCTION_API_URL = 'http://VPBank-Backe-YzuYPJrF9vGD-169276357.us-east-1.elb.amazonaws.com';
 const DEVELOPMENT_API_URL = 'http://localhost:8080';
 
-// Determine API base URL - Force production URL when hosted on S3
+// Determine API base URL - Force production URL when hosted on S3 or CloudFront
 const isS3Hosted = window.location.hostname.includes('s3-website') || window.location.hostname.includes('amazonaws.com');
-const isProduction = process.env.NODE_ENV === 'production' || isS3Hosted;
+const isCloudFront = window.location.hostname.includes('cloudfront.net');
+const isProduction = process.env.NODE_ENV === 'production' || isS3Hosted || isCloudFront;
 
 export const API_BASE_URL = isProduction 
   ? PRODUCTION_API_URL 
@@ -19,6 +20,7 @@ export const PUBLIC_PREFIX = '/mutil_agent/public/api/v1'; // Backend public API
 console.log('Frontend API Configuration:', {
   hostname: window.location.hostname,
   isS3Hosted,
+  isCloudFront,
   isProduction,
   API_BASE_URL,
   NODE_ENV: process.env.NODE_ENV
