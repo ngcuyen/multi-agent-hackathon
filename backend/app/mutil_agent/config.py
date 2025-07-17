@@ -34,6 +34,7 @@ MODEL_MAPPING = {
     "claude-37-sonnet": "us.anthropic.claude-3-7-sonnet-20250219-v1:0",
     "claude-instant-v1": "anthropic.claude-instant-v1",
     "claude-3-5-sonnet": "anthropic.claude-3-5-sonnet-20240620-v1:0",
+    "anthropic.claude-3-5-sonnet-20241022-v2:0": "us.anthropic.claude-3-5-sonnet-20241022-v2:0",
 }
 
 # Amazon Bedrock Configuration

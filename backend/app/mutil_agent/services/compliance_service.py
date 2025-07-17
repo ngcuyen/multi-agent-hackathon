@@ -44,6 +44,10 @@ class ComplianceValidationService:
         
         # Get model configuration
         model_name = CONVERSATION_CHAT_MODEL_NAME or "claude-37-sonnet"
+        
+        # Handle the specific problematic model ID directly
+        if model_name == "anthropic.claude-3-5-sonnet-20241022-v2:0":
+            model_name = "claude-37-sonnet"
         self.bedrock_model_id = MODEL_MAPPING.get(model_name, MODEL_MAPPING["claude-37-sonnet"])
         
         temperature = float(CONVERSATION_CHAT_TEMPERATURE or "0.6")
