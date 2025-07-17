@@ -1,0 +1,996 @@
+{
+ "Description": "CI/CD Pipeline for VPBank K-MULT Agent Studio",
+ "Resources": {
+  "PipelineArtifacts4A9B2621": {
+   "Type": "AWS::S3::Bucket",
+   "Properties": {
+    "BucketEncryption": {
+     "ServerSideEncryptionConfiguration": [
+      {
+       "ServerSideEncryptionByDefault": {
+        "SSEAlgorithm": "AES256"
+       }
+      }
+     ]
+    },
+    "BucketName": "vpbank-kmult-pipeline-artifacts-590183822512",
+    "LifecycleConfiguration": {
+     "Rules": [
+      {
+       "ExpirationInDays": 30,
+       "Id": "DeleteOldArtifacts",
+       "Status": "Enabled"
+      }
+     ]
+    },
+    "PublicAccessBlockConfiguration": {
+     "BlockPublicAcls": true,
+     "BlockPublicPolicy": true,
+     "IgnorePublicAcls": true,
+     "RestrictPublicBuckets": true
+    }
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultCICDStack/PipelineArtifacts/Resource"
+   }
+  },
+  "BackendBuildRole8503E10C": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "codebuild.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultCICDStack/BackendBuild/Role/Resource"
+   }
+  },
+  "BackendBuildRoleDefaultPolicy525BFDF2": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:aws:logs:us-east-1:536697254280:log-group:/aws/codebuild/",
+           {
+            "Ref": "BackendBuild8F461A5F"
+           },
+           ":*"
+          ]
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:aws:logs:us-east-1:536697254280:log-group:/aws/codebuild/",
+           {
+            "Ref": "BackendBuild8F461A5F"
+           }
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": [
+        "codebuild:BatchPutCodeCoverages",
+        "codebuild:BatchPutTestCases",
+        "codebuild:CreateReport",
+        "codebuild:CreateReportGroup",
+        "codebuild:UpdateReport"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::Join": [
+         "",
+         [
+          "arn:aws:codebuild:us-east-1:536697254280:report-group/",
+          {
+           "Ref": "BackendBuild8F461A5F"
+          },
+          "-*"
+         ]
+        ]
+       }
+      },
+      {
+       "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:BatchGetImage",
+        "ecr:CompleteLayerUpload",
+        "ecr:GetDownloadUrlForLayer",
+        "ecr:InitiateLayerUpload",
+        "ecr:PutImage",
+        "ecr:UploadLayerPart"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::ImportValue": "VPBankKMultStack:ExportsOutputFnGetAttBackendRepository9B711290Arn1306B815"
+       }
+      },
+      {
+       "Action": "ecr:GetAuthorizationToken",
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": [
+        "s3:Abort*",
+        "s3:DeleteObject*",
+        "s3:GetBucket*",
+        "s3:GetObject*",
+        "s3:List*",
+        "s3:PutObject",
+        "s3:PutObjectLegalHold",
+        "s3:PutObjectRetention",
+        "s3:PutObjectTagging",
+        "s3:PutObjectVersionTagging"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "PipelineArtifacts4A9B2621",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "PipelineArtifacts4A9B2621",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "BackendBuildRoleDefaultPolicy525BFDF2",
+    "Roles": [
+     {
+      "Ref": "BackendBuildRole8503E10C"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultCICDStack/BackendBuild/Role/DefaultPolicy/Resource"
+   }
+  },
+  "BackendBuild8F461A5F": {
+   "Type": "AWS::CodeBuild::Project",
+   "Properties": {
+    "Artifacts": {
+     "Type": "NO_ARTIFACTS"
+    },
+    "Cache": {
+     "Type": "NO_CACHE"
+    },
+    "EncryptionKey": "alias/aws/s3",
+    "Environment": {
+     "ComputeType": "BUILD_GENERAL1_SMALL",
+     "EnvironmentVariables": [
+      {
+       "Name": "AWS_DEFAULT_REGION",
+       "Type": "PLAINTEXT",
+       "Value": "us-east-1"
+      },
+      {
+       "Name": "AWS_ACCOUNT_ID",
+       "Type": "PLAINTEXT",
+       "Value": "536697254280"
+      },
+      {
+       "Name": "IMAGE_REPO_NAME",
+       "Type": "PLAINTEXT",
+       "Value": {
+        "Fn::ImportValue": "VPBankKMultStack:ExportsOutputRefBackendRepository9B711290218DBB68"
+       }
+      },
+      {
+       "Name": "IMAGE_TAG",
+       "Type": "PLAINTEXT",
+       "Value": "latest"
+      }
+     ],
+     "Image": "aws/codebuild/standard:7.0",
+     "ImagePullCredentialsType": "CODEBUILD",
+     "PrivilegedMode": true,
+     "Type": "LINUX_CONTAINER"
+    },
+    "Name": "vpbank-kmult-backend-build",
+    "ServiceRole": {
+     "Fn::GetAtt": [
+      "BackendBuildRole8503E10C",
+      "Arn"
+     ]
+    },
+    "Source": {
+     "BuildSpec": "{\n  \"version\": \"0.2\",\n  \"phases\": {\n    \"pre_build\": {\n      \"commands\": [\n        \"echo Logging in to Amazon ECR...\",\n        \"aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com\",\n        \"REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME\",\n        \"COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)\",\n        \"IMAGE_TAG=${COMMIT_HASH:=latest}\"\n      ]\n    },\n    \"build\": {\n      \"commands\": [\n        \"echo Build started on `date`\",\n        \"echo Building the Docker image...\",\n        \"cd backend\",\n        \"docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .\",\n        \"docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $REPOSITORY_URI:$IMAGE_TAG\",\n        \"docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $REPOSITORY_URI:latest\"\n      ]\n    },\n    \"post_build\": {\n      \"commands\": [\n        \"echo Build completed on `date`\",\n        \"echo Pushing the Docker images...\",\n        \"docker push $REPOSITORY_URI:$IMAGE_TAG\",\n        \"docker push $REPOSITORY_URI:latest\",\n        \"echo Writing image definitions file...\",\n        \"printf '[{\\\"name\\\":\\\"vpbank-kmult-backend\\\",\\\"imageUri\\\":\\\"%s\\\"}]' $REPOSITORY_URI:$IMAGE_TAG > ../imagedefinitions.json\"\n      ]\n    }\n  },\n  \"artifacts\": {\n    \"files\": [\n      \"imagedefinitions.json\"\n    ]\n  }\n}",
+     "Location": "https://github.com/ngcuyen/multi-agent-hackathon.git",
+     "ReportBuildStatus": true,
+     "Type": "GITHUB"
+    },
+    "Triggers": {
+     "FilterGroups": [
+      [
+       {
+        "Pattern": "PUSH",
+        "Type": "EVENT"
+       },
+       {
+        "Pattern": "refs/heads/main",
+        "Type": "HEAD_REF"
+       }
+      ]
+     ],
+     "Webhook": true
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultCICDStack/BackendBuild/Resource"
+   }
+  },
+  "FrontendBuildRole0F0B131E": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "codebuild.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultCICDStack/FrontendBuild/Role/Resource"
+   }
+  },
+  "FrontendBuildRoleDefaultPolicyDA9694DB": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:aws:logs:us-east-1:536697254280:log-group:/aws/codebuild/",
+           {
+            "Ref": "FrontendBuildD4632151"
+           },
+           ":*"
+          ]
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:aws:logs:us-east-1:536697254280:log-group:/aws/codebuild/",
+           {
+            "Ref": "FrontendBuildD4632151"
+           }
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": [
+        "codebuild:BatchPutCodeCoverages",
+        "codebuild:BatchPutTestCases",
+        "codebuild:CreateReport",
+        "codebuild:CreateReportGroup",
+        "codebuild:UpdateReport"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::Join": [
+         "",
+         [
+          "arn:aws:codebuild:us-east-1:536697254280:report-group/",
+          {
+           "Ref": "FrontendBuildD4632151"
+          },
+          "-*"
+         ]
+        ]
+       }
+      },
+      {
+       "Action": [
+        "s3:Abort*",
+        "s3:DeleteObject*",
+        "s3:GetBucket*",
+        "s3:GetObject*",
+        "s3:List*",
+        "s3:PutObject",
+        "s3:PutObjectLegalHold",
+        "s3:PutObjectRetention",
+        "s3:PutObjectTagging",
+        "s3:PutObjectVersionTagging"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "PipelineArtifacts4A9B2621",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::ImportValue": "VPBankKMultStack:ExportsOutputFnGetAttVPBankKMultFrontend56B3C68BArnA3B84230"
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "PipelineArtifacts4A9B2621",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::ImportValue": "VPBankKMultStack:ExportsOutputFnGetAttVPBankKMultFrontend56B3C68BArnA3B84230"
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "FrontendBuildRoleDefaultPolicyDA9694DB",
+    "Roles": [
+     {
+      "Ref": "FrontendBuildRole0F0B131E"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultCICDStack/FrontendBuild/Role/DefaultPolicy/Resource"
+   }
+  },
+  "FrontendBuildD4632151": {
+   "Type": "AWS::CodeBuild::Project",
+   "Properties": {
+    "Artifacts": {
+     "Type": "NO_ARTIFACTS"
+    },
+    "Cache": {
+     "Type": "NO_CACHE"
+    },
+    "EncryptionKey": "alias/aws/s3",
+    "Environment": {
+     "ComputeType": "BUILD_GENERAL1_SMALL",
+     "EnvironmentVariables": [
+      {
+       "Name": "FRONTEND_BUCKET",
+       "Type": "PLAINTEXT",
+       "Value": {
+        "Fn::ImportValue": "VPBankKMultStack:ExportsOutputRefVPBankKMultFrontend56B3C68B9D942812"
+       }
+      }
+     ],
+     "Image": "aws/codebuild/standard:7.0",
+     "ImagePullCredentialsType": "CODEBUILD",
+     "PrivilegedMode": false,
+     "Type": "LINUX_CONTAINER"
+    },
+    "Name": "vpbank-kmult-frontend-build",
+    "ServiceRole": {
+     "Fn::GetAtt": [
+      "FrontendBuildRole0F0B131E",
+      "Arn"
+     ]
+    },
+    "Source": {
+     "BuildSpec": "{\n  \"version\": \"0.2\",\n  \"phases\": {\n    \"pre_build\": {\n      \"commands\": [\n        \"echo Installing dependencies...\",\n        \"cd frontend\",\n        \"npm ci\"\n      ]\n    },\n    \"build\": {\n      \"commands\": [\n        \"echo Building the React application...\",\n        \"npm run build\"\n      ]\n    },\n    \"post_build\": {\n      \"commands\": [\n        \"echo Deploying to S3...\",\n        \"aws s3 sync build/ s3://$FRONTEND_BUCKET --delete\",\n        \"echo Frontend deployment completed\"\n      ]\n    }\n  }\n}",
+     "Location": "https://github.com/ngcuyen/multi-agent-hackathon.git",
+     "ReportBuildStatus": true,
+     "Type": "GITHUB"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultCICDStack/FrontendBuild/Resource"
+   }
+  },
+  "VPBankKMultPipelineRoleBF21FC5F": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "codepipeline.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultCICDStack/VPBankKMultPipeline/Role/Resource"
+   }
+  },
+  "VPBankKMultPipelineRoleDefaultPolicyCA230BBE": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "s3:Abort*",
+        "s3:DeleteObject*",
+        "s3:GetBucket*",
+        "s3:GetObject*",
+        "s3:List*",
+        "s3:PutObject",
+        "s3:PutObjectLegalHold",
+        "s3:PutObjectRetention",
+        "s3:PutObjectTagging",
+        "s3:PutObjectVersionTagging"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "PipelineArtifacts4A9B2621",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "PipelineArtifacts4A9B2621",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "VPBankKMultPipelineBuildBackendBuildCodePipelineActionRole26E04181",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::GetAtt": [
+          "VPBankKMultPipelineBuildFrontendBuildCodePipelineActionRoleEA26F4EF",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::GetAtt": [
+          "VPBankKMultPipelineDeployBackendDeployCodePipelineActionRoleD619A338",
+          "Arn"
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "VPBankKMultPipelineRoleDefaultPolicyCA230BBE",
+    "Roles": [
+     {
+      "Ref": "VPBankKMultPipelineRoleBF21FC5F"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultCICDStack/VPBankKMultPipeline/Role/DefaultPolicy/Resource"
+   }
+  },
+  "VPBankKMultPipeline058AA893": {
+   "Type": "AWS::CodePipeline::Pipeline",
+   "Properties": {
+    "ArtifactStore": {
+     "Location": {
+      "Ref": "PipelineArtifacts4A9B2621"
+     },
+     "Type": "S3"
+    },
+    "Name": "vpbank-kmult-pipeline",
+    "RoleArn": {
+     "Fn::GetAtt": [
+      "VPBankKMultPipelineRoleBF21FC5F",
+      "Arn"
+     ]
+    },
+    "Stages": [
+     {
+      "Actions": [
+       {
+        "ActionTypeId": {
+         "Category": "Source",
+         "Owner": "ThirdParty",
+         "Provider": "GitHub",
+         "Version": "1"
+        },
+        "Configuration": {
+         "Owner": "ngcuyen",
+         "Repo": "multi-agent-hackathon",
+         "Branch": "main",
+         "OAuthToken": "{{resolve:secretsmanager:github-token:SecretString:::}}",
+         "PollForSourceChanges": false
+        },
+        "Name": "GitHub_Source",
+        "OutputArtifacts": [
+         {
+          "Name": "Artifact_Source_GitHub_Source"
+         }
+        ],
+        "RunOrder": 1
+       }
+      ],
+      "Name": "Source"
+     },
+     {
+      "Actions": [
+       {
+        "ActionTypeId": {
+         "Category": "Build",
+         "Owner": "AWS",
+         "Provider": "CodeBuild",
+         "Version": "1"
+        },
+        "Configuration": {
+         "ProjectName": {
+          "Ref": "BackendBuild8F461A5F"
+         }
+        },
+        "InputArtifacts": [
+         {
+          "Name": "Artifact_Source_GitHub_Source"
+         }
+        ],
+        "Name": "Backend_Build",
+        "OutputArtifacts": [
+         {
+          "Name": "Artifact_Build_Backend_Build"
+         }
+        ],
+        "RoleArn": {
+         "Fn::GetAtt": [
+          "VPBankKMultPipelineBuildBackendBuildCodePipelineActionRole26E04181",
+          "Arn"
+         ]
+        },
+        "RunOrder": 1
+       },
+       {
+        "ActionTypeId": {
+         "Category": "Build",
+         "Owner": "AWS",
+         "Provider": "CodeBuild",
+         "Version": "1"
+        },
+        "Configuration": {
+         "ProjectName": {
+          "Ref": "FrontendBuildD4632151"
+         }
+        },
+        "InputArtifacts": [
+         {
+          "Name": "Artifact_Source_GitHub_Source"
+         }
+        ],
+        "Name": "Frontend_Build",
+        "OutputArtifacts": [
+         {
+          "Name": "Artifact_Build_Frontend_Build"
+         }
+        ],
+        "RoleArn": {
+         "Fn::GetAtt": [
+          "VPBankKMultPipelineBuildFrontendBuildCodePipelineActionRoleEA26F4EF",
+          "Arn"
+         ]
+        },
+        "RunOrder": 2
+       }
+      ],
+      "Name": "Build"
+     },
+     {
+      "Actions": [
+       {
+        "ActionTypeId": {
+         "Category": "Deploy",
+         "Owner": "AWS",
+         "Provider": "ECS",
+         "Version": "1"
+        },
+        "Configuration": {
+         "ClusterName": {
+          "Fn::ImportValue": "VPBankKMultStack:ExportsOutputRefVPBankKMultCluster90EBD85EDF2872AB"
+         },
+         "ServiceName": {
+          "Fn::ImportValue": "VPBankKMultStack:ExportsOutputFnGetAttBackendService2147DAF9NameA2E933C2"
+         }
+        },
+        "InputArtifacts": [
+         {
+          "Name": "Artifact_Build_Backend_Build"
+         }
+        ],
+        "Name": "Backend_Deploy",
+        "RoleArn": {
+         "Fn::GetAtt": [
+          "VPBankKMultPipelineDeployBackendDeployCodePipelineActionRoleD619A338",
+          "Arn"
+         ]
+        },
+        "RunOrder": 1
+       }
+      ],
+      "Name": "Deploy"
+     }
+    ]
+   },
+   "DependsOn": [
+    "VPBankKMultPipelineRoleDefaultPolicyCA230BBE",
+    "VPBankKMultPipelineRoleBF21FC5F"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultCICDStack/VPBankKMultPipeline/Resource"
+   }
+  },
+  "VPBankKMultPipelineSourceGitHubSourceWebhookResourceDC8C6C35": {
+   "Type": "AWS::CodePipeline::Webhook",
+   "Properties": {
+    "Authentication": "GITHUB_HMAC",
+    "AuthenticationConfiguration": {
+     "SecretToken": "{{resolve:secretsmanager:github-token:SecretString:::}}"
+    },
+    "Filters": [
+     {
+      "JsonPath": "$.ref",
+      "MatchEquals": "refs/heads/{Branch}"
+     }
+    ],
+    "RegisterWithThirdParty": true,
+    "TargetAction": "GitHub_Source",
+    "TargetPipeline": {
+     "Ref": "VPBankKMultPipeline058AA893"
+    },
+    "TargetPipelineVersion": 1
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultCICDStack/VPBankKMultPipeline/Source/GitHub_Source/WebhookResource"
+   }
+  },
+  "VPBankKMultPipelineBuildBackendBuildCodePipelineActionRole26E04181": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "AWS": "arn:aws:iam::536697254280:root"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultCICDStack/VPBankKMultPipeline/Build/Backend_Build/CodePipelineActionRole/Resource"
+   }
+  },
+  "VPBankKMultPipelineBuildBackendBuildCodePipelineActionRoleDefaultPolicy302A3431": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "codebuild:BatchGetBuilds",
+        "codebuild:StartBuild",
+        "codebuild:StopBuild"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "BackendBuild8F461A5F",
+         "Arn"
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "VPBankKMultPipelineBuildBackendBuildCodePipelineActionRoleDefaultPolicy302A3431",
+    "Roles": [
+     {
+      "Ref": "VPBankKMultPipelineBuildBackendBuildCodePipelineActionRole26E04181"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultCICDStack/VPBankKMultPipeline/Build/Backend_Build/CodePipelineActionRole/DefaultPolicy/Resource"
+   }
+  },
+  "VPBankKMultPipelineBuildFrontendBuildCodePipelineActionRoleEA26F4EF": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "AWS": "arn:aws:iam::536697254280:root"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultCICDStack/VPBankKMultPipeline/Build/Frontend_Build/CodePipelineActionRole/Resource"
+   }
+  },
+  "VPBankKMultPipelineBuildFrontendBuildCodePipelineActionRoleDefaultPolicy0C0126FB": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "codebuild:BatchGetBuilds",
+        "codebuild:StartBuild",
+        "codebuild:StopBuild"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "FrontendBuildD4632151",
+         "Arn"
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "VPBankKMultPipelineBuildFrontendBuildCodePipelineActionRoleDefaultPolicy0C0126FB",
+    "Roles": [
+     {
+      "Ref": "VPBankKMultPipelineBuildFrontendBuildCodePipelineActionRoleEA26F4EF"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultCICDStack/VPBankKMultPipeline/Build/Frontend_Build/CodePipelineActionRole/DefaultPolicy/Resource"
+   }
+  },
+  "VPBankKMultPipelineDeployBackendDeployCodePipelineActionRoleD619A338": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "AWS": "arn:aws:iam::536697254280:root"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultCICDStack/VPBankKMultPipeline/Deploy/Backend_Deploy/CodePipelineActionRole/Resource"
+   }
+  },
+  "VPBankKMultPipelineDeployBackendDeployCodePipelineActionRoleDefaultPolicyF83CBED3": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "ecs:DescribeServices",
+        "ecs:DescribeTaskDefinition",
+        "ecs:DescribeTasks",
+        "ecs:ListTasks",
+        "ecs:RegisterTaskDefinition",
+        "ecs:UpdateService"
+       ],
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": "iam:PassRole",
+       "Condition": {
+        "StringEqualsIfExists": {
+         "iam:PassedToService": [
+          "ec2.amazonaws.com",
+          "ecs-tasks.amazonaws.com"
+         ]
+        }
+       },
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": [
+        "s3:GetBucket*",
+        "s3:GetObject*",
+        "s3:List*"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "PipelineArtifacts4A9B2621",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "PipelineArtifacts4A9B2621",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "VPBankKMultPipelineDeployBackendDeployCodePipelineActionRoleDefaultPolicyF83CBED3",
+    "Roles": [
+     {
+      "Ref": "VPBankKMultPipelineDeployBackendDeployCodePipelineActionRoleD619A338"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultCICDStack/VPBankKMultPipeline/Deploy/Backend_Deploy/CodePipelineActionRole/DefaultPolicy/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/02NQQ7CIBBFz9I9HYtudKsHsMGFS9PSMU6h0BTQGMLdrbQmrv7Lm58/W+BVBVXRvFwpO1VqaiFefCMVm9Utuh3EY5AKPTvdzUKJSdthG0h3EOvJ9ijzdcXEqBkgCqvxa3PWVpN851KmZWKkETUZnFdWyo0/vmL7sFalxAQ6GyaZ7Tn4MeSXP5uYmfegd5sn3wM/AC96R1ROwXgaEMSSHy58Go7uAAAA"
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultCICDStack/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "PipelineName": {
+   "Description": "CI/CD Pipeline Name",
+   "Value": {
+    "Ref": "VPBankKMultPipeline058AA893"
+   }
+  },
+  "BackendBuildProject": {
+   "Description": "Backend CodeBuild Project",
+   "Value": {
+    "Ref": "BackendBuild8F461A5F"
+   }
+  },
+  "FrontendBuildProject": {
+   "Description": "Frontend CodeBuild Project",
+   "Value": {
+    "Ref": "FrontendBuildD4632151"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

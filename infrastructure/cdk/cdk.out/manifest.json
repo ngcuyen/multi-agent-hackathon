@@ -1,0 +1,675 @@
+{
+  "version": "34.0.0",
+  "artifacts": {
+    "VPBankKMultStack.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "VPBankKMultStack.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "VPBankKMultStack": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://536697254280/us-east-1",
+      "properties": {
+        "templateFile": "VPBankKMultStack.template.json",
+        "terminationProtection": false,
+        "tags": {
+          "CostCenter": "Banking-Automation",
+          "Environment": "Production",
+          "Project": "VPBank-KMULT",
+          "Team": "Multi-Agent-Hackathon-Group-181"
+        },
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::536697254280:role/cdk-hnb659fds-deploy-role-536697254280-us-east-1",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::536697254280:role/cdk-hnb659fds-cfn-exec-role-536697254280-us-east-1",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-536697254280-us-east-1/d54c5ee6ffdc3651faeefa5c1db56ff376b6c577e42434d0ffb3eb7f893a26f5.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": [
+          "VPBankKMultStack.assets"
+        ],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::536697254280:role/cdk-hnb659fds-lookup-role-536697254280-us-east-1",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": [
+        "VPBankKMultStack.assets"
+      ],
+      "metadata": {
+        "/VPBankKMultStack": [
+          {
+            "type": "aws:cdk:stack-tags",
+            "data": [
+              {
+                "Key": "CostCenter",
+                "Value": "Banking-Automation"
+              },
+              {
+                "Key": "Environment",
+                "Value": "Production"
+              },
+              {
+                "Key": "Project",
+                "Value": "VPBank-KMULT"
+              },
+              {
+                "Key": "Team",
+                "Value": "Multi-Agent-Hackathon-Group-181"
+              }
+            ]
+          }
+        ],
+        "/VPBankKMultStack/VPBankKMultVPC/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPBankKMultVPCCA9EDDA9"
+          }
+        ],
+        "/VPBankKMultStack/VPBankKMultVPC/publicSubnet1/Subnet": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPBankKMultVPCpublicSubnet1Subnet4DEA220B"
+          }
+        ],
+        "/VPBankKMultStack/VPBankKMultVPC/publicSubnet1/RouteTable": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPBankKMultVPCpublicSubnet1RouteTableE5934DC4"
+          }
+        ],
+        "/VPBankKMultStack/VPBankKMultVPC/publicSubnet1/RouteTableAssociation": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPBankKMultVPCpublicSubnet1RouteTableAssociation05801E1C"
+          }
+        ],
+        "/VPBankKMultStack/VPBankKMultVPC/publicSubnet1/DefaultRoute": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPBankKMultVPCpublicSubnet1DefaultRoute39020C01"
+          }
+        ],
+        "/VPBankKMultStack/VPBankKMultVPC/publicSubnet1/EIP": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPBankKMultVPCpublicSubnet1EIPDEA2B8D4"
+          }
+        ],
+        "/VPBankKMultStack/VPBankKMultVPC/publicSubnet1/NATGateway": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPBankKMultVPCpublicSubnet1NATGateway82BCCDE3"
+          }
+        ],
+        "/VPBankKMultStack/VPBankKMultVPC/publicSubnet2/Subnet": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPBankKMultVPCpublicSubnet2SubnetC89D1A8C"
+          }
+        ],
+        "/VPBankKMultStack/VPBankKMultVPC/publicSubnet2/RouteTable": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPBankKMultVPCpublicSubnet2RouteTableF2A02F5A"
+          }
+        ],
+        "/VPBankKMultStack/VPBankKMultVPC/publicSubnet2/RouteTableAssociation": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPBankKMultVPCpublicSubnet2RouteTableAssociationE6530636"
+          }
+        ],
+        "/VPBankKMultStack/VPBankKMultVPC/publicSubnet2/DefaultRoute": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPBankKMultVPCpublicSubnet2DefaultRouteA5E7F734"
+          }
+        ],
+        "/VPBankKMultStack/VPBankKMultVPC/privateSubnet1/Subnet": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPBankKMultVPCprivateSubnet1Subnet8873A8CB"
+          }
+        ],
+        "/VPBankKMultStack/VPBankKMultVPC/privateSubnet1/RouteTable": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPBankKMultVPCprivateSubnet1RouteTableA23D346B"
+          }
+        ],
+        "/VPBankKMultStack/VPBankKMultVPC/privateSubnet1/RouteTableAssociation": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPBankKMultVPCprivateSubnet1RouteTableAssociation00C2A325"
+          }
+        ],
+        "/VPBankKMultStack/VPBankKMultVPC/privateSubnet1/DefaultRoute": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPBankKMultVPCprivateSubnet1DefaultRoute8420ED5F"
+          }
+        ],
+        "/VPBankKMultStack/VPBankKMultVPC/privateSubnet2/Subnet": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPBankKMultVPCprivateSubnet2Subnet42937706"
+          }
+        ],
+        "/VPBankKMultStack/VPBankKMultVPC/privateSubnet2/RouteTable": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPBankKMultVPCprivateSubnet2RouteTable4D649036"
+          }
+        ],
+        "/VPBankKMultStack/VPBankKMultVPC/privateSubnet2/RouteTableAssociation": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPBankKMultVPCprivateSubnet2RouteTableAssociation2F157B03"
+          }
+        ],
+        "/VPBankKMultStack/VPBankKMultVPC/privateSubnet2/DefaultRoute": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPBankKMultVPCprivateSubnet2DefaultRoute43CF8D9E"
+          }
+        ],
+        "/VPBankKMultStack/VPBankKMultVPC/IGW": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPBankKMultVPCIGWC5A91FEF"
+          }
+        ],
+        "/VPBankKMultStack/VPBankKMultVPC/VPCGW": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPBankKMultVPCVPCGWEFFC7EC6"
+          }
+        ],
+        "/VPBankKMultStack/VPBankKMultVPC/RestrictDefaultSecurityGroupCustomResource/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPBankKMultVPCRestrictDefaultSecurityGroupCustomResourceFF8E5836"
+          }
+        ],
+        "/VPBankKMultStack/Custom::VpcRestrictDefaultSGCustomResourceProvider/Role": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CustomVpcRestrictDefaultSGCustomResourceProviderRole26592FE0"
+          }
+        ],
+        "/VPBankKMultStack/Custom::VpcRestrictDefaultSGCustomResourceProvider/Handler": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CustomVpcRestrictDefaultSGCustomResourceProviderHandlerDC833E5E"
+          }
+        ],
+        "/VPBankKMultStack/VPBankKMultDocuments/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPBankKMultDocuments8E603DA4"
+          }
+        ],
+        "/VPBankKMultStack/VPBankKMultFrontend/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPBankKMultFrontend56B3C68B"
+          }
+        ],
+        "/VPBankKMultStack/VPBankKMultFrontend/Policy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPBankKMultFrontendPolicyF747B357"
+          }
+        ],
+        "/VPBankKMultStack/ConversationsTable": [
+          {
+            "type": "aws:cdk:hasPhysicalName",
+            "data": {
+              "Ref": "ConversationsTableCD91EB96"
+            }
+          }
+        ],
+        "/VPBankKMultStack/ConversationsTable/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ConversationsTableCD91EB96"
+          }
+        ],
+        "/VPBankKMultStack/DocumentsTable": [
+          {
+            "type": "aws:cdk:hasPhysicalName",
+            "data": {
+              "Ref": "DocumentsTable7E808EE5"
+            }
+          }
+        ],
+        "/VPBankKMultStack/DocumentsTable/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DocumentsTable7E808EE5"
+          }
+        ],
+        "/VPBankKMultStack/RedisSubnetGroup": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RedisSubnetGroup"
+          }
+        ],
+        "/VPBankKMultStack/RedisSecurityGroup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RedisSecurityGroupB05951F6"
+          }
+        ],
+        "/VPBankKMultStack/RedisCluster": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RedisCluster"
+          }
+        ],
+        "/VPBankKMultStack/BackendRepository/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendRepository9B711290"
+          }
+        ],
+        "/VPBankKMultStack/VPBankKMultCluster/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPBankKMultCluster90EBD85E"
+          }
+        ],
+        "/VPBankKMultStack/ECSTaskRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ECSTaskRoleF2ADB362"
+          }
+        ],
+        "/VPBankKMultStack/AppSecrets/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AppSecretsA1997F2A"
+          }
+        ],
+        "/VPBankKMultStack/BackendService/LB/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendServiceLB09608E98"
+          }
+        ],
+        "/VPBankKMultStack/BackendService/LB/SecurityGroup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendServiceLBSecurityGroup2B9BA648"
+          }
+        ],
+        "/VPBankKMultStack/BackendService/LB/SecurityGroup/to VPBankKMultStackBackendServiceSecurityGroup5EF3A953:8080": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendServiceLBSecurityGrouptoVPBankKMultStackBackendServiceSecurityGroup5EF3A95380809C19FBF1"
+          }
+        ],
+        "/VPBankKMultStack/BackendService/LB/PublicListener/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendServiceLBPublicListener2FA7FC98"
+          }
+        ],
+        "/VPBankKMultStack/BackendService/LB/PublicListener/ECSGroup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendServiceLBPublicListenerECSGroupD43CD2AB"
+          }
+        ],
+        "/VPBankKMultStack/BackendService/LoadBalancerDNS": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendServiceLoadBalancerDNSE742582D"
+          }
+        ],
+        "/VPBankKMultStack/BackendService/ServiceURL": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendServiceServiceURLB1770053"
+          }
+        ],
+        "/VPBankKMultStack/BackendService/TaskDef/TaskRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendServiceTaskDefTaskRoleD63B95BB"
+          }
+        ],
+        "/VPBankKMultStack/BackendService/TaskDef/TaskRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendServiceTaskDefTaskRoleDefaultPolicy3BCDB2C6"
+          }
+        ],
+        "/VPBankKMultStack/BackendService/TaskDef/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendServiceTaskDef9F97F56B"
+          }
+        ],
+        "/VPBankKMultStack/BackendService/TaskDef/web/LogGroup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendServiceTaskDefwebLogGroup614D1BFF"
+          }
+        ],
+        "/VPBankKMultStack/BackendService/TaskDef/ExecutionRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendServiceTaskDefExecutionRole15BE46B5"
+          }
+        ],
+        "/VPBankKMultStack/BackendService/TaskDef/ExecutionRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendServiceTaskDefExecutionRoleDefaultPolicyDFB9BC56"
+          }
+        ],
+        "/VPBankKMultStack/BackendService/Service/Service": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendService2147DAF9"
+          }
+        ],
+        "/VPBankKMultStack/BackendService/Service/SecurityGroup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendServiceSecurityGroup7599F85E"
+          }
+        ],
+        "/VPBankKMultStack/BackendService/Service/SecurityGroup/from VPBankKMultStackBackendServiceLBSecurityGroup80C36610:8080": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendServiceSecurityGroupfromVPBankKMultStackBackendServiceLBSecurityGroup80C36610808015C2A6F2"
+          }
+        ],
+        "/VPBankKMultStack/BackendService/Service/TaskCount/Target/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendServiceTaskCountTarget2134EDB2"
+          }
+        ],
+        "/VPBankKMultStack/BackendService/Service/TaskCount/Target/CpuScaling/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendServiceTaskCountTargetCpuScalingB44CAB95"
+          }
+        ],
+        "/VPBankKMultStack/BackendService/Service/TaskCount/Target/MemoryScaling/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendServiceTaskCountTargetMemoryScalingBB00C473"
+          }
+        ],
+        "/VPBankKMultStack/BackendURL": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendURL"
+          }
+        ],
+        "/VPBankKMultStack/FrontendBucket": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FrontendBucket"
+          }
+        ],
+        "/VPBankKMultStack/DocumentsBucket": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DocumentsBucket"
+          }
+        ],
+        "/VPBankKMultStack/ECRRepository": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ECRRepository"
+          }
+        ],
+        "/VPBankKMultStack/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/VPBankKMultStack/Exports/Output{\"Fn::GetAtt\":[\"BackendRepository9B711290\",\"Arn\"]}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputFnGetAttBackendRepository9B711290Arn1306B815"
+          }
+        ],
+        "/VPBankKMultStack/Exports/Output{\"Ref\":\"BackendRepository9B711290\"}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputRefBackendRepository9B711290218DBB68"
+          }
+        ],
+        "/VPBankKMultStack/Exports/Output{\"Fn::GetAtt\":[\"VPBankKMultFrontend56B3C68B\",\"Arn\"]}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputFnGetAttVPBankKMultFrontend56B3C68BArnA3B84230"
+          }
+        ],
+        "/VPBankKMultStack/Exports/Output{\"Ref\":\"VPBankKMultFrontend56B3C68B\"}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputRefVPBankKMultFrontend56B3C68B9D942812"
+          }
+        ],
+        "/VPBankKMultStack/Exports/Output{\"Ref\":\"VPBankKMultCluster90EBD85E\"}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputRefVPBankKMultCluster90EBD85EDF2872AB"
+          }
+        ],
+        "/VPBankKMultStack/Exports/Output{\"Fn::GetAtt\":[\"BackendService2147DAF9\",\"Name\"]}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputFnGetAttBackendService2147DAF9NameA2E933C2"
+          }
+        ],
+        "/VPBankKMultStack/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/VPBankKMultStack/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "VPBankKMultStack"
+    },
+    "VPBankKMultCICDStack.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "VPBankKMultCICDStack.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "VPBankKMultCICDStack": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://536697254280/us-east-1",
+      "properties": {
+        "templateFile": "VPBankKMultCICDStack.template.json",
+        "terminationProtection": false,
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::536697254280:role/cdk-hnb659fds-deploy-role-536697254280-us-east-1",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::536697254280:role/cdk-hnb659fds-cfn-exec-role-536697254280-us-east-1",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-536697254280-us-east-1/5e2b6cb226b40a791cc6b974f5ebbe512e11c6eed0a167d62b54ef6a17770e0a.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": [
+          "VPBankKMultCICDStack.assets"
+        ],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::536697254280:role/cdk-hnb659fds-lookup-role-536697254280-us-east-1",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": [
+        "VPBankKMultStack",
+        "VPBankKMultCICDStack.assets"
+      ],
+      "metadata": {
+        "/VPBankKMultCICDStack/PipelineArtifacts/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PipelineArtifacts4A9B2621"
+          }
+        ],
+        "/VPBankKMultCICDStack/BackendBuild/Role/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendBuildRole8503E10C"
+          }
+        ],
+        "/VPBankKMultCICDStack/BackendBuild/Role/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendBuildRoleDefaultPolicy525BFDF2"
+          }
+        ],
+        "/VPBankKMultCICDStack/BackendBuild/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendBuild8F461A5F"
+          }
+        ],
+        "/VPBankKMultCICDStack/FrontendBuild/Role/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FrontendBuildRole0F0B131E"
+          }
+        ],
+        "/VPBankKMultCICDStack/FrontendBuild/Role/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FrontendBuildRoleDefaultPolicyDA9694DB"
+          }
+        ],
+        "/VPBankKMultCICDStack/FrontendBuild/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FrontendBuildD4632151"
+          }
+        ],
+        "/VPBankKMultCICDStack/VPBankKMultPipeline/Role/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPBankKMultPipelineRoleBF21FC5F"
+          }
+        ],
+        "/VPBankKMultCICDStack/VPBankKMultPipeline/Role/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPBankKMultPipelineRoleDefaultPolicyCA230BBE"
+          }
+        ],
+        "/VPBankKMultCICDStack/VPBankKMultPipeline/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPBankKMultPipeline058AA893"
+          }
+        ],
+        "/VPBankKMultCICDStack/VPBankKMultPipeline/Source/GitHub_Source/WebhookResource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPBankKMultPipelineSourceGitHubSourceWebhookResourceDC8C6C35"
+          }
+        ],
+        "/VPBankKMultCICDStack/VPBankKMultPipeline/Build/Backend_Build/CodePipelineActionRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPBankKMultPipelineBuildBackendBuildCodePipelineActionRole26E04181"
+          }
+        ],
+        "/VPBankKMultCICDStack/VPBankKMultPipeline/Build/Backend_Build/CodePipelineActionRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPBankKMultPipelineBuildBackendBuildCodePipelineActionRoleDefaultPolicy302A3431"
+          }
+        ],
+        "/VPBankKMultCICDStack/VPBankKMultPipeline/Build/Frontend_Build/CodePipelineActionRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPBankKMultPipelineBuildFrontendBuildCodePipelineActionRoleEA26F4EF"
+          }
+        ],
+        "/VPBankKMultCICDStack/VPBankKMultPipeline/Build/Frontend_Build/CodePipelineActionRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPBankKMultPipelineBuildFrontendBuildCodePipelineActionRoleDefaultPolicy0C0126FB"
+          }
+        ],
+        "/VPBankKMultCICDStack/VPBankKMultPipeline/Deploy/Backend_Deploy/CodePipelineActionRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPBankKMultPipelineDeployBackendDeployCodePipelineActionRoleD619A338"
+          }
+        ],
+        "/VPBankKMultCICDStack/VPBankKMultPipeline/Deploy/Backend_Deploy/CodePipelineActionRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPBankKMultPipelineDeployBackendDeployCodePipelineActionRoleDefaultPolicyF83CBED3"
+          }
+        ],
+        "/VPBankKMultCICDStack/PipelineName": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PipelineName"
+          }
+        ],
+        "/VPBankKMultCICDStack/BackendBuildProject": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendBuildProject"
+          }
+        ],
+        "/VPBankKMultCICDStack/FrontendBuildProject": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FrontendBuildProject"
+          }
+        ],
+        "/VPBankKMultCICDStack/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/VPBankKMultCICDStack/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/VPBankKMultCICDStack/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "VPBankKMultCICDStack"
+    },
+    "Tree": {
+      "type": "cdk:tree",
+      "properties": {
+        "file": "tree.json"
+      }
+    }
+  }
+}

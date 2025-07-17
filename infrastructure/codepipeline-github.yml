@@ -1,0 +1,238 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'VPBank K-MULT CodePipeline with GitHub Source'
+
+Parameters:
+  GitHubRepo:
+    Type: String
+    Default: 'multi-agent-hackathon'
+    Description: 'GitHub repository name'
+  
+  GitHubOwner:
+    Type: String
+    Default: 'ngcuyen'
+    Description: 'GitHub repository owner'
+  
+  GitHubBranch:
+    Type: String
+    Default: 'main'
+    Description: 'GitHub branch to track'
+
+Resources:
+  # S3 Bucket for Pipeline Artifacts
+  PipelineArtifactsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'vpbank-kmult-pipeline-artifacts-${AWS::AccountId}'
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  # CodePipeline Service Role
+  CodePipelineServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: VPBankKMult-CodePipeline-Role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codepipeline.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: CodePipelinePolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetBucketVersioning
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:PutObject
+                  - s3:PutObjectAcl
+                Resource:
+                  - !Sub '${PipelineArtifactsBucket}/*'
+                  - !GetAtt PipelineArtifactsBucket.Arn
+              - Effect: Allow
+                Action:
+                  - codebuild:BatchGetBuilds
+                  - codebuild:StartBuild
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - ecs:DescribeServices
+                  - ecs:DescribeTaskDefinition
+                  - ecs:DescribeTasks
+                  - ecs:ListTasks
+                  - ecs:RegisterTaskDefinition
+                  - ecs:UpdateService
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - iam:PassRole
+                Resource: '*'
+
+  # CodeBuild Project for Pipeline
+  CodeBuildProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: VPBankKMult-Pipeline-Build
+      Description: 'CodeBuild project for VPBank K-MULT Pipeline'
+      ServiceRole: !Sub 'arn:aws:iam::${AWS::AccountId}:role/VPBankKMult-CodeBuild-Role'
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_MEDIUM
+        Image: aws/codebuild/amazonlinux2-x86_64-standard:5.0
+        PrivilegedMode: true
+        EnvironmentVariables:
+          - Name: AWS_DEFAULT_REGION
+            Value: !Ref AWS::Region
+          - Name: AWS_ACCOUNT_ID
+            Value: !Ref AWS::AccountId
+          - Name: IMAGE_REPO_NAME
+            Value: vpbank-kmult-backend
+          - Name: IMAGE_TAG
+            Value: pipeline-latest
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: |
+          version: 0.2
+          phases:
+            pre_build:
+              commands:
+                - echo Logging in to Amazon ECR...
+                - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+                - REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME
+                - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+                - IMAGE_TAG=pipeline-${COMMIT_HASH:=latest}
+                - echo Build started on `date`
+                - echo Repository URI = $REPOSITORY_URI
+                - echo Image tag = $IMAGE_TAG
+            build:
+              commands:
+                - echo Build phase started on `date`
+                - echo Building Docker image...
+                - cd backend
+                - |
+                  cat > Dockerfile.pipeline << 'EOF'
+                  FROM python:3.11-slim
+                  WORKDIR /app
+                  RUN apt-get update && apt-get install -y \
+                      curl \
+                      tesseract-ocr \
+                      tesseract-ocr-vie \
+                      tesseract-ocr-eng \
+                      poppler-utils \
+                      && rm -rf /var/lib/apt/lists/*
+                  COPY requirements.txt .
+                  RUN pip install --no-cache-dir -r requirements.txt
+                  COPY . .
+                  EXPOSE 8080
+                  HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+                      CMD curl -f http://localhost:8080/mutil_agent/public/api/v1/health-check/health || exit 1
+                  CMD ["uvicorn", "app.mutil_agent.main:app", "--host", "0.0.0.0", "--port", "8080", "--workers", "2"]
+                  EOF
+                - docker build -f Dockerfile.pipeline -t $REPOSITORY_URI:$IMAGE_TAG .
+                - docker tag $REPOSITORY_URI:$IMAGE_TAG $REPOSITORY_URI:latest
+            post_build:
+              commands:
+                - echo Build completed on `date`
+                - echo Pushing Docker images...
+                - docker push $REPOSITORY_URI:$IMAGE_TAG
+                - docker push $REPOSITORY_URI:latest
+                - echo Writing image definitions file...
+                - printf '[{"name":"web","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+                - cat imagedefinitions.json
+          artifacts:
+            files:
+              - imagedefinitions.json
+              - backend/**/*
+      TimeoutInMinutes: 30
+
+  # CodePipeline
+  CodePipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      Name: VPBankKMult-GitHub-Pipeline
+      RoleArn: !GetAtt CodePipelineServiceRole.Arn
+      ArtifactStore:
+        Type: S3
+        Location: !Ref PipelineArtifactsBucket
+      Stages:
+        - Name: Source
+          Actions:
+            - Name: SourceAction
+              ActionTypeId:
+                Category: Source
+                Owner: ThirdParty
+                Provider: GitHub
+                Version: '1'
+              Configuration:
+                Owner: !Ref GitHubOwner
+                Repo: !Ref GitHubRepo
+                Branch: !Ref GitHubBranch
+                OAuthToken: '{{resolve:secretsmanager:github-token:SecretString:token}}'
+                PollForSourceChanges: true
+              OutputArtifacts:
+                - Name: SourceOutput
+
+        - Name: Build
+          Actions:
+            - Name: BuildAction
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: '1'
+              Configuration:
+                ProjectName: !Ref CodeBuildProject
+              InputArtifacts:
+                - Name: SourceOutput
+              OutputArtifacts:
+                - Name: BuildOutput
+
+        - Name: Deploy
+          Actions:
+            - Name: DeployAction
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: ECS
+                Version: '1'
+              Configuration:
+                ClusterName: vpbank-kmult-cluster
+                ServiceName: vpbank-kmult-backend
+                FileName: imagedefinitions.json
+              InputArtifacts:
+                - Name: BuildOutput
+              Region: !Ref AWS::Region
+
+Outputs:
+  PipelineName:
+    Description: 'Name of the CodePipeline'
+    Value: !Ref CodePipeline
+    Export:
+      Name: !Sub '${AWS::StackName}-PipelineName'
+
+  PipelineUrl:
+    Description: 'URL of the CodePipeline'
+    Value: !Sub 'https://console.aws.amazon.com/codesuite/codepipeline/pipelines/${CodePipeline}/view'
+    Export:
+      Name: !Sub '${AWS::StackName}-PipelineUrl'
+
+  ArtifactsBucket:
+    Description: 'S3 Bucket for Pipeline Artifacts'
+    Value: !Ref PipelineArtifactsBucket
+    Export:
+      Name: !Sub '${AWS::StackName}-ArtifactsBucket'

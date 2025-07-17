@@ -61,7 +61,11 @@ class MarketDataResponse(BaseModel):
     timestamp: str 
 
 class CreditAssessmentResponseShort(BaseModel):
-    status: str
-    threats: List[Dict]
-    ai_report: str
-    recommendations: List[str] 
+    creditScore: int
+    riskRating: str
+    maxLoanAmount: float
+    interestRate: float
+    financialMetrics: Dict
+    complianceChecks: Dict
+    recommendation: str
+    confidence: float 

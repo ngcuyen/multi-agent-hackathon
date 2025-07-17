@@ -1,0 +1,1792 @@
+{
+ "Description": "VPBank K-MULT Agent Studio - Multi-Agent Banking Automation Platform",
+ "Resources": {
+  "VPBankKMultVPCCA9EDDA9": {
+   "Type": "AWS::EC2::VPC",
+   "Properties": {
+    "CidrBlock": "10.0.0.0/16",
+    "EnableDnsHostnames": true,
+    "EnableDnsSupport": true,
+    "InstanceTenancy": "default",
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "VPBankKMultStack/VPBankKMultVPC"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/VPBankKMultVPC/Resource"
+   }
+  },
+  "VPBankKMultVPCpublicSubnet1Subnet4DEA220B": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "us-east-1a",
+    "CidrBlock": "10.0.0.0/24",
+    "MapPublicIpOnLaunch": true,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "public"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Public"
+     },
+     {
+      "Key": "Name",
+      "Value": "VPBankKMultStack/VPBankKMultVPC/publicSubnet1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "VPBankKMultVPCCA9EDDA9"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/VPBankKMultVPC/publicSubnet1/Subnet"
+   }
+  },
+  "VPBankKMultVPCpublicSubnet1RouteTableE5934DC4": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "VPBankKMultStack/VPBankKMultVPC/publicSubnet1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "VPBankKMultVPCCA9EDDA9"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/VPBankKMultVPC/publicSubnet1/RouteTable"
+   }
+  },
+  "VPBankKMultVPCpublicSubnet1RouteTableAssociation05801E1C": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "VPBankKMultVPCpublicSubnet1RouteTableE5934DC4"
+    },
+    "SubnetId": {
+     "Ref": "VPBankKMultVPCpublicSubnet1Subnet4DEA220B"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/VPBankKMultVPC/publicSubnet1/RouteTableAssociation"
+   }
+  },
+  "VPBankKMultVPCpublicSubnet1DefaultRoute39020C01": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "GatewayId": {
+     "Ref": "VPBankKMultVPCIGWC5A91FEF"
+    },
+    "RouteTableId": {
+     "Ref": "VPBankKMultVPCpublicSubnet1RouteTableE5934DC4"
+    }
+   },
+   "DependsOn": [
+    "VPBankKMultVPCVPCGWEFFC7EC6"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/VPBankKMultVPC/publicSubnet1/DefaultRoute"
+   }
+  },
+  "VPBankKMultVPCpublicSubnet1EIPDEA2B8D4": {
+   "Type": "AWS::EC2::EIP",
+   "Properties": {
+    "Domain": "vpc",
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "VPBankKMultStack/VPBankKMultVPC/publicSubnet1"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/VPBankKMultVPC/publicSubnet1/EIP"
+   }
+  },
+  "VPBankKMultVPCpublicSubnet1NATGateway82BCCDE3": {
+   "Type": "AWS::EC2::NatGateway",
+   "Properties": {
+    "AllocationId": {
+     "Fn::GetAtt": [
+      "VPBankKMultVPCpublicSubnet1EIPDEA2B8D4",
+      "AllocationId"
+     ]
+    },
+    "SubnetId": {
+     "Ref": "VPBankKMultVPCpublicSubnet1Subnet4DEA220B"
+    },
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "VPBankKMultStack/VPBankKMultVPC/publicSubnet1"
+     }
+    ]
+   },
+   "DependsOn": [
+    "VPBankKMultVPCpublicSubnet1DefaultRoute39020C01",
+    "VPBankKMultVPCpublicSubnet1RouteTableAssociation05801E1C"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/VPBankKMultVPC/publicSubnet1/NATGateway"
+   }
+  },
+  "VPBankKMultVPCpublicSubnet2SubnetC89D1A8C": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "us-east-1b",
+    "CidrBlock": "10.0.1.0/24",
+    "MapPublicIpOnLaunch": true,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "public"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Public"
+     },
+     {
+      "Key": "Name",
+      "Value": "VPBankKMultStack/VPBankKMultVPC/publicSubnet2"
+     }
+    ],
+    "VpcId": {
+     "Ref": "VPBankKMultVPCCA9EDDA9"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/VPBankKMultVPC/publicSubnet2/Subnet"
+   }
+  },
+  "VPBankKMultVPCpublicSubnet2RouteTableF2A02F5A": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "VPBankKMultStack/VPBankKMultVPC/publicSubnet2"
+     }
+    ],
+    "VpcId": {
+     "Ref": "VPBankKMultVPCCA9EDDA9"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/VPBankKMultVPC/publicSubnet2/RouteTable"
+   }
+  },
+  "VPBankKMultVPCpublicSubnet2RouteTableAssociationE6530636": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "VPBankKMultVPCpublicSubnet2RouteTableF2A02F5A"
+    },
+    "SubnetId": {
+     "Ref": "VPBankKMultVPCpublicSubnet2SubnetC89D1A8C"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/VPBankKMultVPC/publicSubnet2/RouteTableAssociation"
+   }
+  },
+  "VPBankKMultVPCpublicSubnet2DefaultRouteA5E7F734": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "GatewayId": {
+     "Ref": "VPBankKMultVPCIGWC5A91FEF"
+    },
+    "RouteTableId": {
+     "Ref": "VPBankKMultVPCpublicSubnet2RouteTableF2A02F5A"
+    }
+   },
+   "DependsOn": [
+    "VPBankKMultVPCVPCGWEFFC7EC6"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/VPBankKMultVPC/publicSubnet2/DefaultRoute"
+   }
+  },
+  "VPBankKMultVPCprivateSubnet1Subnet8873A8CB": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "us-east-1a",
+    "CidrBlock": "10.0.2.0/24",
+    "MapPublicIpOnLaunch": false,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "private"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Private"
+     },
+     {
+      "Key": "Name",
+      "Value": "VPBankKMultStack/VPBankKMultVPC/privateSubnet1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "VPBankKMultVPCCA9EDDA9"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/VPBankKMultVPC/privateSubnet1/Subnet"
+   }
+  },
+  "VPBankKMultVPCprivateSubnet1RouteTableA23D346B": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "VPBankKMultStack/VPBankKMultVPC/privateSubnet1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "VPBankKMultVPCCA9EDDA9"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/VPBankKMultVPC/privateSubnet1/RouteTable"
+   }
+  },
+  "VPBankKMultVPCprivateSubnet1RouteTableAssociation00C2A325": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "VPBankKMultVPCprivateSubnet1RouteTableA23D346B"
+    },
+    "SubnetId": {
+     "Ref": "VPBankKMultVPCprivateSubnet1Subnet8873A8CB"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/VPBankKMultVPC/privateSubnet1/RouteTableAssociation"
+   }
+  },
+  "VPBankKMultVPCprivateSubnet1DefaultRoute8420ED5F": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "NatGatewayId": {
+     "Ref": "VPBankKMultVPCpublicSubnet1NATGateway82BCCDE3"
+    },
+    "RouteTableId": {
+     "Ref": "VPBankKMultVPCprivateSubnet1RouteTableA23D346B"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/VPBankKMultVPC/privateSubnet1/DefaultRoute"
+   }
+  },
+  "VPBankKMultVPCprivateSubnet2Subnet42937706": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "us-east-1b",
+    "CidrBlock": "10.0.3.0/24",
+    "MapPublicIpOnLaunch": false,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "private"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Private"
+     },
+     {
+      "Key": "Name",
+      "Value": "VPBankKMultStack/VPBankKMultVPC/privateSubnet2"
+     }
+    ],
+    "VpcId": {
+     "Ref": "VPBankKMultVPCCA9EDDA9"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/VPBankKMultVPC/privateSubnet2/Subnet"
+   }
+  },
+  "VPBankKMultVPCprivateSubnet2RouteTable4D649036": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "VPBankKMultStack/VPBankKMultVPC/privateSubnet2"
+     }
+    ],
+    "VpcId": {
+     "Ref": "VPBankKMultVPCCA9EDDA9"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/VPBankKMultVPC/privateSubnet2/RouteTable"
+   }
+  },
+  "VPBankKMultVPCprivateSubnet2RouteTableAssociation2F157B03": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "VPBankKMultVPCprivateSubnet2RouteTable4D649036"
+    },
+    "SubnetId": {
+     "Ref": "VPBankKMultVPCprivateSubnet2Subnet42937706"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/VPBankKMultVPC/privateSubnet2/RouteTableAssociation"
+   }
+  },
+  "VPBankKMultVPCprivateSubnet2DefaultRoute43CF8D9E": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "NatGatewayId": {
+     "Ref": "VPBankKMultVPCpublicSubnet1NATGateway82BCCDE3"
+    },
+    "RouteTableId": {
+     "Ref": "VPBankKMultVPCprivateSubnet2RouteTable4D649036"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/VPBankKMultVPC/privateSubnet2/DefaultRoute"
+   }
+  },
+  "VPBankKMultVPCIGWC5A91FEF": {
+   "Type": "AWS::EC2::InternetGateway",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "VPBankKMultStack/VPBankKMultVPC"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/VPBankKMultVPC/IGW"
+   }
+  },
+  "VPBankKMultVPCVPCGWEFFC7EC6": {
+   "Type": "AWS::EC2::VPCGatewayAttachment",
+   "Properties": {
+    "InternetGatewayId": {
+     "Ref": "VPBankKMultVPCIGWC5A91FEF"
+    },
+    "VpcId": {
+     "Ref": "VPBankKMultVPCCA9EDDA9"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/VPBankKMultVPC/VPCGW"
+   }
+  },
+  "VPBankKMultVPCRestrictDefaultSecurityGroupCustomResourceFF8E5836": {
+   "Type": "Custom::VpcRestrictDefaultSG",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "CustomVpcRestrictDefaultSGCustomResourceProviderHandlerDC833E5E",
+      "Arn"
+     ]
+    },
+    "DefaultSecurityGroupId": {
+     "Fn::GetAtt": [
+      "VPBankKMultVPCCA9EDDA9",
+      "DefaultSecurityGroup"
+     ]
+    },
+    "Account": "536697254280"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/VPBankKMultVPC/RestrictDefaultSecurityGroupCustomResource/Default"
+   }
+  },
+  "CustomVpcRestrictDefaultSGCustomResourceProviderRole26592FE0": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Version": "2012-10-17",
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ]
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+     }
+    ],
+    "Policies": [
+     {
+      "PolicyName": "Inline",
+      "PolicyDocument": {
+       "Version": "2012-10-17",
+       "Statement": [
+        {
+         "Effect": "Allow",
+         "Action": [
+          "ec2:AuthorizeSecurityGroupIngress",
+          "ec2:AuthorizeSecurityGroupEgress",
+          "ec2:RevokeSecurityGroupIngress",
+          "ec2:RevokeSecurityGroupEgress"
+         ],
+         "Resource": [
+          {
+           "Fn::Join": [
+            "",
+            [
+             "arn:aws:ec2:us-east-1:536697254280:security-group/",
+             {
+              "Fn::GetAtt": [
+               "VPBankKMultVPCCA9EDDA9",
+               "DefaultSecurityGroup"
+              ]
+             }
+            ]
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/Custom::VpcRestrictDefaultSGCustomResourceProvider/Role"
+   }
+  },
+  "CustomVpcRestrictDefaultSGCustomResourceProviderHandlerDC833E5E": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-536697254280-us-east-1",
+     "S3Key": "7f18a11296f35510ee16538afec983ed6312e12afbf81b777089a9f8e34e2474.zip"
+    },
+    "Timeout": 900,
+    "MemorySize": 128,
+    "Handler": "__entrypoint__.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "CustomVpcRestrictDefaultSGCustomResourceProviderRole26592FE0",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs18.x",
+    "Description": "Lambda function for removing all inbound/outbound rules from the VPC default security group"
+   },
+   "DependsOn": [
+    "CustomVpcRestrictDefaultSGCustomResourceProviderRole26592FE0"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/Custom::VpcRestrictDefaultSGCustomResourceProvider/Handler",
+    "aws:asset:path": "asset.7f18a11296f35510ee16538afec983ed6312e12afbf81b777089a9f8e34e2474",
+    "aws:asset:property": "Code"
+   }
+  },
+  "VPBankKMultDocuments8E603DA4": {
+   "Type": "AWS::S3::Bucket",
+   "Properties": {
+    "BucketEncryption": {
+     "ServerSideEncryptionConfiguration": [
+      {
+       "ServerSideEncryptionByDefault": {
+        "SSEAlgorithm": "AES256"
+       }
+      }
+     ]
+    },
+    "BucketName": "vpbank-kmult-documents-590183822512",
+    "LifecycleConfiguration": {
+     "Rules": [
+      {
+       "ExpirationInDays": 90,
+       "Id": "DeleteOldVersions",
+       "NoncurrentVersionExpiration": {
+        "NoncurrentDays": 30
+       },
+       "Status": "Enabled"
+      }
+     ]
+    },
+    "PublicAccessBlockConfiguration": {
+     "BlockPublicAcls": true,
+     "BlockPublicPolicy": true,
+     "IgnorePublicAcls": true,
+     "RestrictPublicBuckets": true
+    },
+    "VersioningConfiguration": {
+     "Status": "Enabled"
+    }
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/VPBankKMultDocuments/Resource"
+   }
+  },
+  "VPBankKMultFrontend56B3C68B": {
+   "Type": "AWS::S3::Bucket",
+   "Properties": {
+    "BucketName": "vpbank-kmult-frontend-590183822512",
+    "PublicAccessBlockConfiguration": {
+     "BlockPublicAcls": false,
+     "BlockPublicPolicy": false,
+     "IgnorePublicAcls": false,
+     "RestrictPublicBuckets": false
+    },
+    "WebsiteConfiguration": {
+     "ErrorDocument": "error.html",
+     "IndexDocument": "index.html"
+    }
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/VPBankKMultFrontend/Resource"
+   }
+  },
+  "VPBankKMultFrontendPolicyF747B357": {
+   "Type": "AWS::S3::BucketPolicy",
+   "Properties": {
+    "Bucket": {
+     "Ref": "VPBankKMultFrontend56B3C68B"
+    },
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "s3:GetObject",
+       "Effect": "Allow",
+       "Principal": {
+        "AWS": "*"
+       },
+       "Resource": {
+        "Fn::Join": [
+         "",
+         [
+          {
+           "Fn::GetAtt": [
+            "VPBankKMultFrontend56B3C68B",
+            "Arn"
+           ]
+          },
+          "/*"
+         ]
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/VPBankKMultFrontend/Policy/Resource"
+   }
+  },
+  "ConversationsTableCD91EB96": {
+   "Type": "AWS::DynamoDB::Table",
+   "Properties": {
+    "AttributeDefinitions": [
+     {
+      "AttributeName": "conversation_id",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "timestamp",
+      "AttributeType": "N"
+     }
+    ],
+    "BillingMode": "PAY_PER_REQUEST",
+    "KeySchema": [
+     {
+      "AttributeName": "conversation_id",
+      "KeyType": "HASH"
+     },
+     {
+      "AttributeName": "timestamp",
+      "KeyType": "RANGE"
+     }
+    ],
+    "PointInTimeRecoverySpecification": {
+     "PointInTimeRecoveryEnabled": true
+    },
+    "SSESpecification": {
+     "SSEEnabled": true
+    },
+    "TableName": "vpbank-kmult-conversations"
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/ConversationsTable/Resource"
+   }
+  },
+  "DocumentsTable7E808EE5": {
+   "Type": "AWS::DynamoDB::Table",
+   "Properties": {
+    "AttributeDefinitions": [
+     {
+      "AttributeName": "document_id",
+      "AttributeType": "S"
+     }
+    ],
+    "BillingMode": "PAY_PER_REQUEST",
+    "KeySchema": [
+     {
+      "AttributeName": "document_id",
+      "KeyType": "HASH"
+     }
+    ],
+    "PointInTimeRecoverySpecification": {
+     "PointInTimeRecoveryEnabled": true
+    },
+    "SSESpecification": {
+     "SSEEnabled": true
+    },
+    "TableName": "vpbank-kmult-documents"
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/DocumentsTable/Resource"
+   }
+  },
+  "RedisSubnetGroup": {
+   "Type": "AWS::ElastiCache::SubnetGroup",
+   "Properties": {
+    "Description": "Subnet group for Redis cluster",
+    "SubnetIds": [
+     {
+      "Ref": "VPBankKMultVPCprivateSubnet1Subnet8873A8CB"
+     },
+     {
+      "Ref": "VPBankKMultVPCprivateSubnet2Subnet42937706"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/RedisSubnetGroup"
+   }
+  },
+  "RedisSecurityGroupB05951F6": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "Security group for Redis cluster",
+    "SecurityGroupEgress": [
+     {
+      "CidrIp": "255.255.255.255/32",
+      "Description": "Disallow all traffic",
+      "FromPort": 252,
+      "IpProtocol": "icmp",
+      "ToPort": 86
+     }
+    ],
+    "SecurityGroupIngress": [
+     {
+      "Description": "Allow ECS to access Redis",
+      "FromPort": 6379,
+      "IpProtocol": "tcp",
+      "SourceSecurityGroupId": {
+       "Fn::GetAtt": [
+        "BackendServiceSecurityGroup7599F85E",
+        "GroupId"
+       ]
+      },
+      "ToPort": 6379
+     }
+    ],
+    "VpcId": {
+     "Ref": "VPBankKMultVPCCA9EDDA9"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/RedisSecurityGroup/Resource"
+   }
+  },
+  "RedisCluster": {
+   "Type": "AWS::ElastiCache::CacheCluster",
+   "Properties": {
+    "CacheNodeType": "cache.t3.micro",
+    "CacheSubnetGroupName": {
+     "Ref": "RedisSubnetGroup"
+    },
+    "Engine": "redis",
+    "NumCacheNodes": 1,
+    "VpcSecurityGroupIds": [
+     {
+      "Fn::GetAtt": [
+       "RedisSecurityGroupB05951F6",
+       "GroupId"
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/RedisCluster"
+   }
+  },
+  "BackendRepository9B711290": {
+   "Type": "AWS::ECR::Repository",
+   "Properties": {
+    "ImageScanningConfiguration": {
+     "ScanOnPush": true
+    },
+    "LifecyclePolicy": {
+     "LifecyclePolicyText": "{\"rules\":[{\"rulePriority\":1,\"selection\":{\"tagStatus\":\"untagged\",\"countType\":\"imageCountMoreThan\",\"countNumber\":10},\"action\":{\"type\":\"expire\"}}]}"
+    },
+    "RepositoryName": "vpbank-kmult-backend"
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/BackendRepository/Resource"
+   }
+  },
+  "VPBankKMultCluster90EBD85E": {
+   "Type": "AWS::ECS::Cluster",
+   "Properties": {
+    "ClusterName": "vpbank-kmult-cluster",
+    "ClusterSettings": [
+     {
+      "Name": "containerInsights",
+      "Value": "enabled"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/VPBankKMultCluster/Resource"
+   }
+  },
+  "ECSTaskRoleF2ADB362": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+       ]
+      ]
+     }
+    ],
+    "Policies": [
+     {
+      "PolicyDocument": {
+       "Statement": [
+        {
+         "Action": [
+          "bedrock:InvokeModel",
+          "bedrock:InvokeModelWithResponseStream"
+         ],
+         "Effect": "Allow",
+         "Resource": "*"
+        }
+       ],
+       "Version": "2012-10-17"
+      },
+      "PolicyName": "BedrockAccess"
+     },
+     {
+      "PolicyDocument": {
+       "Statement": [
+        {
+         "Action": [
+          "s3:DeleteObject",
+          "s3:GetObject",
+          "s3:PutObject"
+         ],
+         "Effect": "Allow",
+         "Resource": [
+          {
+           "Fn::GetAtt": [
+            "VPBankKMultDocuments8E603DA4",
+            "Arn"
+           ]
+          },
+          {
+           "Fn::Join": [
+            "",
+            [
+             {
+              "Fn::GetAtt": [
+               "VPBankKMultDocuments8E603DA4",
+               "Arn"
+              ]
+             },
+             "/*"
+            ]
+           ]
+          }
+         ]
+        }
+       ],
+       "Version": "2012-10-17"
+      },
+      "PolicyName": "S3Access"
+     },
+     {
+      "PolicyDocument": {
+       "Statement": [
+        {
+         "Action": [
+          "dynamodb:DeleteItem",
+          "dynamodb:GetItem",
+          "dynamodb:PutItem",
+          "dynamodb:Query",
+          "dynamodb:Scan",
+          "dynamodb:UpdateItem"
+         ],
+         "Effect": "Allow",
+         "Resource": [
+          {
+           "Fn::GetAtt": [
+            "ConversationsTableCD91EB96",
+            "Arn"
+           ]
+          },
+          {
+           "Fn::GetAtt": [
+            "DocumentsTable7E808EE5",
+            "Arn"
+           ]
+          }
+         ]
+        }
+       ],
+       "Version": "2012-10-17"
+      },
+      "PolicyName": "DynamoDBAccess"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/ECSTaskRole/Resource"
+   }
+  },
+  "AppSecretsA1997F2A": {
+   "Type": "AWS::SecretsManager::Secret",
+   "Properties": {
+    "Description": "Application secrets for VPBank K-MULT",
+    "GenerateSecretString": {
+     "ExcludeCharacters": "\"@/\\",
+     "GenerateStringKey": "password",
+     "SecretStringTemplate": {
+      "Fn::Join": [
+       "",
+       [
+        "{\"AWS_REGION\":\"us-east-1\",\"AWS_BEDROCK_REGION\":\"us-east-1\",\"REDIS_HOST\":\"",
+        {
+         "Fn::GetAtt": [
+          "RedisCluster",
+          "RedisEndpoint.Address"
+         ]
+        },
+        "\",\"REDIS_PORT\":\"",
+        {
+         "Fn::GetAtt": [
+          "RedisCluster",
+          "RedisEndpoint.Port"
+         ]
+        },
+        "\",\"DOCUMENTS_BUCKET\":\"",
+        {
+         "Ref": "VPBankKMultDocuments8E603DA4"
+        },
+        "\",\"CONVERSATIONS_TABLE\":\"",
+        {
+         "Ref": "ConversationsTableCD91EB96"
+        },
+        "\",\"DOCUMENTS_TABLE\":\"",
+        {
+         "Ref": "DocumentsTable7E808EE5"
+        },
+        "\"}"
+       ]
+      ]
+     }
+    },
+    "Name": "vpbank-kmult/app-secrets"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/AppSecrets/Resource"
+   }
+  },
+  "BackendServiceLB09608E98": {
+   "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+   "Properties": {
+    "LoadBalancerAttributes": [
+     {
+      "Key": "deletion_protection.enabled",
+      "Value": "false"
+     }
+    ],
+    "Scheme": "internet-facing",
+    "SecurityGroups": [
+     {
+      "Fn::GetAtt": [
+       "BackendServiceLBSecurityGroup2B9BA648",
+       "GroupId"
+      ]
+     }
+    ],
+    "Subnets": [
+     {
+      "Ref": "VPBankKMultVPCpublicSubnet1Subnet4DEA220B"
+     },
+     {
+      "Ref": "VPBankKMultVPCpublicSubnet2SubnetC89D1A8C"
+     }
+    ],
+    "Type": "application"
+   },
+   "DependsOn": [
+    "VPBankKMultVPCpublicSubnet1DefaultRoute39020C01",
+    "VPBankKMultVPCpublicSubnet1RouteTableAssociation05801E1C",
+    "VPBankKMultVPCpublicSubnet2DefaultRouteA5E7F734",
+    "VPBankKMultVPCpublicSubnet2RouteTableAssociationE6530636"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/BackendService/LB/Resource"
+   }
+  },
+  "BackendServiceLBSecurityGroup2B9BA648": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "Automatically created Security Group for ELB VPBankKMultStackBackendServiceLB67F51309",
+    "SecurityGroupIngress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow from anyone on port 80",
+      "FromPort": 80,
+      "IpProtocol": "tcp",
+      "ToPort": 80
+     }
+    ],
+    "VpcId": {
+     "Ref": "VPBankKMultVPCCA9EDDA9"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/BackendService/LB/SecurityGroup/Resource"
+   }
+  },
+  "BackendServiceLBSecurityGrouptoVPBankKMultStackBackendServiceSecurityGroup5EF3A95380809C19FBF1": {
+   "Type": "AWS::EC2::SecurityGroupEgress",
+   "Properties": {
+    "Description": "Load balancer to target",
+    "DestinationSecurityGroupId": {
+     "Fn::GetAtt": [
+      "BackendServiceSecurityGroup7599F85E",
+      "GroupId"
+     ]
+    },
+    "FromPort": 8080,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "BackendServiceLBSecurityGroup2B9BA648",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "ToPort": 8080
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/BackendService/LB/SecurityGroup/to VPBankKMultStackBackendServiceSecurityGroup5EF3A953:8080"
+   }
+  },
+  "BackendServiceLBPublicListener2FA7FC98": {
+   "Type": "AWS::ElasticLoadBalancingV2::Listener",
+   "Properties": {
+    "DefaultActions": [
+     {
+      "TargetGroupArn": {
+       "Ref": "BackendServiceLBPublicListenerECSGroupD43CD2AB"
+      },
+      "Type": "forward"
+     }
+    ],
+    "LoadBalancerArn": {
+     "Ref": "BackendServiceLB09608E98"
+    },
+    "Port": 80,
+    "Protocol": "HTTP"
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/BackendService/LB/PublicListener/Resource"
+   }
+  },
+  "BackendServiceLBPublicListenerECSGroupD43CD2AB": {
+   "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+   "Properties": {
+    "Port": 80,
+    "Protocol": "HTTP",
+    "TargetGroupAttributes": [
+     {
+      "Key": "stickiness.enabled",
+      "Value": "false"
+     }
+    ],
+    "TargetType": "ip",
+    "VpcId": {
+     "Ref": "VPBankKMultVPCCA9EDDA9"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/BackendService/LB/PublicListener/ECSGroup/Resource"
+   }
+  },
+  "BackendServiceTaskDefTaskRoleD63B95BB": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/BackendService/TaskDef/TaskRole/Resource"
+   }
+  },
+  "BackendServiceTaskDefTaskRoleDefaultPolicy3BCDB2C6": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "bedrock:InvokeModel",
+        "bedrock:InvokeModelWithResponseStream"
+       ],
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": [
+        "s3:DeleteObject",
+        "s3:GetObject",
+        "s3:PutObject"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "VPBankKMultDocuments8E603DA4",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "VPBankKMultDocuments8E603DA4",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": [
+        "dynamodb:DeleteItem",
+        "dynamodb:GetItem",
+        "dynamodb:PutItem",
+        "dynamodb:Query",
+        "dynamodb:Scan",
+        "dynamodb:UpdateItem"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "ConversationsTableCD91EB96",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::GetAtt": [
+          "DocumentsTable7E808EE5",
+          "Arn"
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "BackendServiceTaskDefTaskRoleDefaultPolicy3BCDB2C6",
+    "Roles": [
+     {
+      "Ref": "BackendServiceTaskDefTaskRoleD63B95BB"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/BackendService/TaskDef/TaskRole/DefaultPolicy/Resource"
+   }
+  },
+  "BackendServiceTaskDef9F97F56B": {
+   "Type": "AWS::ECS::TaskDefinition",
+   "Properties": {
+    "ContainerDefinitions": [
+     {
+      "Environment": [
+       {
+        "Name": "ENVIRONMENT",
+        "Value": "production"
+       },
+       {
+        "Name": "AWS_DEFAULT_REGION",
+        "Value": "us-east-1"
+       }
+      ],
+      "Essential": true,
+      "Image": {
+       "Fn::Join": [
+        "",
+        [
+         {
+          "Fn::Select": [
+           4,
+           {
+            "Fn::Split": [
+             ":",
+             {
+              "Fn::GetAtt": [
+               "BackendRepository9B711290",
+               "Arn"
+              ]
+             }
+            ]
+           }
+          ]
+         },
+         ".dkr.ecr.",
+         {
+          "Fn::Select": [
+           3,
+           {
+            "Fn::Split": [
+             ":",
+             {
+              "Fn::GetAtt": [
+               "BackendRepository9B711290",
+               "Arn"
+              ]
+             }
+            ]
+           }
+          ]
+         },
+         ".",
+         {
+          "Ref": "AWS::URLSuffix"
+         },
+         "/",
+         {
+          "Ref": "BackendRepository9B711290"
+         },
+         ":latest"
+        ]
+       ]
+      },
+      "LogConfiguration": {
+       "LogDriver": "awslogs",
+       "Options": {
+        "awslogs-group": {
+         "Ref": "BackendServiceTaskDefwebLogGroup614D1BFF"
+        },
+        "awslogs-stream-prefix": "vpbank-kmult-backend",
+        "awslogs-region": "us-east-1"
+       }
+      },
+      "Name": "web",
+      "PortMappings": [
+       {
+        "ContainerPort": 8080,
+        "Protocol": "tcp"
+       }
+      ],
+      "Secrets": [
+       {
+        "Name": "APP_SECRETS",
+        "ValueFrom": {
+         "Ref": "AppSecretsA1997F2A"
+        }
+       }
+      ]
+     }
+    ],
+    "Cpu": "1024",
+    "ExecutionRoleArn": {
+     "Fn::GetAtt": [
+      "BackendServiceTaskDefExecutionRole15BE46B5",
+      "Arn"
+     ]
+    },
+    "Family": "VPBankKMultStackBackendServiceTaskDef5AD716F9",
+    "Memory": "2048",
+    "NetworkMode": "awsvpc",
+    "RequiresCompatibilities": [
+     "FARGATE"
+    ],
+    "TaskRoleArn": {
+     "Fn::GetAtt": [
+      "BackendServiceTaskDefTaskRoleD63B95BB",
+      "Arn"
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/BackendService/TaskDef/Resource"
+   }
+  },
+  "BackendServiceTaskDefwebLogGroup614D1BFF": {
+   "Type": "AWS::Logs::LogGroup",
+   "Properties": {
+    "RetentionInDays": 7
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/BackendService/TaskDef/web/LogGroup/Resource"
+   }
+  },
+  "BackendServiceTaskDefExecutionRole15BE46B5": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/BackendService/TaskDef/ExecutionRole/Resource"
+   }
+  },
+  "BackendServiceTaskDefExecutionRoleDefaultPolicyDFB9BC56": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:BatchGetImage",
+        "ecr:GetDownloadUrlForLayer"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "BackendRepository9B711290",
+         "Arn"
+        ]
+       }
+      },
+      {
+       "Action": "ecr:GetAuthorizationToken",
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": [
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "BackendServiceTaskDefwebLogGroup614D1BFF",
+         "Arn"
+        ]
+       }
+      },
+      {
+       "Action": [
+        "secretsmanager:DescribeSecret",
+        "secretsmanager:GetSecretValue"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Ref": "AppSecretsA1997F2A"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "BackendServiceTaskDefExecutionRoleDefaultPolicyDFB9BC56",
+    "Roles": [
+     {
+      "Ref": "BackendServiceTaskDefExecutionRole15BE46B5"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/BackendService/TaskDef/ExecutionRole/DefaultPolicy/Resource"
+   }
+  },
+  "BackendService2147DAF9": {
+   "Type": "AWS::ECS::Service",
+   "Properties": {
+    "Cluster": {
+     "Ref": "VPBankKMultCluster90EBD85E"
+    },
+    "DeploymentConfiguration": {
+     "Alarms": {
+      "AlarmNames": [],
+      "Enable": false,
+      "Rollback": false
+     },
+     "MaximumPercent": 200,
+     "MinimumHealthyPercent": 50
+    },
+    "DesiredCount": 2,
+    "EnableECSManagedTags": false,
+    "HealthCheckGracePeriodSeconds": 60,
+    "LaunchType": "FARGATE",
+    "LoadBalancers": [
+     {
+      "ContainerName": "web",
+      "ContainerPort": 8080,
+      "TargetGroupArn": {
+       "Ref": "BackendServiceLBPublicListenerECSGroupD43CD2AB"
+      }
+     }
+    ],
+    "NetworkConfiguration": {
+     "AwsvpcConfiguration": {
+      "AssignPublicIp": "DISABLED",
+      "SecurityGroups": [
+       {
+        "Fn::GetAtt": [
+         "BackendServiceSecurityGroup7599F85E",
+         "GroupId"
+        ]
+       }
+      ],
+      "Subnets": [
+       {
+        "Ref": "VPBankKMultVPCprivateSubnet1Subnet8873A8CB"
+       },
+       {
+        "Ref": "VPBankKMultVPCprivateSubnet2Subnet42937706"
+       }
+      ]
+     }
+    },
+    "ServiceName": "vpbank-kmult-backend",
+    "TaskDefinition": {
+     "Ref": "BackendServiceTaskDef9F97F56B"
+    }
+   },
+   "DependsOn": [
+    "BackendServiceLBPublicListenerECSGroupD43CD2AB",
+    "BackendServiceLBPublicListener2FA7FC98",
+    "BackendServiceTaskDefTaskRoleDefaultPolicy3BCDB2C6",
+    "BackendServiceTaskDefTaskRoleD63B95BB"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/BackendService/Service/Service"
+   }
+  },
+  "BackendServiceSecurityGroup7599F85E": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "VPBankKMultStack/BackendService/Service/SecurityGroup",
+    "SecurityGroupEgress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow all outbound traffic by default",
+      "IpProtocol": "-1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "VPBankKMultVPCCA9EDDA9"
+    }
+   },
+   "DependsOn": [
+    "BackendServiceTaskDefTaskRoleDefaultPolicy3BCDB2C6",
+    "BackendServiceTaskDefTaskRoleD63B95BB"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/BackendService/Service/SecurityGroup/Resource"
+   }
+  },
+  "BackendServiceSecurityGroupfromVPBankKMultStackBackendServiceLBSecurityGroup80C36610808015C2A6F2": {
+   "Type": "AWS::EC2::SecurityGroupIngress",
+   "Properties": {
+    "Description": "Load balancer to target",
+    "FromPort": 8080,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "BackendServiceSecurityGroup7599F85E",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "SourceSecurityGroupId": {
+     "Fn::GetAtt": [
+      "BackendServiceLBSecurityGroup2B9BA648",
+      "GroupId"
+     ]
+    },
+    "ToPort": 8080
+   },
+   "DependsOn": [
+    "BackendServiceTaskDefTaskRoleDefaultPolicy3BCDB2C6",
+    "BackendServiceTaskDefTaskRoleD63B95BB"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/BackendService/Service/SecurityGroup/from VPBankKMultStackBackendServiceLBSecurityGroup80C36610:8080"
+   }
+  },
+  "BackendServiceTaskCountTarget2134EDB2": {
+   "Type": "AWS::ApplicationAutoScaling::ScalableTarget",
+   "Properties": {
+    "MaxCapacity": 10,
+    "MinCapacity": 1,
+    "ResourceId": {
+     "Fn::Join": [
+      "",
+      [
+       "service/",
+       {
+        "Ref": "VPBankKMultCluster90EBD85E"
+       },
+       "/",
+       {
+        "Fn::GetAtt": [
+         "BackendService2147DAF9",
+         "Name"
+        ]
+       }
+      ]
+     ]
+    },
+    "RoleARN": "arn:aws:iam::536697254280:role/aws-service-role/ecs.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_ECSService",
+    "ScalableDimension": "ecs:service:DesiredCount",
+    "ServiceNamespace": "ecs"
+   },
+   "DependsOn": [
+    "BackendServiceTaskDefTaskRoleDefaultPolicy3BCDB2C6",
+    "BackendServiceTaskDefTaskRoleD63B95BB"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/BackendService/Service/TaskCount/Target/Resource"
+   }
+  },
+  "BackendServiceTaskCountTargetCpuScalingB44CAB95": {
+   "Type": "AWS::ApplicationAutoScaling::ScalingPolicy",
+   "Properties": {
+    "PolicyName": "VPBankKMultStackBackendServiceTaskCountTargetCpuScalingEBA66F52",
+    "PolicyType": "TargetTrackingScaling",
+    "ScalingTargetId": {
+     "Ref": "BackendServiceTaskCountTarget2134EDB2"
+    },
+    "TargetTrackingScalingPolicyConfiguration": {
+     "PredefinedMetricSpecification": {
+      "PredefinedMetricType": "ECSServiceAverageCPUUtilization"
+     },
+     "ScaleInCooldown": 300,
+     "ScaleOutCooldown": 120,
+     "TargetValue": 70
+    }
+   },
+   "DependsOn": [
+    "BackendServiceTaskDefTaskRoleDefaultPolicy3BCDB2C6",
+    "BackendServiceTaskDefTaskRoleD63B95BB"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/BackendService/Service/TaskCount/Target/CpuScaling/Resource"
+   }
+  },
+  "BackendServiceTaskCountTargetMemoryScalingBB00C473": {
+   "Type": "AWS::ApplicationAutoScaling::ScalingPolicy",
+   "Properties": {
+    "PolicyName": "VPBankKMultStackBackendServiceTaskCountTargetMemoryScalingD687CC51",
+    "PolicyType": "TargetTrackingScaling",
+    "ScalingTargetId": {
+     "Ref": "BackendServiceTaskCountTarget2134EDB2"
+    },
+    "TargetTrackingScalingPolicyConfiguration": {
+     "PredefinedMetricSpecification": {
+      "PredefinedMetricType": "ECSServiceAverageMemoryUtilization"
+     },
+     "ScaleInCooldown": 300,
+     "ScaleOutCooldown": 120,
+     "TargetValue": 80
+    }
+   },
+   "DependsOn": [
+    "BackendServiceTaskDefTaskRoleDefaultPolicy3BCDB2C6",
+    "BackendServiceTaskDefTaskRoleD63B95BB"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/BackendService/Service/TaskCount/Target/MemoryScaling/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/31Ty27bMBD8ltxp1k4u7dFR08BAkAqWkWtAURuVsUQKfCgwBP17l6QkymnQE2dnH9ydJW/pbrul2xv2YTa8Om8aUdKhsIyfCVKvA/BbOrx0nGRv8iXPSO7KRvDClRKs5xI6KmfhxMoGEp+4vTGKC2aFkkuwBw+H3B/PzD4yCx/sQnIteoSp8EFa0IjngNjJZO0t9vqnBWlJAdxpYS+PWrku9PBf4qHWYMw/9EEGfiTmjg73jp9jExOKR65Qg0uioz2S6iJZqypUcNEhgJFAw4wVHFsFOizyLI1l3pE1zuCkGMw1HY7QKSOs0uGeZHm3wRoxOCRP8BfTNfNym/NPeBNSzGJ/ZpS0TEjQK27KLUD3gscFTrDgrPEz+CKZctKORLAW+1NxwHAmQWYpDA4B1rRMshpwnCLYk9qIwhivHbN+t4buuw7zwvN4Uqy6xzslh+pTW5OKDUaUIULIusf3+XV2EOfKXscJ1ExOMTNe+U9482pBK3MkjapxA0+qXtwzHglLJZizyqB62CTOv8joCwUdrpl4nDT+PEwoYl7S9YoYR3IEo5z2q8LlqzaZ/q186cq16kXlpzQGLH7xGuv5+N/Odg4XIlUF9N1863ff6e4H3d28GyE2GlcuWqDHeP4FlzxvnzAEAAA="
+   },
+   "Metadata": {
+    "aws:cdk:path": "VPBankKMultStack/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "BackendServiceLoadBalancerDNSE742582D": {
+   "Value": {
+    "Fn::GetAtt": [
+     "BackendServiceLB09608E98",
+     "DNSName"
+    ]
+   }
+  },
+  "BackendServiceServiceURLB1770053": {
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "http://",
+      {
+       "Fn::GetAtt": [
+        "BackendServiceLB09608E98",
+        "DNSName"
+       ]
+      }
+     ]
+    ]
+   }
+  },
+  "BackendURL": {
+   "Description": "Backend API URL",
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "http://",
+      {
+       "Fn::GetAtt": [
+        "BackendServiceLB09608E98",
+        "DNSName"
+       ]
+      }
+     ]
+    ]
+   }
+  },
+  "FrontendBucket": {
+   "Description": "Frontend S3 Bucket",
+   "Value": {
+    "Ref": "VPBankKMultFrontend56B3C68B"
+   }
+  },
+  "DocumentsBucket": {
+   "Description": "Documents S3 Bucket",
+   "Value": {
+    "Ref": "VPBankKMultDocuments8E603DA4"
+   }
+  },
+  "ECRRepository": {
+   "Description": "ECR Repository URI",
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      {
+       "Fn::Select": [
+        4,
+        {
+         "Fn::Split": [
+          ":",
+          {
+           "Fn::GetAtt": [
+            "BackendRepository9B711290",
+            "Arn"
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      ".dkr.ecr.",
+      {
+       "Fn::Select": [
+        3,
+        {
+         "Fn::Split": [
+          ":",
+          {
+           "Fn::GetAtt": [
+            "BackendRepository9B711290",
+            "Arn"
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      ".",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/",
+      {
+       "Ref": "BackendRepository9B711290"
+      }
+     ]
+    ]
+   }
+  },
+  "ExportsOutputFnGetAttBackendRepository9B711290Arn1306B815": {
+   "Value": {
+    "Fn::GetAtt": [
+     "BackendRepository9B711290",
+     "Arn"
+    ]
+   },
+   "Export": {
+    "Name": "VPBankKMultStack:ExportsOutputFnGetAttBackendRepository9B711290Arn1306B815"
+   }
+  },
+  "ExportsOutputRefBackendRepository9B711290218DBB68": {
+   "Value": {
+    "Ref": "BackendRepository9B711290"
+   },
+   "Export": {
+    "Name": "VPBankKMultStack:ExportsOutputRefBackendRepository9B711290218DBB68"
+   }
+  },
+  "ExportsOutputFnGetAttVPBankKMultFrontend56B3C68BArnA3B84230": {
+   "Value": {
+    "Fn::GetAtt": [
+     "VPBankKMultFrontend56B3C68B",
+     "Arn"
+    ]
+   },
+   "Export": {
+    "Name": "VPBankKMultStack:ExportsOutputFnGetAttVPBankKMultFrontend56B3C68BArnA3B84230"
+   }
+  },
+  "ExportsOutputRefVPBankKMultFrontend56B3C68B9D942812": {
+   "Value": {
+    "Ref": "VPBankKMultFrontend56B3C68B"
+   },
+   "Export": {
+    "Name": "VPBankKMultStack:ExportsOutputRefVPBankKMultFrontend56B3C68B9D942812"
+   }
+  },
+  "ExportsOutputRefVPBankKMultCluster90EBD85EDF2872AB": {
+   "Value": {
+    "Ref": "VPBankKMultCluster90EBD85E"
+   },
+   "Export": {
+    "Name": "VPBankKMultStack:ExportsOutputRefVPBankKMultCluster90EBD85EDF2872AB"
+   }
+  },
+  "ExportsOutputFnGetAttBackendService2147DAF9NameA2E933C2": {
+   "Value": {
+    "Fn::GetAtt": [
+     "BackendService2147DAF9",
+     "Name"
+    ]
+   },
+   "Export": {
+    "Name": "VPBankKMultStack:ExportsOutputFnGetAttBackendService2147DAF9NameA2E933C2"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

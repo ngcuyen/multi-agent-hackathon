@@ -1,0 +1,34 @@
+{
+  "version": "34.0.0",
+  "files": {
+    "7f18a11296f35510ee16538afec983ed6312e12afbf81b777089a9f8e34e2474": {
+      "source": {
+        "path": "asset.7f18a11296f35510ee16538afec983ed6312e12afbf81b777089a9f8e34e2474",
+        "packaging": "zip"
+      },
+      "destinations": {
+        "590183822512-us-east-1": {
+          "bucketName": "cdk-hnb659fds-assets-590183822512-us-east-1",
+          "objectKey": "7f18a11296f35510ee16538afec983ed6312e12afbf81b777089a9f8e34e2474.zip",
+          "region": "us-east-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::590183822512:role/cdk-hnb659fds-file-publishing-role-590183822512-us-east-1"
+        }
+      }
+    },
+    "b527bf2a9831a0efab8ef2c5862b15c69c0bb73d9eeaf43a6022252e567b871f": {
+      "source": {
+        "path": "SimpleVPBankStack.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "590183822512-us-east-1": {
+          "bucketName": "cdk-hnb659fds-assets-590183822512-us-east-1",
+          "objectKey": "b527bf2a9831a0efab8ef2c5862b15c69c0bb73d9eeaf43a6022252e567b871f.json",
+          "region": "us-east-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::590183822512:role/cdk-hnb659fds-file-publishing-role-590183822512-us-east-1"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

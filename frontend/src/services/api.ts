@@ -1,8 +1,15 @@
 // API Service for Multi-Agent AI Risk Assessment System
-// Updated to match actual backend endpoints
+// Updated for AWS Production Deployment
 
-// Use proxy for both development and production
-export const API_BASE_URL = `http://localhost:8080`; // Always use relative URL to leverage proxy
+// Production AWS URLs
+const PRODUCTION_API_URL = 'http://VPBank-Backe-YzuYPJrF9vGD-169276357.us-east-1.elb.amazonaws.com';
+const DEVELOPMENT_API_URL = 'http://localhost:8080';
+
+// Determine API base URL based on environment
+export const API_BASE_URL = process.env.NODE_ENV === 'production' 
+  ? PRODUCTION_API_URL 
+  : process.env.REACT_APP_API_BASE_URL || DEVELOPMENT_API_URL;
+
 export const API_PREFIX = '/mutil_agent/api/v1'; // Backend API path
 export const PUBLIC_PREFIX = '/mutil_agent/public/api/v1'; // Backend public API path
 
@@ -443,3 +450,10 @@ export const complianceAPI = {
     return await response.json();
   },
 };
+
+// Compliance API interface for backward compatibility
+export interface ComplianceValidationRequest {
+  text: string;
+  document_type?: string;
+  compliance_standards?: string[];
+}

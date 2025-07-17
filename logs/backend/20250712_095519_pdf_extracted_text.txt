@@ -1,0 +1,12 @@
+================================================================================
+EXTRACTED TEXT - 2025-07-12 09:55:19
+Extraction Method: PyPDF2 text extraction
+================================================================================
+
+Tổng Công ty Dịch vụ Viễn thông - VNPT Vinaphone. Trung tâm kinh doanh VNPT-Bình Dương, MST: 0106869738-068, Điện thoại: 0274.3840860 Vui lòng tra cứu thông tin hóa đơn điện tử tại: https://2300278842-tt78.vnpt-invoice.com.vn . Mã tra cứu: 159171001C25TNM1417587443 37.194.300 Thuế suất thuế GTGT (VAT rate) : 8% 2.975.544 40.169.844 Số tiền viết bằng chữ (Amount in words) : Bốn mươi triệu một trăm sáu mươi chín ngàn tám trăm bốn mươi bốn đồng STT (No.) Tên hàng hóa, dịch vụ (Description) Đơn vị tính (Unit) Số lượng (Quantity) Đơn giá (Unit Price) Thành tiền (Amount) 1 2 3 4 5 6=4x5 1 Un-giấy cuộn phở 3 miền gold gà 75g cuộn 22,00 1.690.650 37.194.300 . PO : 4100010522.... ngày : 03/03/25 Cộng tiền hàng (Total amount) : Tiền thuế GTGT (VAT amount): Tổng Cộng tiền thanh toán (Total payment) : HÓA ĐƠN GIÁ TRỊ GIA TĂNG (VAT INVOICE) Ngày (Date) 08 tháng (month) 07 năm (year) 2025 Mã của cơ quan thuế: 000F8D1590EFEC4232BB311873C05A29A7 Ký hiệu (Series) : 1C25TNM Số (No) : 00001417 Đơn vị bán hàng (Issued) : CÔNG TY TNHH BAO BÌ NM VIỆT NAM Mã số thuế (VAT code) : 2300278842 Địa chỉ (Address) : Số 2, Đường TS6, Khu công nghiệp Tiên Sơn, Xã Tiên Du, Tỉnh Bắc Ninh, Việt Nam Điện thoại (Tel) : 0222 3714 748 Fax: 0222 3714 749 Số tài khoản (A/C No) : VND-0351 0000 85984 tại Ngân hàng TMCP Ngoại thương Việt Nam (Vietcombank) - Chi nhánh Kinh Bắc Họ tên người mua hàng (Customer's name) : Tên đơn vị (Company's name) : CHI NHÁNH CÔNG TY CỔ PHẦN UNIBEN TẠI HƯNG YÊN Mã số thuế (VAT code) : 0301442989-006 Địa chỉ (Address) : KCN Phố Nối A mở rộng, Xã Lạc Ðạo, Tỉnh Hưng Yên, Việt Nam Hình thức thanh toán (Payment method) : Chuyển khoản Số tài khoản (AC No) : Signature Valid Ký bởi: CÔNG TY TNHH BAO BÌ NM VIỆT NAM Ký ngày: 08/07/2025 13:22:39 Người mua hàng (Buyer) Người bán hàng (Seller) (Ký, ghi rõ họ tên) (Ký, ghi rõ họ, tên) (Sign,full name) (Sign, full name)
+
+================================================================================
+Total characters: 1877
+Total words: 351
+Extraction method: PyPDF2 text extraction
+================================================================================

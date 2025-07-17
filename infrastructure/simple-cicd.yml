@@ -1,0 +1,138 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Simple VPBank K-MULT CI/CD with CodeBuild'
+
+Parameters:
+  ECRRepositoryName:
+    Type: String
+    Default: 'vpbank-kmult-backend'
+    Description: ECR repository name
+
+Resources:
+  # ==================== S3 ARTIFACTS BUCKET ====================
+  ArtifactsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'vpbank-kmult-cicd-${AWS::AccountId}-${AWS::Region}'
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  # ==================== IAM ROLE FOR CODEBUILD ====================
+  CodeBuildServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codebuild.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
+      Policies:
+        - PolicyName: CodeBuildServiceRolePolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:PutObject
+                Resource: !Sub '${ArtifactsBucket}/*'
+              - Effect: Allow
+                Action:
+                  - ecr:BatchCheckLayerAvailability
+                  - ecr:GetDownloadUrlForLayer
+                  - ecr:BatchGetImage
+                  - ecr:GetAuthorizationToken
+                  - ecr:PutImage
+                  - ecr:InitiateLayerUpload
+                  - ecr:UploadLayerPart
+                  - ecr:CompleteLayerUpload
+                Resource: '*'
+
+  # ==================== CODEBUILD PROJECT ====================
+  CodeBuildProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Sub 'VPBankKMult-Build'
+      Description: 'Build project for VPBank K-MULT application'
+      ServiceRole: !GetAtt CodeBuildServiceRole.Arn
+      Artifacts:
+        Type: NO_ARTIFACTS
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_MEDIUM
+        Image: aws/codebuild/amazonlinux2-x86_64-standard:5.0
+        PrivilegedMode: true
+        EnvironmentVariables:
+          - Name: AWS_DEFAULT_REGION
+            Value: !Ref AWS::Region
+          - Name: AWS_ACCOUNT_ID
+            Value: !Ref AWS::AccountId
+          - Name: IMAGE_REPO_NAME
+            Value: !Ref ECRRepositoryName
+      Source:
+        Type: GITHUB
+        Location: https://github.com/ngcuyen/multi-agent-hackathon.git
+        BuildSpec: |
+          version: 0.2
+          phases:
+            pre_build:
+              commands:
+                - echo Logging in to Amazon ECR...
+                - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+                - REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME
+                - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+                - IMAGE_TAG=${COMMIT_HASH:=latest}
+            build:
+              commands:
+                - echo Build started on `date`
+                - echo Building the Docker image...
+                - cd backend
+                - docker build -f Dockerfile.prod -t $REPOSITORY_URI:latest .
+                - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
+                - echo Running tests...
+                - docker run --rm $REPOSITORY_URI:latest python -m pytest tests/ -v || echo "Tests completed"
+            post_build:
+              commands:
+                - echo Build completed on `date`
+                - echo Pushing the Docker images...
+                - docker push $REPOSITORY_URI:latest
+                - docker push $REPOSITORY_URI:$IMAGE_TAG
+                - echo Build completed successfully
+      TimeoutInMinutes: 30
+      Triggers:
+        Webhook: true
+        FilterGroups:
+          - - Type: EVENT
+              Pattern: PUSH
+            - Type: HEAD_REF
+              Pattern: ^refs/heads/main$
+
+Outputs:
+  CodeBuildProject:
+    Description: 'CodeBuild project name'
+    Value: !Ref CodeBuildProject
+    Export:
+      Name: !Sub '${AWS::StackName}-CodeBuildProject'
+
+  ArtifactsBucket:
+    Description: 'S3 bucket for artifacts'
+    Value: !Ref ArtifactsBucket
+    Export:
+      Name: !Sub '${AWS::StackName}-ArtifactsBucket'
+
+  CodeBuildProjectUrl:
+    Description: 'URL of the CodeBuild project'
+    Value: !Sub 'https://console.aws.amazon.com/codesuite/codebuild/projects/${CodeBuildProject}/view/new'

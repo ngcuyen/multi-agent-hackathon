@@ -17,6 +17,10 @@ import html
 
 # Khởi tạo BedrockService giống text_service
 model_name = CONVERSATION_CHAT_MODEL_NAME or "claude-37-sonnet"
+
+# Handle the specific problematic model ID directly
+if model_name == "anthropic.claude-3-5-sonnet-20241022-v2:0":
+    model_name = "claude-37-sonnet"
 temperature = float(CONVERSATION_CHAT_TEMPERATURE or "0.6")
 top_p = float(CONVERSATION_CHAT_TOP_P or "0.6")
 max_tokens = int(LLM_MAX_TOKENS or "8192")

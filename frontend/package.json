@@ -58,5 +58,5 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://localhost:8080"
+  "proxy": "http://VPBank-Backe-YzuYPJrF9vGD-169276357.us-east-1.elb.amazonaws.com"
 }

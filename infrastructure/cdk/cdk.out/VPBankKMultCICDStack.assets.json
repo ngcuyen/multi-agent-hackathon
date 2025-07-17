@@ -1,0 +1,20 @@
+{
+  "version": "34.0.0",
+  "files": {
+    "5e2b6cb226b40a791cc6b974f5ebbe512e11c6eed0a167d62b54ef6a17770e0a": {
+      "source": {
+        "path": "VPBankKMultCICDStack.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "536697254280-us-east-1": {
+          "bucketName": "cdk-hnb659fds-assets-536697254280-us-east-1",
+          "objectKey": "5e2b6cb226b40a791cc6b974f5ebbe512e11c6eed0a167d62b54ef6a17770e0a.json",
+          "region": "us-east-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::536697254280:role/cdk-hnb659fds-file-publishing-role-536697254280-us-east-1"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

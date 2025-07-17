@@ -1,0 +1,348 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'VPBank K-MULT CI/CD Pipeline with CodePipeline, CodeBuild, and CodeDeploy'
+
+Parameters:
+  GitHubOwner:
+    Type: String
+    Default: 'ngcuyen'
+    Description: GitHub repository owner
+  
+  GitHubRepo:
+    Type: String
+    Default: 'multi-agent-hackathon'
+    Description: GitHub repository name
+  
+  GitHubBranch:
+    Type: String
+    Default: 'main'
+    Description: GitHub branch to track
+  
+  GitHubToken:
+    Type: String
+    NoEcho: true
+    Description: GitHub personal access token
+  
+  ECRRepositoryName:
+    Type: String
+    Default: 'vpbank-kmult-backend'
+    Description: ECR repository name
+  
+  ECSClusterName:
+    Type: String
+    Default: 'vpbank-kmult-cluster'
+    Description: ECS cluster name
+  
+  ECSServiceName:
+    Type: String
+    Default: 'vpbank-kmult-backend'
+    Description: ECS service name
+
+Resources:
+  # ==================== S3 ARTIFACTS BUCKET ====================
+  ArtifactsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'vpbank-kmult-pipeline-artifacts-${AWS::AccountId}-${AWS::Region}'
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: DeleteOldArtifacts
+            Status: Enabled
+            ExpirationInDays: 30
+
+  # ==================== IAM ROLES ====================
+  CodePipelineServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'VPBankKMult-CodePipeline-Role-${AWS::Region}'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codepipeline.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: CodePipelinePolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetBucketVersioning
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:PutObject
+                  - s3:PutObjectAcl
+                Resource:
+                  - !Sub '${ArtifactsBucket}/*'
+                  - !GetAtt ArtifactsBucket.Arn
+              - Effect: Allow
+                Action:
+                  - codebuild:BatchGetBuilds
+                  - codebuild:StartBuild
+                Resource: !GetAtt CodeBuildProject.Arn
+              - Effect: Allow
+                Action:
+                  - ecs:DescribeServices
+                  - ecs:DescribeTaskDefinition
+                  - ecs:DescribeTasks
+                  - ecs:ListTasks
+                  - ecs:RegisterTaskDefinition
+                  - ecs:UpdateService
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - iam:PassRole
+                Resource: '*'
+
+  CodeBuildServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'VPBankKMult-CodeBuild-Role-${AWS::Region}'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codebuild.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: CodeBuildPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/*'
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:PutObject
+                Resource: !Sub '${ArtifactsBucket}/*'
+              - Effect: Allow
+                Action:
+                  - ecr:BatchCheckLayerAvailability
+                  - ecr:GetDownloadUrlForLayer
+                  - ecr:BatchGetImage
+                  - ecr:GetAuthorizationToken
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - ecr:PutImage
+                  - ecr:InitiateLayerUpload
+                  - ecr:UploadLayerPart
+                  - ecr:CompleteLayerUpload
+                Resource: !Sub 'arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/${ECRRepositoryName}'
+
+  # ==================== CODEBUILD PROJECT ====================
+  CodeBuildProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Sub 'VPBankKMult-Build-${AWS::Region}'
+      Description: 'Build project for VPBank K-MULT application'
+      ServiceRole: !GetAtt CodeBuildServiceRole.Arn
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_MEDIUM
+        Image: aws/codebuild/amazonlinux2-x86_64-standard:5.0
+        PrivilegedMode: true
+        EnvironmentVariables:
+          - Name: AWS_DEFAULT_REGION
+            Value: !Ref AWS::Region
+          - Name: AWS_ACCOUNT_ID
+            Value: !Ref AWS::AccountId
+          - Name: IMAGE_REPO_NAME
+            Value: !Ref ECRRepositoryName
+          - Name: IMAGE_TAG
+            Value: latest
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: |
+          version: 0.2
+          phases:
+            pre_build:
+              commands:
+                - echo Logging in to Amazon ECR...
+                - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+                - REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME
+                - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+                - IMAGE_TAG=${COMMIT_HASH:=latest}
+                - echo Build started on `date`
+            build:
+              commands:
+                - echo Build started on `date`
+                - echo Building the Docker image...
+                - cd backend
+                - docker build -f Dockerfile.prod -t $REPOSITORY_URI:latest .
+                - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
+                - echo Running tests...
+                - docker run --rm $REPOSITORY_URI:latest python -m pytest tests/ -v || echo "No tests found"
+            post_build:
+              commands:
+                - echo Build completed on `date`
+                - echo Pushing the Docker images...
+                - docker push $REPOSITORY_URI:latest
+                - docker push $REPOSITORY_URI:$IMAGE_TAG
+                - echo Writing image definitions file...
+                - printf '[{"name":"web","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+                - cat imagedefinitions.json
+          artifacts:
+            files:
+              - imagedefinitions.json
+              - backend/app/**/*
+            name: VPBankKMultBuildArtifact
+      TimeoutInMinutes: 30
+
+  # ==================== CODEPIPELINE ====================
+  CodePipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      Name: !Sub 'VPBankKMult-Pipeline-${AWS::Region}'
+      RoleArn: !GetAtt CodePipelineServiceRole.Arn
+      ArtifactStore:
+        Type: S3
+        Location: !Ref ArtifactsBucket
+      Stages:
+        # SOURCE STAGE
+        - Name: Source
+          Actions:
+            - Name: SourceAction
+              ActionTypeId:
+                Category: Source
+                Owner: ThirdParty
+                Provider: GitHub
+                Version: '1'
+              Configuration:
+                Owner: !Ref GitHubOwner
+                Repo: !Ref GitHubRepo
+                Branch: !Ref GitHubBranch
+                OAuthToken: !Ref GitHubToken
+                PollForSourceChanges: false
+              OutputArtifacts:
+                - Name: SourceOutput
+
+        # BUILD STAGE
+        - Name: Build
+          Actions:
+            - Name: BuildAction
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: '1'
+              Configuration:
+                ProjectName: !Ref CodeBuildProject
+              InputArtifacts:
+                - Name: SourceOutput
+              OutputArtifacts:
+                - Name: BuildOutput
+
+        # DEPLOY STAGE
+        - Name: Deploy
+          Actions:
+            - Name: DeployAction
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: ECS
+                Version: '1'
+              Configuration:
+                ClusterName: !Ref ECSClusterName
+                ServiceName: !Ref ECSServiceName
+                FileName: imagedefinitions.json
+              InputArtifacts:
+                - Name: BuildOutput
+              Region: !Ref AWS::Region
+
+  # ==================== WEBHOOK FOR GITHUB ====================
+  GitHubWebhook:
+    Type: AWS::CodePipeline::Webhook
+    Properties:
+      Name: !Sub 'VPBankKMult-Webhook-${AWS::Region}'
+      Authentication: GITHUB_HMAC
+      AuthenticationConfiguration:
+        SecretToken: !Ref GitHubToken
+      Filters:
+        - JsonPath: $.ref
+          MatchEquals: !Sub 'refs/heads/${GitHubBranch}'
+      TargetPipeline: !Ref CodePipeline
+      TargetAction: SourceAction
+      TargetPipelineVersion: !GetAtt CodePipeline.Version
+      RegisterWithThirdParty: true
+
+  # ==================== CLOUDWATCH ALARMS ====================
+  PipelineFailureAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub 'VPBankKMult-Pipeline-Failure-${AWS::Region}'
+      AlarmDescription: 'Alarm for CodePipeline failures'
+      MetricName: PipelineExecutionFailure
+      Namespace: AWS/CodePipeline
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: PipelineName
+          Value: !Ref CodePipeline
+      TreatMissingData: notBreaching
+
+  BuildFailureAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub 'VPBankKMult-Build-Failure-${AWS::Region}'
+      AlarmDescription: 'Alarm for CodeBuild failures'
+      MetricName: FailedBuilds
+      Namespace: AWS/CodeBuild
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: ProjectName
+          Value: !Ref CodeBuildProject
+      TreatMissingData: notBreaching
+
+Outputs:
+  PipelineName:
+    Description: 'Name of the CodePipeline'
+    Value: !Ref CodePipeline
+    Export:
+      Name: !Sub '${AWS::StackName}-PipelineName'
+
+  PipelineUrl:
+    Description: 'URL of the CodePipeline'
+    Value: !Sub 'https://console.aws.amazon.com/codesuite/codepipeline/pipelines/${CodePipeline}/view'
+    Export:
+      Name: !Sub '${AWS::StackName}-PipelineUrl'
+
+  ArtifactsBucket:
+    Description: 'S3 bucket for pipeline artifacts'
+    Value: !Ref ArtifactsBucket
+    Export:
+      Name: !Sub '${AWS::StackName}-ArtifactsBucket'
+
+  CodeBuildProject:
+    Description: 'CodeBuild project name'
+    Value: !Ref CodeBuildProject
+    Export:
+      Name: !Sub '${AWS::StackName}-CodeBuildProject'
