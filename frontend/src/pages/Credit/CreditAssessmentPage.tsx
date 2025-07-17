@@ -19,11 +19,25 @@ import {
   Badge,
   Textarea,
   PieChart,
-  BarChart
+  BarChart,
+  ExpandableSection
 } from '@cloudscape-design/components';
+import { creditAPI, CreditAssessmentRequest, CreditAssessmentResult } from '../../services/api';
+import ReactMarkdown from 'react-markdown';
 
 interface CreditAssessmentPageProps {
   onShowSnackbar: (message: string, severity: 'error' | 'success' | 'info' | 'warning') => void;
+}
+
+function fixMarkdown(text) {
+  if (!text) return '';
+  // Thêm xuống dòng trước mỗi heading kiểu ##1., ##2., ...
+  let fixed = text.replace(/(##[0-9]+\.)/g, '\n$1');
+  // Thêm xuống dòng trước mỗi dấu gạch đầu dòng nếu chưa có
+  fixed = fixed.replace(/([^\n])(- )/g, '$1\n- ');
+  // Loại bỏ các chuỗi 'additional_kwargs={}' nếu có
+  fixed = fixed.replace(/additional_kwargs=\{\}/g, '');
+  return fixed;
 }
 
 const CreditAssessmentPage: React.FC<CreditAssessmentPageProps> = ({ onShowSnackbar }) => {
@@ -31,6 +45,7 @@ const CreditAssessmentPage: React.FC<CreditAssessmentPageProps> = ({ onShowSnack
   const [loading, setLoading] = useState(false);
   const [documents, setDocuments] = useState<File[]>([]);
   const [assessmentResult, setAssessmentResult] = useState<any>(null);
+  const [consentCIC, setConsentCIC] = useState(false);
 
   const [creditForm, setCreditForm] = useState({
     applicantName: '',
@@ -54,9 +69,9 @@ const CreditAssessmentPage: React.FC<CreditAssessmentPageProps> = ({ onShowSnack
 
   const assessmentTypeOptions = [
     { label: 'Comprehensive Assessment', value: 'comprehensive' },
-    { label: 'Quick Assessment', value: 'quick' },
-    { label: 'Risk Analysis Only', value: 'risk_only' },
-    { label: 'Financial Analysis Only', value: 'financial_only' }
+    // { label: 'Quick Assessment', value: 'quick' },
+    // { label: 'Risk Analysis Only', value: 'risk_only' },
+    // { label: 'Financial Analysis Only', value: 'financial_only' }
   ];
 
   const collateralOptions = [
@@ -77,45 +92,42 @@ const CreditAssessmentPage: React.FC<CreditAssessmentPageProps> = ({ onShowSnack
   ];
 
   const handleCreditAssessment = async () => {
-    if (!creditForm.applicantName || !creditForm.requestedAmount) {
-      onShowSnackbar('Vui lòng điền đầy đủ thông tin bắt buộc', 'warning');
+    if (
+      !creditForm.applicantName ||
+      !creditForm.requestedAmount ||
+      !creditForm.loanTerm ||
+      documents.length === 0 ||
+      !consentCIC
+    ) {
+      onShowSnackbar('Vui lòng điền đầy đủ thông tin bắt buộc: Tên khách hàng, Số tiền vay, Kỳ hạn vay, Tài liệu đính kèm và đồng ý cho phép tra cứu CIC.', 'warning');
       return;
     }
 
     setLoading(true);
     try {
       onShowSnackbar('Đang phân tích hồ sơ tín dụng...', 'info');
-      
-      // Mock assessment result
-      setTimeout(() => {
-        setAssessmentResult({
-          applicantName: creditForm.applicantName,
-          creditScore: 742,
-          riskRating: 'B+',
-          recommendation: 'APPROVED',
-          confidence: 87.5,
-          maxLoanAmount: parseFloat(creditForm.requestedAmount) * 0.85,
-          interestRate: 8.5,
-          riskFactors: riskFactors,
-          financialMetrics: {
-            debtToEquity: 0.65,
-            currentRatio: 1.8,
-            returnOnAssets: 12.5,
-            cashFlow: 'Positive'
-          },
-          complianceChecks: {
-            kyc: 'Passed',
-            aml: 'Passed',
-            creditBureau: 'Passed',
-            blacklist: 'Clear'
-          }
-        });
-        setLoading(false);
+      // Map form fields to backend keys
+      const formData: CreditAssessmentRequest = {
+        applicant_name: creditForm.applicantName,
+        business_type: creditForm.businessType,
+        requested_amount: creditForm.requestedAmount,
+        currency: creditForm.currency,
+        loan_purpose: creditForm.loanPurpose,
+        loan_term: creditForm.loanTerm,
+        collateral_type: creditForm.collateralType,
+        assessment_type: creditForm.assessmentType
+      };
+      const response = await creditAPI.assessCreditWithFile(formData, documents);
+      if (response.status === 'success' && response.data) {
+        setAssessmentResult(response.data);
         onShowSnackbar('Đánh giá tín dụng hoàn tất!', 'success');
-      }, 8000);
+      } else {
+        setAssessmentResult(response.data); // fallback mock data
+        onShowSnackbar('Không thể lấy kết quả thực, hiển thị dữ liệu mẫu.', 'warning');
+      }
     } catch (error) {
-      console.error('Credit assessment error:', error);
       onShowSnackbar('Không thể đánh giá tín dụng. Vui lòng thử lại.', 'error');
+    } finally {
       setLoading(false);
     }
   };
@@ -130,6 +142,20 @@ const CreditAssessmentPage: React.FC<CreditAssessmentPageProps> = ({ onShowSnack
     x: factor.name,
     y: factor.value
   })) : [];
+
+  const getApprovalBgColor = () => {
+    if (assessmentResult.approved === false) return '#fff1f0'; // đỏ nhạt
+    if (assessmentResult.recommendation?.toLowerCase().includes('hoãn')) return '#fffbe6'; // vàng nhạt
+    if (assessmentResult.approved === true) return '#e6ffed'; // xanh lá nhạt
+    return '#e6f7ff'; // mặc định xanh dương nhạt
+  };
+
+  const getApprovalTextColor = () => {
+    if (assessmentResult.approved === false) return '#d32f2f'; // đỏ đậm
+    if (assessmentResult.recommendation?.toLowerCase().includes('hoãn')) return '#b26a00'; // cam đậm
+    if (assessmentResult.approved === true) return '#388e3c'; // xanh lá đậm
+    return '#1976d2'; // xanh dương đậm
+  };
 
   return (
     <Container>
@@ -164,7 +190,7 @@ const CreditAssessmentPage: React.FC<CreditAssessmentPageProps> = ({ onShowSnack
                   <Form>
                     <SpaceBetween direction="vertical" size="l">
                       <ColumnLayout columns={2}>
-                        <FormField label="Applicant Name" description="Full name or company name">
+                        <FormField label={<span>Applicant Name <span style={{color: 'red'}}>*</span></span>} description="Full name or company name">
                           <Input
                             value={creditForm.applicantName}
                             onChange={({ detail }) => setCreditForm({ ...creditForm, applicantName: detail.value })}
@@ -183,7 +209,7 @@ const CreditAssessmentPage: React.FC<CreditAssessmentPageProps> = ({ onShowSnack
                       </ColumnLayout>
 
                       <ColumnLayout columns={3}>
-                        <FormField label="Requested Amount" description="Loan amount requested">
+                        <FormField label={<span>Requested Amount <span style={{color: 'red'}}>*</span></span>} description="Loan amount requested">
                           <Input
                             value={creditForm.requestedAmount}
                             onChange={({ detail }) => setCreditForm({ ...creditForm, requestedAmount: detail.value })}
@@ -203,7 +229,7 @@ const CreditAssessmentPage: React.FC<CreditAssessmentPageProps> = ({ onShowSnack
                           />
                         </FormField>
 
-                        <FormField label="Loan Term" description="In months">
+                        <FormField label={<span>Loan Term <span style={{color: 'red'}}>*</span></span>} description="In months">
                           <Input
                             value={creditForm.loanTerm}
                             onChange={({ detail }) => setCreditForm({ ...creditForm, loanTerm: detail.value })}
@@ -242,7 +268,7 @@ const CreditAssessmentPage: React.FC<CreditAssessmentPageProps> = ({ onShowSnack
                       </FormField>
 
                       <FormField
-                        label="Supporting Documents"
+                        label={<span>Supporting Documents <span style={{color: 'red'}}>*</span></span>}
                         description="Upload financial statements, business registration, etc."
                       >
                         <FileUpload
@@ -264,12 +290,33 @@ const CreditAssessmentPage: React.FC<CreditAssessmentPageProps> = ({ onShowSnack
                         />
                       </FormField>
 
+                      <FormField>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                          <input
+                            type="checkbox"
+                            id="consent-cic"
+                            checked={consentCIC}
+                            onChange={e => setConsentCIC(e.target.checked)}
+                            style={{ marginRight: 8, width: 18, height: 18 }}
+                          />
+                          <label htmlFor="consent-cic" style={{ fontSize: 15, color: '#222', cursor: 'pointer' }}>
+                            I agree to allow the bank to check my CIC credit score information <span style={{ color: 'red' }}>*</span> (required)
+                          </label>
+                        </div>
+                      </FormField>
+
                       <Box>
                         <Button
                           variant="primary"
                           onClick={handleCreditAssessment}
                           loading={loading}
-                          disabled={!creditForm.applicantName || !creditForm.requestedAmount}
+                          disabled={
+                            !creditForm.applicantName ||
+                            !creditForm.requestedAmount ||
+                            !creditForm.loanTerm ||
+                            documents.length === 0 ||
+                            !consentCIC
+                          }
                         >
                           🔍 Start Credit Assessment
                         </Button>
@@ -295,84 +342,180 @@ const CreditAssessmentPage: React.FC<CreditAssessmentPageProps> = ({ onShowSnack
                     </Box>
                   )}
 
-                  {assessmentResult && (
-                    <>
-                      <Header variant="h2">Risk Analysis Dashboard</Header>
-                      
-                      <ColumnLayout columns={2}>
+                  {/* MOCK DATA minh họa đúng hình mẫu nếu chưa có */}
+                  {assessmentResult || false ? (
+                    (() => {
+                      // Mock values
+                      const mock = {
+                        creditScore: 0,
+                        creditRank: 0,
+                        scoringDate: 'Không có dữ liệu',
+                      };
+                      // Ưu tiên dữ liệu thực, fallback sang mock nếu thiếu
+                      const result = {
+                        creditScore: assessmentResult?.creditScore ?? mock.creditScore,
+                        creditRank: assessmentResult?.creditRank ?? mock.creditRank,
+                        scoringDate: assessmentResult?.scoringDate ?? mock.scoringDate,
+                      };
+                      // Dữ liệu bảng
+                      const ranks = [10,9,8,7,6,5,4,3,2,1];
+                      const ranges = ['403-429','430-454','455-479','480-544','545-571','572-587','588-605','606-621','622-644','645-706'];
+                      const colors = ['#ff3300','#ff5500','#ff7700','#ffbb00','#ffff00','#bfff00','#66ff00','#33ff33','#00ff66','#00ff99'];
+                      // Dòng nhãn
+                      const labelRow = [
+                        { label: 'Xấu', colSpan: 2 },
+                        { label: 'Dưới trung bình', colSpan: 2 },
+                        { label: 'Trung bình', colSpan: 2 },
+                        { label: 'Tốt', colSpan: 2 },
+                        { label: 'Rất tốt', colSpan: 2 },
+                      ];
+                      // Tìm vị trí điểm khách hàng
+                      let arrowIdx = ranks.findIndex((_, i) => {
+                        const [min, max] = ranges[i].split('-').map(Number);
+                        return result.creditScore >= min && result.creditScore <= max;
+                      });
+                      if (arrowIdx === -1) arrowIdx = 0;
+                      // Mapping nhận xét điển hình theo hạng
+                      const rankComments = {
+                        10: "Xấu: Khách hàng không đủ điều kiện vay vốn tại hầu hết ngân hàng.",
+                        9: "Xấu: Rủi ro cao, bị từ chối vay vốn, cần cải thiện tín dụng.",
+                        8: "Dưới trung bình: Khó vay vốn, chỉ có thể vay tại công ty tài chính, lãi suất cao.",
+                        7: "Dưới trung bình: Có thể vay vốn với hạn mức thấp, yêu cầu bổ sung hồ sơ nhiều.",
+                        6: "Trung bình: Một số ngân hàng vẫn từ chối, cần tăng điểm để cải thiện cơ hội vay.",
+                        5: "Trung bình: Vay vốn khó tại ngân hàng lớn, có thể mở thẻ tín dụng hạn mức thấp.",
+                        4: "Tốt: Có thể được duyệt vay vốn với điều kiện chứng minh tài chính rõ ràng.",
+                        3: "Tốt: Dễ dàng vay vốn tín chấp hoặc thế chấp, mở thẻ tín dụng dễ.",
+                        2: "Rất tốt: Khả năng vay vốn cao, lãi suất tốt, nhiều ưu đãi từ ngân hàng.",
+                        1: "Rất tốt: Dễ duyệt vay vốn lớn, mở thẻ tín dụng cao cấp, được ưu đãi tín dụng."
+                      };
+                      return (
                         <Box>
-                          <Header variant="h3">Risk Distribution</Header>
-                          <PieChart
-                            data={pieChartData}
-                            detailPopoverContent={(datum, sum) => [
-                              { key: "Percentage", value: `${((datum.value / sum) * 100).toFixed(1)}%` },
-                              { key: "Value", value: datum.value }
-                            ]}
-                            segmentDescription={(datum, sum) => 
-                              `${datum.title}: ${datum.value} (${((datum.value / sum) * 100).toFixed(1)}%)`
-                            }
-                            i18nStrings={{
-                              filterLabel: "Filter displayed data",
-                              filterPlaceholder: "Filter data",
-                              filterSelectedAriaLabel: "selected",
-                              detailPopoverDismissAriaLabel: "Dismiss",
-                              legendAriaLabel: "Legend",
-                              chartAriaRoleDescription: "pie chart",
-                              segmentAriaRoleDescription: "segment"
-                            }}
-                            ariaDescription="Risk distribution pie chart"
-                            errorText="Error loading data."
-                            loadingText="Loading chart"
-                            recoveryText="Retry"
-                            empty={
-                              <Box textAlign="center" color="inherit">
-                                <b>No data available</b>
-                                <Box variant="p" color="inherit">
-                                  There is no data available
+                          <Box margin={{ bottom: 'l' }}>
+                            <Header variant="h2">ĐÁNH GIÁ ĐIỂM TÍN DỤNG</Header>
+                            <ColumnLayout columns={2}>
+                              <div style={{
+                                border: '1px solid #bfc9d9',
+                                borderRadius: 8,
+                                background: '#fff',
+                                minHeight: 120,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                              }}>
+                                <Box padding="l">
+                                  <Box fontSize="body-m" color="text-body-secondary">Điểm tín dụng</Box>
+                                  <Box fontSize="display-l" fontWeight="bold" color="text-status-info" margin={{ bottom: 'xxs' }}>
+                                    {result.creditScore}
+                                  </Box>
+                                  <Box fontSize="body-m" color="text-body-secondary">Hạng</Box>
+                                  <Box fontSize="display-l" fontWeight="bold" color="text-status-warning" margin={{ bottom: 'xxs' }}>
+                                    {result.creditRank}
+                                  </Box>
+                                  <Box fontSize="body-m" color="text-body-secondary">Ngày tra cứu</Box>
+                                  <Box fontSize="body-m" fontWeight="bold">
+                                    {result.scoringDate}
+                                  </Box>
                                 </Box>
-                              </Box>
-                            }
-                          />
+                              </div>
+                              <div style={{
+                                border: '2px solid #e9ebed',
+                                borderRadius: 8,
+                                minHeight: 120,
+                                background: '#f8f9fa',
+                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                              }}>
+                                <div style={{ minHeight: 60, display: 'flex', alignItems: 'center', height: '100%' }}>
+                                   <div style={{ fontSize: 20, color: '#1976d2', width: '100%' }}>
+                                     <Box padding="l" fontWeight="bold">
+                                       {result.creditRank ? rankComments[result.creditRank] : ''}
+                                     </Box>
+                                   </div>
+                                </div>
+                              </div>
+                            </ColumnLayout>
+                          </Box>
+                          {/* Bảng phân loại điểm và hạng đúng mẫu */}
+                          <Box margin={{ top: 'l' }}>
+                            <div style={{ width: '100%', maxWidth: 1100, margin: '0 auto' }}>
+                              <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+                                <thead>
+                                  <tr>
+                                    <th style={{ border: 'none', width: 60 }}></th>
+                                    {labelRow.map((item, idx) => (
+                                      <th key={item.label} colSpan={item.colSpan} style={{ border: 'none', textAlign: 'center', fontWeight: 700, fontSize: 16 }}>{item.label}</th>
+                                    ))}
+                                  </tr>
+                                  <tr>
+                                    <th style={{ border: 'none', textAlign: 'center', fontWeight: 500 }}>Hạng</th>
+                                    {ranks.map((rank, i) => (
+                                      <td key={rank} style={{
+                                        background: colors[i],
+                                        color: '#222',
+                                        textAlign: 'center',
+                                        fontWeight: 700,
+                                        border: '1px solid #fff',
+                                        minWidth: 60,
+                                        height: 40,
+                                        fontSize: 18,
+                                      }}>{rank}</td>
+                                    ))}
+                                  </tr>
+                                  <tr>
+                                    <th style={{ border: 'none', textAlign: 'center', fontWeight: 500 }}>Điểm</th>
+                                    {ranges.map((range, i) => (
+                                      <td key={range} style={{
+                                        background: colors[i],
+                                        color: '#222',
+                                        textAlign: 'center',
+                                        fontWeight: 400,
+                                        border: '1px solid #fff',
+                                        minWidth: 60,
+                                        height: 32,
+                                        fontSize: 15,
+                                      }}>{range}</td>
+                                    ))}
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr>
+                                    <td style={{ border: 'none' }}></td>
+                                    {ranks.map((_, i) => (
+                                      <td key={i} style={{ height: 18, background: 'transparent', border: 'none', padding: 0, position: 'relative' }}>
+                                        {i === arrowIdx && (
+                                          <div style={{ position: 'absolute', left: '50%', top: 0, transform: 'translateX(-50%)' }}>
+                                            <span role="img" aria-label="arrow" style={{ fontSize: 22 }}>⬆️</span>
+                                          </div>
+                                        )}
+                                      </td>
+                                    ))}
+                                  </tr>
+                                  <tr>
+                                    <td style={{ border: 'none', padding: 0 }}></td>
+                                    {ranks.map((_, i) => (
+                                      <td key={i} style={{ border: 'none', padding: 0, background: 'transparent', height: 18, textAlign: 'center' }}>
+                                        {i === arrowIdx && (
+                                          <span style={{ fontSize: 14, color: '#666' }}>Điểm hạng của khách hàng</span>
+                                        )}
+                                      </td>
+                                    ))}
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </div>
+                          </Box>
                         </Box>
-
-                        <Box>
-                          <Header variant="h3">Risk Factors Score</Header>
-                          <BarChart
-                            series={[
-                              {
-                                title: "Risk Score",
-                                type: "bar",
-                                data: barChartData
-                              }
-                            ]}
-                            xDomain={riskFactors.map(f => f.name)}
-                            yDomain={[0, 100]}
-                            i18nStrings={{
-                              filterLabel: "Filter displayed data",
-                              filterPlaceholder: "Filter data",
-                              filterSelectedAriaLabel: "selected",
-                              legendAriaLabel: "Legend",
-                              chartAriaRoleDescription: "bar chart",
-                              xTickFormatter: e => e,
-                              yTickFormatter: e => `${e}%`
-                            }}
-                            ariaLabel="Risk factors bar chart"
-                            errorText="Error loading data."
-                            loadingText="Loading chart"
-                            recoveryText="Retry"
-                            empty={
-                              <Box textAlign="center" color="inherit">
-                                <b>No data available</b>
-                                <Box variant="p" color="inherit">
-                                  There is no data available
-                                </Box>
-                              </Box>
-                            }
-                            height={300}
-                          />
-                        </Box>
-                      </ColumnLayout>
-                    </>
+                      );
+                    })()
+                  ) : (
+                    <Box textAlign="center" padding="xxl">
+                      <Box variant="strong" textAlign="center" color="inherit">
+                        No assessment results available
+                      </Box>
+                      <Box variant="p" padding={{ bottom: "s" }} color="inherit">
+                        Complete a credit assessment to see risk analysis here.
+                      </Box>
+                    </Box>
                   )}
                 </SpaceBetween>
               )
@@ -386,60 +529,90 @@ const CreditAssessmentPage: React.FC<CreditAssessmentPageProps> = ({ onShowSnack
                     <>
                       <Header variant="h2">Credit Assessment Results</Header>
                       
-                      <Alert 
-                        type={assessmentResult.recommendation === 'APPROVED' ? 'success' : 'warning'}
-                        header={`Credit Application ${assessmentResult.recommendation}`}
-                      >
-                        Application for {assessmentResult.applicantName} has been {assessmentResult.recommendation.toLowerCase()} 
-                        with {assessmentResult.confidence}% confidence.
-                      </Alert>
+                      {/* Phần tóm tắt hồ sơ khách hàng */}
+                      {assessmentResult.summary && (
+                        <ExpandableSection headerText="📝 Tóm tắt hồ sơ khách hàng" defaultExpanded={true}>
+                          <div style={{ whiteSpace: 'pre-wrap', fontSize: '14px', color: '#333', borderRadius: '8px', padding: '16px', background: '#f8f9fa' }}>
+                            {assessmentResult.summary}
+                          </div>
+                        </ExpandableSection>
+                      )}
 
-                      <ColumnLayout columns={4}>
+                      {/* Phân tích lịch sử tín dụng */}
+                      {assessmentResult.creditHistory && (
+                        <ExpandableSection headerText="📊 Phân tích lịch sử tín dụng" defaultExpanded={true}>
+                          <div style={{ whiteSpace: 'pre-wrap', fontSize: '14px', color: '#333', borderRadius: '8px', padding: '16px', background: '#f8f9fa' }}>{assessmentResult.creditHistory}</div>
+                        </ExpandableSection>
+                      )}
+
+                      {/* Phân tích tài chính & khả năng trả nợ */}
+                      {assessmentResult.financialAnalysis && (
+                        <ExpandableSection headerText="💰 Phân tích tài chính & khả năng trả nợ" defaultExpanded={true}>
+                          <div style={{ whiteSpace: 'pre-wrap', fontSize: '14px', color: '#333', borderRadius: '8px', padding: '16px', background: '#f8f9fa' }}>{assessmentResult.financialAnalysis}</div>
+                        </ExpandableSection>
+                      )}
+
+                      {/* Phân tích rủi ro tổng thể */}
+                      {assessmentResult.riskAnalysis && (
+                        <ExpandableSection headerText="⚠️ Phân tích rủi ro tổng thể" defaultExpanded={true}>
+                          <div style={{ whiteSpace: 'pre-wrap', fontSize: '14px', color: '#333', borderRadius: '8px', padding: '16px', background: '#f8f9fa' }}>{assessmentResult.riskAnalysis}</div>
+                        </ExpandableSection>
+                      )}
+
+                      {/* Đề xuất phê duyệt tín dụng */}
+                      {assessmentResult.recommendation && (
+                        <ExpandableSection headerText={
+                          `${assessmentResult.approved === false ? '❌' : '✅'} Đề xuất phê duyệt tín dụng`
+                        } defaultExpanded={true}>
+                          <div
+                            style={{
+                              border: '1px solid #e9ebed',
+                              borderRadius: '8px',
+                              backgroundColor: getApprovalBgColor(),
+                              marginBottom: '16px',
+                              padding: '16px'
+                            }}
+                          >
+                            <div style={{ whiteSpace: 'pre-wrap', fontSize: '15px', color: getApprovalTextColor(), fontWeight: 500 }}>
+                              {assessmentResult.recommendation}
+                            </div>
+                          </div>
+                        </ExpandableSection>
+                      )}
+
+                      {/* Thông tin đề xuất số tiền vay, lãi suất, confidence */}
+                      <ColumnLayout columns={3}>
                         <SpaceBetween direction="vertical" size="s">
-                          <Box fontSize="body-s" color="text-body-secondary">Credit Score</Box>
-                          <Box fontSize="heading-xl" color="text-status-success">{assessmentResult.creditScore}</Box>
+                          <Box fontSize="body-s" color="text-body-secondary">Số tiền vay tối đa đề xuất</Box>
+                          <Box fontSize="heading-l" color="text-status-success">{assessmentResult.maxLoanAmount?.toLocaleString()}</Box>
                         </SpaceBetween>
                         <SpaceBetween direction="vertical" size="s">
-                          <Box fontSize="body-s" color="text-body-secondary">Risk Rating</Box>
-                          <Box fontSize="heading-xl">{assessmentResult.riskRating}</Box>
+                          <Box fontSize="body-s" color="text-body-secondary">Lãi suất đề xuất</Box>
+                          <Box fontSize="heading-l">{assessmentResult.interestRate}</Box>
                         </SpaceBetween>
                         <SpaceBetween direction="vertical" size="s">
-                          <Box fontSize="body-s" color="text-body-secondary">Max Loan Amount</Box>
-                          <Box fontSize="heading-xl">{assessmentResult.maxLoanAmount.toLocaleString()} VND</Box>
-                        </SpaceBetween>
-                        <SpaceBetween direction="vertical" size="s">
-                          <Box fontSize="body-s" color="text-body-secondary">Interest Rate</Box>
-                          <Box fontSize="heading-xl">{assessmentResult.interestRate}%</Box>
+                          <Box fontSize="body-s" color="text-body-secondary">Mức độ tin cậy</Box>
+                          <Box fontSize="heading-l">{assessmentResult.confidence}</Box>
                         </SpaceBetween>
                       </ColumnLayout>
 
-                      <Box>
-                        <Header variant="h3">Financial Metrics</Header>
-                        <ColumnLayout columns={4}>
-                          {Object.entries(assessmentResult.financialMetrics).map(([key, value]) => (
-                            <SpaceBetween key={key} direction="vertical" size="xs">
-                              <Box fontSize="body-s" color="text-body-secondary">
-                                {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
-                              </Box>
-                              <Box fontSize="heading-s">{String(value)}</Box>
-                            </SpaceBetween>
-                          ))}
-                        </ColumnLayout>
-                      </Box>
+                      {/* Khuyến nghị & lưu ý cho ngân hàng */}
+                      {assessmentResult.notes && (
+                        <ExpandableSection headerText="💡 Khuyến nghị & lưu ý cho ngân hàng" defaultExpanded={true}>
+                          <div style={{ whiteSpace: 'pre-wrap', fontSize: '14px', color: '#b26a00', background: '#fffbe6', borderRadius: '8px', padding: '16px' }}>
+                            {assessmentResult.notes}
+                          </div>
+                        </ExpandableSection>
+                      )}
 
-                      <Box>
-                        <Header variant="h3">Compliance Checks</Header>
-                        <ColumnLayout columns={4}>
-                          {Object.entries(assessmentResult.complianceChecks).map(([key, value]) => (
-                            <SpaceBetween key={key} direction="vertical" size="xs">
-                              <Box fontSize="body-s" color="text-body-secondary">{key.toUpperCase()}</Box>
-                              <StatusIndicator type={String(value) === 'Passed' || String(value) === 'Clear' ? 'success' : 'error'}>
-                                {String(value)}
-                              </StatusIndicator>
-                            </SpaceBetween>
-                          ))}
-                        </ColumnLayout>
-                      </Box>
+                      {/* AI Report Section - styled giống TextSummaryPage */}
+                      {assessmentResult.ai_report && (
+                        <ExpandableSection headerText="🤖 AI Report - Nội dung phân tích chi tiết từ AI" defaultExpanded={true}>
+                          <div style={{ background: '#f5f6fa', borderRadius: '8px', padding: '16px' }}>
+                            <ReactMarkdown>{fixMarkdown(assessmentResult.ai_report)}</ReactMarkdown>
+                          </div>
+                        </ExpandableSection>
+                      )}
 
                       <SpaceBetween direction="horizontal" size="s">
                         <Button variant="primary">Generate Loan Contract</Button>
