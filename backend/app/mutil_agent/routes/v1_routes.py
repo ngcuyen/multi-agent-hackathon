@@ -9,5 +9,5 @@ router = APIRouter()
 
 router.include_router(conversation_router, prefix="/v1/conversation")
 router.include_router(text_router, prefix="/v1/text")
-router.include_router(risk_router, prefix="/risk", tags=["Risk Assessment"])
+router.include_router(risk_router, prefix="/v1/risk", tags=["Risk Assessment"])
 router.include_router(compliance_router, prefix="/v1/compliance")
