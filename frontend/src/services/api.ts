@@ -54,6 +54,23 @@ export interface ConversationResponse {
   response?: string;
 }
 
+export interface ComplianceValidationResponse {
+  status: string;
+  data?: {
+    validation_result?: string;
+    compliance_score?: number;
+    issues?: string[];
+    recommendations?: string[];
+  };
+  message?: string;
+  // Additional fields from backend
+  document_type?: string;
+  is_trade_document?: boolean;
+  compliance_status?: string;
+  validation_details?: any;
+  [key: string]: any; // Allow additional properties
+}
+
 export interface HealthCheckResponse {
   status: string;
   service: string;
@@ -362,3 +379,67 @@ export const creditAPI = {
 };
 
 export default apiClient;
+
+// Compliance API exports
+export const complianceAPI = {
+  validateCompliance: async (request: any) => {
+    const response = await fetch(`${API_BASE_URL}${API_PREFIX}/compliance/validate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(request),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    return await response.json();
+  },
+  
+  validateDocumentFile: async (file: File, documentType?: string, metadata?: any) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    if (documentType) {
+      formData.append('document_type', documentType);
+    }
+    
+    if (metadata) {
+      // Add metadata fields to form data
+      Object.keys(metadata).forEach(key => {
+        if (metadata[key] !== undefined && metadata[key] !== null) {
+          formData.append(key, metadata[key]);
+        }
+      });
+    }
+    
+    const response = await fetch(`${API_BASE_URL}${API_PREFIX}/compliance/document`, {
+      method: 'POST',
+      body: formData,
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    return await response.json();
+  },
+  
+  queryRegulations: async (query: string) => {
+    const response = await fetch(`${API_BASE_URL}${API_PREFIX}/compliance/query`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ query }),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    return await response.json();
+  },
+};
