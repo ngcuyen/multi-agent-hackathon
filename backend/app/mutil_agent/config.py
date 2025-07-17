@@ -52,6 +52,7 @@ BEDROCK_KNOWLEDGEBASE = boto3.client(
     region_name=AWS_KNOWLEDGEBASE_REGION,
     aws_access_key_id=AWS_KNOWLEDGEBASE_ACCESS_KEY_ID,
     aws_secret_access_key=AWS_KNOWLEDGEBASE_SECRET_ACCESS_KEY,
+    verify=VERIFY_HTTPS,
 )
 LLM_MAX_TOKENS = os.getenv("LLM_MAX_TOKENS")
 LLM_TOP_P = os.getenv("LLM_TOP_P")

@@ -9,6 +9,38 @@ from typing import Dict, List, Any
 class ComplianceConfig:
     """Configuration class for compliance service patterns and rules"""
     
+    # Regulation mapping for different document types - easily extensible
+    REGULATION_MAPPING = {
+        'letter_of_credit': ['UCP600'],
+        'standby_letter_of_credit': ['UCP600', 'ISP98'],  # Future expansion
+        'documentary_collection': ['URC522'],  # Future expansion
+        'commercial_invoice': ['UCP600'],
+        'bill_of_lading': ['UCP600'],
+        'insurance_document': ['UCP600'],
+        'packing_list': ['UCP600'],
+        # Can be expanded with more document types and regulations
+    }
+    
+    # UCP 600 Article references for common violations
+    UCP_ARTICLE_REFERENCES = {
+        'missing_information': 'UCP 600 Article 14(a) - Document Examination',
+        'discrepancy': 'UCP 600 Article 16 - Discrepant Documents',
+        'expiry_date': 'UCP 600 Article 6 - Availability, Expiry Date',
+        'amount_discrepancy': 'UCP 600 Article 18 - Commercial Invoice',
+        'transport_document': 'UCP 600 Article 19-25 - Transport Documents',
+        'insurance_document': 'UCP 600 Article 28 - Insurance Document',
+        'late_presentation': 'UCP 600 Article 14(c) - Presentation Period',
+        'partial_shipment': 'UCP 600 Article 31 - Partial Drawings/Shipments',
+    }
+    
+    def get_applicable_regulations(self, document_type: str) -> List[str]:
+        """Get applicable regulations for a document type"""
+        return self.REGULATION_MAPPING.get(document_type, ['UCP600'])  # Default to UCP600
+    
+    def get_regulation_reference(self, violation_type: str) -> str:
+        """Get UCP article reference for violation type"""
+        return self.UCP_ARTICLE_REFERENCES.get(violation_type, 'UCP 600 - General Compliance')
+    
     # Document classification patterns - easily extensible
     DOCUMENT_PATTERNS = {
         "balance_sheet": {
