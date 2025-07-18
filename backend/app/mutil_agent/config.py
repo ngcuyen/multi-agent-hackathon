@@ -31,7 +31,7 @@ AWS_KNOWLEDGEBASE_SECRET_ACCESS_KEY = os.getenv("AWS_KNOWLEDGEBASE_SECRET_ACCESS
 MODEL_MAPPING = {
     # Claude models
     "claude-3-sonnet": "anthropic.claude-3-sonnet-20240229-v1:0",
-    "claude-37-sonnet": "anthropic.claude-3-5-sonnet-20240620-v1:0",  # ACTIVE + ON_DEMAND
+    "claude-37-sonnet": "us.anthropic.claude-3-7-sonnet-20250219-v1:0",  # ACTIVE + ON_DEMAND
     "claude-instant-v1": "anthropic.claude-instant-v1",
     "claude-3-5-sonnet": "anthropic.claude-3-5-sonnet-20240620-v1:0",
     "anthropic.claude-3-5-sonnet-20241022-v2:0": "anthropic.claude-3-5-sonnet-20240620-v1:0",  # Fallback to ON_DEMAND model

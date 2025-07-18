@@ -375,10 +375,22 @@ const TextSummaryPage: React.FC<TextSummaryPageProps> = ({ onShowSnackbar }) => 
                       <div>{result.model_used}</div>
                     </div>
                     <div>
-                      <Box variant="awsui-key-label">Loại tài liệu</Box>
-                      <div>{result.document_analysis.document_category}</div>
+                      <Box variant="awsui-key-label">Phương thức xử lý</Box>
+                      <div>{result.processing_method || 'Không xác định'}</div>
                     </div>
                   </ColumnLayout>
+
+                  {result.document_info && (
+                    <Box>
+                      <Box variant="awsui-key-label">Thông tin tài liệu</Box>
+                      <ColumnLayout columns={2}>
+                        <div>Tên file: {result.document_info.filename}</div>
+                        <div>Kích thước: {(result.document_info.file_size / 1024).toFixed(1)} KB</div>
+                        <div>Loại file: {result.document_info.file_type}</div>
+                        <div>Độ dài văn bản: {result.document_info.extracted_text_length.toLocaleString()} ký tự</div>
+                      </ColumnLayout>
+                    </Box>
+                  )}
 
                   <Box>
                     <Box variant="awsui-key-label">Số từ</Box>
@@ -388,7 +400,7 @@ const TextSummaryPage: React.FC<TextSummaryPageProps> = ({ onShowSnackbar }) => 
                     </ColumnLayout>
                   </Box>
 
-                  {result.document_analysis.recommendations && (
+                  {result.document_analysis?.recommendations && (
                     <Box>
                       <Box variant="awsui-key-label">Gợi ý</Box>
                       <div style={{ fontSize: '14px', color: '#5f6b7a' }}>

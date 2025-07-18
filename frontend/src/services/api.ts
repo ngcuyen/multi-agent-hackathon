@@ -8,10 +8,11 @@ const DEVELOPMENT_API_URL = 'http://localhost:8080';
 // Determine API base URL - Force production URL when hosted on S3 or CloudFront
 const isS3Hosted = window.location.hostname.includes('s3-website') || window.location.hostname.includes('amazonaws.com');
 const isCloudFront = window.location.hostname.includes('cloudfront.net');
-const isProduction = process.env.NODE_ENV === 'production' || isS3Hosted || isCloudFront;
+// const isProduction = process.env.NODE_ENV === 'production' || isS3Hosted || isCloudFront;
+const isProduction = false
 
-export const API_BASE_URL = isProduction 
-  ? PRODUCTION_API_URL 
+export const API_BASE_URL = isProduction
+  ? PRODUCTION_API_URL
   : process.env.REACT_APP_API_BASE_URL || DEVELOPMENT_API_URL;
 
 export const API_PREFIX = '/mutil_agent/api/v1'; // Backend API path
@@ -410,22 +411,22 @@ export const complianceAPI = {
       },
       body: JSON.stringify(request),
     });
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
+
     return await response.json();
   },
-  
+
   validateDocumentFile: async (file: File, documentType?: string, metadata?: any) => {
     const formData = new FormData();
     formData.append('file', file);
-    
+
     if (documentType) {
       formData.append('document_type', documentType);
     }
-    
+
     if (metadata) {
       // Add metadata fields to form data
       Object.keys(metadata).forEach(key => {
@@ -434,19 +435,19 @@ export const complianceAPI = {
         }
       });
     }
-    
+
     const response = await fetch(`${API_BASE_URL}${API_PREFIX}/compliance/document`, {
       method: 'POST',
       body: formData,
     });
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
+
     return await response.json();
   },
-  
+
   queryRegulations: async (query: string) => {
     const response = await fetch(`${API_BASE_URL}${API_PREFIX}/compliance/query`, {
       method: 'POST',
@@ -455,11 +456,11 @@ export const complianceAPI = {
       },
       body: JSON.stringify({ query }),
     });
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
+
     return await response.json();
   },
 };
