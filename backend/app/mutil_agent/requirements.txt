@@ -18,7 +18,7 @@ botocore==1.36.25
 langsmith
 langchain_aws==0.2.13
 psycopg2-binary==2.9.10
-pillow==11.1.0
+pillow==11.2.1
 beanie==1.29.0
 fastapi-pagination==0.12.34
 pandas==2.2.0
@@ -32,3 +32,5 @@ python-multipart==0.0.9
 pytesseract==0.3.10
 pdf2image==1.17.0
 # Note: System packages needed in Dockerfile: tesseract-ocr tesseract-ocr-vie
+strands-agents>=0.1.0
+strands-agents-tools>=0.1.0

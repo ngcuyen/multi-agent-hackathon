@@ -6,6 +6,7 @@ from app.mutil_agent.routes.v1.risk_routes import router as risk_router
 from app.mutil_agent.routes.v1.compliance_routes import router as compliance_router
 from app.mutil_agent.routes.v1.agents_routes import router as agents_router
 from app.mutil_agent.routes.v1.knowledge_routes import router as knowledge_router
+from app.mutil_agent.routes.pure_strands_routes import pure_strands_router
 
 router = APIRouter()
 
@@ -15,4 +16,5 @@ router.include_router(risk_router, prefix="/v1/risk", tags=["Risk Assessment"])
 router.include_router(compliance_router, prefix="/v1/compliance")
 router.include_router(agents_router, prefix="/v1/agents", tags=["Multi-Agent Coordination"])
 router.include_router(knowledge_router, prefix="/v1/knowledge", tags=["Knowledge Base"])
+router.include_router(pure_strands_router, prefix="/v1", tags=["Pure Strands VPBank System"])
 
