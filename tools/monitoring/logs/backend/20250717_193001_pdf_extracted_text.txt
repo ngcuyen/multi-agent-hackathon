@@ -1,0 +1,12 @@
+================================================================================
+EXTRACTED TEXT - 2025-07-17 19:30:01
+Extraction Method: PyPDF2 text extraction
+================================================================================
+
+AWS TEAM TODAY Kelye Wong Global Account ManagerAntoine Hom Senior Solutions Architect Shiva Subramanian Senior Solutions Architect Yogendra Singh Solutions Architect Yogish Kutkunje Senior Solutions Architect Sujoy Gulati Solutions Technical Account Manager Abhishek Jawali Senior Solutions Architect Sujoy Gulati Technical Account Mngr+ 2 Partner Solution Architects 1) Nguyen Dong Thanh Hiep 2) Van Hoang Kha Hung Nguyen Gia Manager, Solutions Architect Hackathon Team Presentation on Day 1 Hackathon Team Demo to Jury Day 3 •Expert scoring to shortlist the 4 teams out of the x teams in each location •Jury scoring to select the winners from the shortlisted 4 teams.Hackathon Team Demo to Jury Day 3 Expert scoring to shortlist the 4 teams out of the x teams in each location Jury scoring to select the winners from the shortlisted 4 teams.Overview of Hackathon environment on AWS •AWS Account: 637423364122 •AWS region: us -west -2 •Be Cost aware •Be judicious in the AWS services you use, resources you create •Special prize for the team which completes Hackathon with minimal AWS spend •CRITICAL: DO NOT bring in any SC3 or above dataOverview of Hackathon environment on AWS •If you see AWS Console errors (for e.g. Failed to Fetch ) •This could be due to Bosch Firewall restrictions •Consider using a Hotspot or a VPN connection •Amazon Bedrock models enabled – All Amazon models, Anthropic Claude models •DO NOT enable access to additional Bedrock models (if you have a need, please consult AWS Specialists) •Knowledge Base creation: DO NOT Enable redundancy (active replicas) (in the Additional Configuration section) •If you see API Throttling errors, please use Exponential Backoff mechanisms
+
+================================================================================
+Total characters: 1704
+Total words: 267
+Extraction method: PyPDF2 text extraction
+================================================================================
