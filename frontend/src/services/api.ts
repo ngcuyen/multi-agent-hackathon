@@ -11,14 +11,9 @@ const isCloudFront = window.location.hostname.includes('cloudfront.net');
 // const isProduction = process.env.NODE_ENV === 'production' || isS3Hosted || isCloudFront;
 const isProduction = false
 
-<<<<<<< HEAD
-const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-export const API_BASE_URL = isLocalhost ? DEVELOPMENT_API_URL : PRODUCTION_API_URL;
-=======
 export const API_BASE_URL = isProduction
   ? PRODUCTION_API_URL
   : process.env.REACT_APP_API_BASE_URL || DEVELOPMENT_API_URL;
->>>>>>> origin/main
 
 export const API_PREFIX = '/mutil_agent/api/v1'; // Backend API path
 export const PUBLIC_PREFIX = '/mutil_agent/public/api/v1'; // Backend public API path

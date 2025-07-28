@@ -36,11 +36,7 @@ MODEL_MAPPING = {
     "claude-3-5-sonnet": "anthropic.claude-3-5-sonnet-20240620-v1:0",
     "anthropic.claude-3-5-sonnet-20241022-v2:0": "anthropic.claude-3-5-sonnet-20240620-v1:0",  # Fallback to ON_DEMAND model
     "claude-3-haiku": "anthropic.claude-3-haiku-20240307-v1:0",  # ACTIVE + ON_DEMAND
-<<<<<<< HEAD
-    "anthropic.claude-3-7-sonnet-20250219-v1:0": "anthropic.claude-3-5-sonnet-20240620-v1:0",  # Fallback to ON_DEMAND model
-=======
     "anthropic.claude-3-7-sonnet-20250219-v1:0": "anthropic.claude-3-5-sonnet-20240620-v1:0",  # Fallback to ON_DEMAND model
->>>>>>> origin/main
 }
 
 # Amazon Bedrock Configuration

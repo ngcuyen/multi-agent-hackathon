@@ -79,6 +79,9 @@ async def assess_risk_file_endpoint(
         result = await assess_risk(dummy_request)
         return {"status": "success", "data": result}
     except Exception as e:
+        import traceback
+        print("ERROR in assess_risk_file_endpoint:", e)
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/monitor/{entity_id}", response_model=RiskMonitorResponse)
