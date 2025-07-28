@@ -1,0 +1,1 @@
+VPBank K-MULT Agent Studio là một hệ thống đa tác nhân AI tiên tiến được thiết kế để tự động hóa các quy trình ngân hàng phức tạp. Hệ thống sử dụng 6 tác nhân AI chuyên biệt để xử lý tài liệu, đánh giá rủi ro, và đưa ra quyết định thông minh.

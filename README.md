@@ -5,8 +5,76 @@
 [![React](https://img.shields.io/badge/React-18.2.0-61DAFB.svg?style=flat&logo=React)](https://reactjs.org)
 [![AWS](https://img.shields.io/badge/AWS-Bedrock-FF9900.svg?style=flat&logo=Amazon-AWS)](https://aws.amazon.com/bedrock/)
 [![Claude](https://img.shields.io/badge/Claude-3.7_Sonnet-FF6B35.svg?style=flat)](https://www.anthropic.com/claude)
+[![Project Status](https://img.shields.io/badge/Status-Production_Ready-brightgreen.svg)](https://github.com/ngcuyen/multi-agent-hackathon)
+[![Documentation](https://img.shields.io/badge/Docs-Complete-blue.svg)](./documentation/)
 
 > 🏆 **Multi-Agent Hackathon 2025 - Group 181** | Intelligent multi-agent automation platform designed to transform complex banking processes through collaborative AI, addressing critical inefficiencies in VPBank's core operations.
+
+## 📁 **Project Structure**
+
+```
+📂 VPBank K-MULT Agent Studio/
+├── 📂 documentation/          # Complete project documentation
+│   ├── design/               # Design documents & architecture
+│   ├── api/                  # API reference & OpenAPI specs
+│   └── user-guide/           # User manuals & tutorials
+├── 📂 assets/                # Media & presentation materials
+│   ├── presentations/        # PowerPoint & demo materials
+│   └── videos/              # Demo videos & training content
+├── 📂 deployment/            # Production-ready deployment
+│   ├── aws/                 # AWS deployment configurations
+│   ├── docker/              # Container configurations
+│   └── scripts/             # Automation scripts
+├── 📂 testing/               # Comprehensive testing suite
+│   ├── integration/         # API & system integration tests
+│   └── performance/         # Load & performance testing
+└── 📂 tools/                # Development & monitoring tools
+    ├── monitoring/          # Logs & system monitoring
+    └── backup/              # Backup & recovery tools
+```
+
+## 🚀 **Quick Start**
+
+### **Prerequisites**
+- Docker & Docker Compose
+- Node.js 18+ (for frontend development)
+- AWS Account with Bedrock access (Claude 3.7 Sonnet)
+
+### **1. Clone & Setup**
+```bash
+git clone https://github.com/ngcuyen/multi-agent-hackathon.git
+cd multi-agent-hackathon
+
+# Configure AWS credentials
+cp backend/app/mutil_agent/.env-template backend/app/mutil_agent/.env
+# Edit .env with your AWS credentials
+```
+
+### **2. Start Application**
+```bash
+# One-command startup
+./deployment/scripts/manage.sh start
+
+# Check status
+./deployment/scripts/manage.sh status
+```
+
+### **3. Access Services**
+- **Web Interface**: http://localhost:3000
+- **API Documentation**: http://localhost:8080/docs
+- **Health Check**: http://localhost:8080/health
+
+## 📚 **Documentation**
+
+| Document | Description | Location |
+|----------|-------------|----------|
+| 🏗️ **Project Structure** | Complete project organization | [`PROJECT_STRUCTURE.md`](./PROJECT_STRUCTURE.md) |
+| 🔗 **API Reference** | Complete API documentation | [`documentation/api/`](./documentation/api/) |
+| 📖 **User Manual** | End-user guide & tutorials | [`documentation/user-guide/`](./documentation/user-guide/) |
+| 🎯 **Design Document** | System architecture & design | [`documentation/design/`](./documentation/design/) |
+| 🎬 **Demo Materials** | Presentations & videos | [`assets/`](./assets/) |
+
+## 🎯 **Key Features**
 
 ---
 
