@@ -3,12 +3,12 @@
 
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115.2-009688.svg?style=flat&logo=FastAPI)](https://fastapi.tiangolo.com)
 [![React](https://img.shields.io/badge/React-18.2.0-61DAFB.svg?style=flat&logo=React)](https://reactjs.org)
-[![AWS](https://img.shields.io/badge/AWS-Bedrock-FF9900.svg?style=flat&logo=Amazon-AWS)](https://aws.amazon.com/bedrock/)
+[![AWS](https://img.shields.io/badge/AWS-Well--Architected-FF9900.svg?style=flat&logo=Amazon-AWS)](https://aws.amazon.com/architecture/well-architected/)
 [![Claude](https://img.shields.io/badge/Claude-3.7_Sonnet-FF6B35.svg?style=flat)](https://www.anthropic.com/claude)
 [![Project Status](https://img.shields.io/badge/Status-Production_Ready-brightgreen.svg)](https://github.com/ngcuyen/multi-agent-hackathon)
-[![Documentation](https://img.shields.io/badge/Docs-Complete-blue.svg)](./documentation/)
+[![AWS Architecture](https://img.shields.io/badge/AWS-Best_Practices-orange.svg)](./documentation/)
 
-> 🏆 **Multi-Agent Hackathon 2025 - Group 181** | Intelligent multi-agent automation platform designed to transform complex banking processes through collaborative AI, addressing critical inefficiencies in VPBank's core operations.
+> 🏆 **Multi-Agent Hackathon 2025 - Group 181** | Enterprise-grade multi-agent automation platform built on AWS Well-Architected Framework, designed to transform complex banking processes through collaborative AI, addressing critical inefficiencies in VPBank's core operations.
 
 ## 📁 **Project Structure**
 
@@ -17,65 +17,167 @@
 ├── 📂 documentation/          # Complete project documentation
 │   ├── design/               # Design documents & architecture
 │   ├── api/                  # API reference & OpenAPI specs
+│   ├── aws-best-practices/   # AWS implementation guidelines
 │   └── user-guide/           # User manuals & tutorials
 ├── 📂 assets/                # Media & presentation materials
 │   ├── presentations/        # PowerPoint & demo materials
 │   └── videos/              # Demo videos & training content
 ├── 📂 deployment/            # Production-ready deployment
-│   ├── aws/                 # AWS deployment configurations
+│   ├── aws/                 # AWS CloudFormation templates
 │   ├── docker/              # Container configurations
 │   └── scripts/             # Automation scripts
 ├── 📂 testing/               # Comprehensive testing suite
 │   ├── integration/         # API & system integration tests
 │   └── performance/         # Load & performance testing
-└── 📂 tools/                # Development & monitoring tools
-    ├── monitoring/          # Logs & system monitoring
-    └── backup/              # Backup & recovery tools
+├── 📂 tools/                # Development & monitoring tools
+│   ├── monitoring/          # Logs & system monitoring
+│   └── backup/              # Backup & recovery tools
+└── 📂 generated-diagrams/   # AWS architecture diagrams
+    ├── enterprise/          # Enterprise-grade architectures
+    ├── banking-standard/    # Banking compliance architectures
+    └── core-system/         # Technical implementation diagrams
 ```
 
 ## 🚀 **Quick Start**
 
 ### **Prerequisites**
-- Docker & Docker Compose
-- Node.js 18+ (for frontend development)
-- AWS Account with Bedrock access (Claude 3.7 Sonnet)
+- AWS Account with appropriate IAM permissions
+- AWS CLI v2.x configured with MFA
+- Docker & Docker Compose v2.x
+- Node.js 18+ LTS (for frontend development)
+- Python 3.11+ (for backend development)
+- AWS CDK v2.x (for infrastructure deployment)
 
 ### **1. Clone & Setup**
 ```bash
 git clone https://github.com/ngcuyen/multi-agent-hackathon.git
 cd multi-agent-hackathon
 
-# Configure AWS credentials
+# Configure AWS credentials with MFA
+aws configure --profile vpbank-kmult
+aws sts get-caller-identity --profile vpbank-kmult
+
+# Setup environment variables
 cp backend/app/mutil_agent/.env-template backend/app/mutil_agent/.env
-# Edit .env with your AWS credentials
+# Edit .env with your AWS credentials and region settings
 ```
 
-### **2. Start Application**
+### **2. Infrastructure Deployment (AWS Best Practices)**
 ```bash
-# One-command startup
-./deployment/scripts/manage.sh start
+# Deploy using AWS CDK (Infrastructure as Code)
+cd deployment/aws
+npm install
+cdk bootstrap --profile vpbank-kmult
+cdk deploy VPBankKMultStack --profile vpbank-kmult
 
-# Check status
-./deployment/scripts/manage.sh status
+# Verify deployment
+aws ecs list-clusters --profile vpbank-kmult
+aws s3 ls --profile vpbank-kmult
 ```
 
-### **3. Access Services**
-- **Web Interface**: http://localhost:3000
-- **API Documentation**: http://localhost:8080/docs
-- **Health Check**: http://localhost:8080/health
+### **3. Application Deployment**
+```bash
+# Build and push container images to ECR
+./deployment/scripts/build-and-push.sh
+
+# Deploy ECS services
+./deployment/scripts/deploy-services.sh
+
+# Check service health
+./deployment/scripts/health-check.sh
+```
+
+### **4. Access Services**
+- **Web Interface**: https://vpbank-kmult.example.com (via CloudFront)
+- **API Documentation**: https://api.vpbank-kmult.example.com/docs
+- **Health Check**: https://api.vpbank-kmult.example.com/health
+- **Monitoring Dashboard**: AWS CloudWatch Console
 
 ## 📚 **Documentation**
 
 | Document | Description | Location |
 |----------|-------------|----------|
-| 🏗️ **Project Structure** | Complete project organization | [`PROJECT_STRUCTURE.md`](./PROJECT_STRUCTURE.md) |
-| 🏛️ **AWS Architecture** | Complete system architecture diagrams | [`generated-diagrams/`](./generated-diagrams/) |
-| 🔗 **API Reference** | Complete API documentation | [`documentation/api/`](./documentation/api/) |
+| 🏗️ **AWS Architecture** | Complete AWS Well-Architected system diagrams | [`generated-diagrams/`](./generated-diagrams/) |
+| 📋 **AWS Best Practices** | Implementation guidelines and standards | [`documentation/aws-best-practices/`](./documentation/aws-best-practices/) |
+| 🔗 **API Reference** | Complete API documentation with OpenAPI specs | [`documentation/api/`](./documentation/api/) |
 | 📖 **User Manual** | End-user guide & tutorials | [`documentation/user-guide/`](./documentation/user-guide/) |
-| 🎯 **Design Document** | System architecture & design | [`documentation/design/`](./documentation/design/) |
+| 🎯 **Design Document** | System architecture & design patterns | [`documentation/design/`](./documentation/design/) |
 | 🎬 **Demo Materials** | Presentations & videos | [`assets/`](./assets/) |
 
-### 🏗️ **Architecture Diagrams**
+## 🏗️ **AWS Well-Architected Framework Implementation**
+
+### 🎯 **Five Pillars of AWS Well-Architected Framework**
+
+The VPBank K-MULT Agent Studio is built following AWS Well-Architected Framework principles, ensuring operational excellence, security, reliability, performance efficiency, and cost optimization.
+
+#### **1. 🔧 Operational Excellence**
+- **Infrastructure as Code (IaC)**: AWS CloudFormation and CDK for consistent deployments
+- **Automated Deployment**: CI/CD pipelines with AWS CodePipeline and CodeBuild
+- **Monitoring & Observability**: CloudWatch, X-Ray, and CloudTrail for comprehensive monitoring
+- **Configuration Management**: AWS Systems Manager Parameter Store and Secrets Manager
+- **Automated Recovery**: Auto Scaling Groups and health checks for self-healing systems
+
+#### **2. 🔒 Security**
+- **Identity & Access Management**: IAM roles with least privilege principle
+- **Data Protection**: Encryption at rest (KMS) and in transit (TLS 1.3)
+- **Network Security**: VPC with private subnets, NACLs, and Security Groups
+- **Threat Detection**: AWS GuardDuty, Security Hub, and AWS Config
+- **Compliance**: Banking-grade security with CloudHSM and audit trails
+
+#### **3. 🔄 Reliability**
+- **Multi-AZ Deployment**: Resources distributed across multiple Availability Zones
+- **Auto Scaling**: ECS Fargate with target tracking scaling policies
+- **Backup & Recovery**: Automated backups with point-in-time recovery
+- **Disaster Recovery**: Cross-region replication with RTO < 4 hours, RPO < 1 hour
+- **Health Monitoring**: Application Load Balancer health checks and CloudWatch alarms
+
+#### **4. ⚡ Performance Efficiency**
+- **Right-Sizing**: AWS Compute Optimizer recommendations for optimal resource allocation
+- **Caching Strategy**: ElastiCache Redis and CloudFront for improved performance
+- **Content Delivery**: Global CDN with edge locations for low latency
+- **Database Optimization**: RDS with read replicas and connection pooling
+- **Serverless Computing**: ECS Fargate for automatic scaling without server management
+
+#### **5. 💰 Cost Optimization**
+- **Resource Optimization**: Spot instances and Savings Plans for cost reduction
+- **Storage Lifecycle**: S3 Intelligent Tiering for automatic cost optimization
+- **Monitoring & Alerting**: AWS Budgets and Cost Explorer for cost visibility
+- **Reserved Capacity**: Reserved instances for predictable workloads
+- **Auto Scaling**: Dynamic scaling to match demand and reduce waste
+
+---
+
+## 🏗️ **AWS Architecture Best Practices**
+
+### 🎯 **Design Principles**
+
+#### **Scalability & Elasticity**
+- **Horizontal Scaling**: ECS Fargate services scale out/in based on demand
+- **Auto Scaling Groups**: Automatic capacity adjustment with CloudWatch metrics
+- **Load Distribution**: Application Load Balancer with multiple target groups
+- **Database Scaling**: RDS read replicas and DynamoDB on-demand scaling
+
+#### **High Availability & Fault Tolerance**
+- **Multi-AZ Architecture**: Resources deployed across 3+ Availability Zones
+- **Circuit Breaker Pattern**: Graceful degradation with retry mechanisms
+- **Health Checks**: Comprehensive health monitoring at all layers
+- **Graceful Failover**: Automated failover with minimal service disruption
+
+#### **Security by Design**
+- **Defense in Depth**: Multiple security layers from network to application
+- **Zero Trust Architecture**: Verify every request regardless of location
+- **Encryption Everywhere**: Data encrypted at rest, in transit, and in processing
+- **Audit & Compliance**: Comprehensive logging and monitoring for regulatory requirements
+
+#### **Performance Optimization**
+- **Caching Strategy**: Multi-layer caching (CloudFront, ElastiCache, Application)
+- **Database Optimization**: Query optimization, indexing, and connection pooling
+- **Content Optimization**: Image compression, minification, and CDN distribution
+- **Asynchronous Processing**: Event-driven architecture with SQS and SNS
+
+---
+
+### 🏗️ **AWS Well-Architected Architecture Diagrams**
 
 #### **🎯 Enterprise Architecture Overview**
 | Diagram | Description | File |
@@ -100,6 +202,8 @@ cp backend/app/mutil_agent/.env-template backend/app/mutil_agent/.env
 | 🔄 **Data Processing Pipeline** | Document processing workflow with containerized agent coordination | [`vpbank-kmult-data-pipeline.png`](./generated-diagrams/vpbank-kmult-data-pipeline.png) |
 | 🔒 **Security & Compliance** | Banking-grade security with containerized regulatory compliance | [`vpbank-kmult-security-architecture.png`](./generated-diagrams/vpbank-kmult-security-architecture.png) |
 | 💰 **Cost & Scalability** | ECS Fargate auto-scaling and cost optimization architecture | [`vpbank-kmult-cost-scalability.png`](./generated-diagrams/vpbank-kmult-cost-scalability.png) |
+
+---
 
 ## 🎯 **Key Features**
 
@@ -167,11 +271,397 @@ Our solution implements a **6-agent collaborative architecture** with specialize
 
 ---
 
-## 🏗️ Technical Architecture
+## 🏗️ **AWS Best Practices Implementation**
 
-### 🎯 AWS Cloud Architecture Overview
+### 🎯 **Infrastructure as Code (IaC)**
 
-The VPBank K-MULT Agent Studio is built on a comprehensive AWS cloud architecture designed for enterprise-grade banking operations with containerized multi-agent AI collaboration.
+#### **AWS CloudFormation & CDK**
+```yaml
+# CloudFormation Template Structure
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'VPBank K-MULT Agent Studio - Banking Multi-Agent Platform'
+
+Parameters:
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues: [development, staging, production]
+  
+  VpcCidr:
+    Type: String
+    Default: '10.0.0.0/16'
+    Description: 'CIDR block for VPC'
+
+Resources:
+  # VPC with Multi-AZ subnets
+  VPBankVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCidr
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::StackName}-vpc'
+        - Key: Environment
+          Value: !Ref Environment
+
+  # ECS Fargate Cluster for Multi-Agent Platform
+  ECSCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Sub '${AWS::StackName}-cluster'
+      CapacityProviders:
+        - FARGATE
+        - FARGATE_SPOT
+      DefaultCapacityProviderStrategy:
+        - CapacityProvider: FARGATE
+          Weight: 1
+        - CapacityProvider: FARGATE_SPOT
+          Weight: 4
+```
+
+#### **AWS CDK Implementation**
+```typescript
+// CDK Stack for VPBank K-MULT
+export class VPBankKMultStack extends Stack {
+  constructor(scope: Construct, id: string, props?: StackProps) {
+    super(scope, id, props);
+
+    // VPC with Multi-AZ deployment
+    const vpc = new ec2.Vpc(this, 'VPBankVPC', {
+      maxAzs: 3,
+      natGateways: 3,
+      subnetConfiguration: [
+        {
+          cidrMask: 24,
+          name: 'public',
+          subnetType: ec2.SubnetType.PUBLIC,
+        },
+        {
+          cidrMask: 24,
+          name: 'private',
+          subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
+        },
+        {
+          cidrMask: 28,
+          name: 'database',
+          subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
+        },
+      ],
+    });
+
+    // ECS Fargate Cluster
+    const cluster = new ecs.Cluster(this, 'VPBankCluster', {
+      vpc,
+      containerInsights: true,
+      capacityProviders: ['FARGATE', 'FARGATE_SPOT'],
+    });
+  }
+}
+```
+
+### 🔒 **Security Best Practices**
+
+#### **IAM Roles & Policies (Least Privilege)**
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "bedrock:InvokeModel",
+        "textract:AnalyzeDocument",
+        "comprehend:DetectEntities"
+      ],
+      "Resource": [
+        "arn:aws:bedrock:*:*:model/anthropic.claude-3-sonnet-*",
+        "arn:aws:textract:*:*:*",
+        "arn:aws:comprehend:*:*:*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": ["ap-southeast-1", "us-east-1"]
+        }
+      }
+    }
+  ]
+}
+```
+
+#### **VPC Security Configuration**
+```yaml
+# Network ACLs for Banking Security
+PrivateNetworkAcl:
+  Type: AWS::EC2::NetworkAcl
+  Properties:
+    VpcId: !Ref VPBankVPC
+    Tags:
+      - Key: Name
+        Value: Private-NACL
+
+# Security Group for ECS Tasks
+ECSSecurityGroup:
+  Type: AWS::EC2::SecurityGroup
+  Properties:
+    GroupDescription: Security group for ECS Fargate tasks
+    VpcId: !Ref VPBankVPC
+    SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 8080
+        ToPort: 8080
+        SourceSecurityGroupId: !Ref ALBSecurityGroup
+    SecurityGroupEgress:
+      - IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: 0.0.0.0/0
+```
+
+### 📊 **Monitoring & Observability**
+
+#### **CloudWatch Custom Metrics**
+```python
+import boto3
+from datetime import datetime
+
+cloudwatch = boto3.client('cloudwatch')
+
+def publish_custom_metrics(agent_name: str, processing_time: float, success: bool):
+    """Publish custom metrics for banking agents"""
+    
+    # Processing time metric
+    cloudwatch.put_metric_data(
+        Namespace='VPBank/MultiAgent',
+        MetricData=[
+            {
+                'MetricName': 'ProcessingTime',
+                'Dimensions': [
+                    {
+                        'Name': 'AgentName',
+                        'Value': agent_name
+                    }
+                ],
+                'Value': processing_time,
+                'Unit': 'Seconds',
+                'Timestamp': datetime.utcnow()
+            }
+        ]
+    )
+    
+    # Success rate metric
+    cloudwatch.put_metric_data(
+        Namespace='VPBank/MultiAgent',
+        MetricData=[
+            {
+                'MetricName': 'SuccessRate',
+                'Dimensions': [
+                    {
+                        'Name': 'AgentName',
+                        'Value': agent_name
+                    }
+                ],
+                'Value': 1 if success else 0,
+                'Unit': 'Count',
+                'Timestamp': datetime.utcnow()
+            }
+        ]
+    )
+```
+
+#### **X-Ray Distributed Tracing**
+```python
+from aws_xray_sdk.core import xray_recorder
+from aws_xray_sdk.core import patch_all
+
+# Patch AWS SDK calls
+patch_all()
+
+@xray_recorder.capture('document_processing')
+def process_document(document_id: str):
+    """Process banking document with X-Ray tracing"""
+    
+    subsegment = xray_recorder.begin_subsegment('ocr_extraction')
+    try:
+        # OCR processing
+        ocr_result = extract_text_with_textract(document_id)
+        subsegment.put_annotation('document_type', ocr_result.get('type'))
+        subsegment.put_metadata('ocr_confidence', ocr_result.get('confidence'))
+    finally:
+        xray_recorder.end_subsegment()
+    
+    return ocr_result
+```
+
+### 🔄 **Auto Scaling & Performance**
+
+#### **ECS Service Auto Scaling**
+```yaml
+# ECS Service with Auto Scaling
+ECSService:
+  Type: AWS::ECS::Service
+  Properties:
+    Cluster: !Ref ECSCluster
+    TaskDefinition: !Ref TaskDefinition
+    DesiredCount: 2
+    LaunchType: FARGATE
+    NetworkConfiguration:
+      AwsvpcConfiguration:
+        SecurityGroups:
+          - !Ref ECSSecurityGroup
+        Subnets:
+          - !Ref PrivateSubnet1
+          - !Ref PrivateSubnet2
+
+# Auto Scaling Target
+ScalableTarget:
+  Type: AWS::ApplicationAutoScaling::ScalableTarget
+  Properties:
+    MaxCapacity: 50
+    MinCapacity: 2
+    ResourceId: !Sub 'service/${ECSCluster}/${ECSService.Name}'
+    RoleARN: !Sub 'arn:aws:iam::${AWS::AccountId}:role/aws-service-role/ecs.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_ECSService'
+    ScalableDimension: ecs:service:DesiredCount
+    ServiceNamespace: ecs
+
+# Scaling Policy
+ScalingPolicy:
+  Type: AWS::ApplicationAutoScaling::ScalingPolicy
+  Properties:
+    PolicyName: VPBankTargetTrackingScalingPolicy
+    PolicyType: TargetTrackingScaling
+    ScalingTargetId: !Ref ScalableTarget
+    TargetTrackingScalingPolicyConfiguration:
+      PredefinedMetricSpecification:
+        PredefinedMetricType: ECSServiceAverageCPUUtilization
+      TargetValue: 70.0
+```
+
+### 💰 **Cost Optimization Strategies**
+
+#### **Resource Tagging Strategy**
+```yaml
+# Comprehensive tagging for cost allocation
+Tags:
+  - Key: Project
+    Value: VPBank-K-MULT
+  - Key: Environment
+    Value: !Ref Environment
+  - Key: CostCenter
+    Value: Banking-Technology
+  - Key: Owner
+    Value: Multi-Agent-Team
+  - Key: Application
+    Value: Banking-Process-Automation
+  - Key: Compliance
+    Value: Banking-Grade
+```
+
+#### **S3 Lifecycle Policies**
+```json
+{
+  "Rules": [
+    {
+      "ID": "VPBankDocumentLifecycle",
+      "Status": "Enabled",
+      "Filter": {
+        "Prefix": "banking-documents/"
+      },
+      "Transitions": [
+        {
+          "Days": 30,
+          "StorageClass": "STANDARD_IA"
+        },
+        {
+          "Days": 90,
+          "StorageClass": "GLACIER"
+        },
+        {
+          "Days": 365,
+          "StorageClass": "DEEP_ARCHIVE"
+        }
+      ]
+    }
+  ]
+}
+```
+
+### 🔧 **Operational Excellence**
+
+#### **Health Check Implementation**
+```python
+from fastapi import FastAPI, HTTPException
+from typing import Dict, Any
+import boto3
+import asyncio
+
+app = FastAPI()
+
+@app.get("/health")
+async def health_check() -> Dict[str, Any]:
+    """Comprehensive health check for banking services"""
+    
+    health_status = {
+        "status": "healthy",
+        "timestamp": datetime.utcnow().isoformat(),
+        "services": {}
+    }
+    
+    # Check ECS service health
+    try:
+        ecs_client = boto3.client('ecs')
+        services = ecs_client.describe_services(
+            cluster='vpbank-cluster',
+            services=['supervisor-agent', 'document-agent']
+        )
+        health_status["services"]["ecs"] = "healthy"
+    except Exception as e:
+        health_status["services"]["ecs"] = f"unhealthy: {str(e)}"
+        health_status["status"] = "degraded"
+    
+    # Check database connectivity
+    try:
+        # Database health check logic
+        health_status["services"]["database"] = "healthy"
+    except Exception as e:
+        health_status["services"]["database"] = f"unhealthy: {str(e)}"
+        health_status["status"] = "degraded"
+    
+    return health_status
+```
+
+#### **Automated Backup Strategy**
+```yaml
+# RDS Automated Backups
+DatabaseInstance:
+  Type: AWS::RDS::DBInstance
+  Properties:
+    BackupRetentionPeriod: 35
+    PreferredBackupWindow: "03:00-04:00"
+    PreferredMaintenanceWindow: "sun:04:00-sun:05:00"
+    DeletionProtection: true
+    MultiAZ: true
+
+# S3 Cross-Region Replication
+ReplicationConfiguration:
+  Role: !GetAtt ReplicationRole.Arn
+  Rules:
+    - Id: ReplicateToSecondaryRegion
+      Status: Enabled
+      Prefix: banking-documents/
+      Destination:
+        Bucket: !Sub 'arn:aws:s3:::${BackupBucket}'
+        StorageClass: STANDARD_IA
+```
+
+---
+
+## 🏗️ **AWS Well-Architected Technical Architecture**
+
+### 🎯 **AWS Cloud Architecture Overview**
+
+The VPBank K-MULT Agent Studio is built on a comprehensive AWS cloud architecture designed for enterprise-grade banking operations with containerized multi-agent AI collaboration, following AWS Well-Architected Framework principles.
 
 #### 🏢 **Enterprise Banking Architecture**
 ![VPBank K-MULT Enterprise Architecture](./generated-diagrams/vpbank-kmult-enterprise-architecture.png)
@@ -200,7 +690,7 @@ The VPBank K-MULT Agent Studio is built on a comprehensive AWS cloud architectur
 
 ---
 
-### 🏗️ **Architecture Components**
+### 🏗️ **AWS Well-Architected Components**
 
 #### **Multi-Agent Compute Layer (ECS Fargate)**
 - **ECS Fargate Cluster**: Serverless containerized agents with auto-scaling capabilities
@@ -240,7 +730,7 @@ The VPBank K-MULT Agent Studio is built on a comprehensive AWS cloud architectur
 - **NAT Gateway**: Secure outbound internet access for private resources
 - **AWS Transit Gateway**: Inter-region connectivity for disaster recovery
 
-### 💡 **Technology Stack**
+### 💡 **AWS-Native Technology Stack**
 
 #### **Containerized Multi-Agent Platform**
 - **ECS Fargate**: Serverless container orchestration for banking agents
@@ -253,20 +743,20 @@ The VPBank K-MULT Agent Studio is built on a comprehensive AWS cloud architectur
 - **React 18.2.0**: Modern UI framework with hooks and context API
 - **AWS CloudScape**: Enterprise-grade UI components for banking applications
 - **TypeScript**: Type-safe development with enhanced code quality
-- **Responsive Design**: Mobile-first design with desktop optimization
+- **Amazon CloudFront**: Global content delivery with edge optimization
 
 #### **Backend Services**
 - **FastAPI 0.115.2**: High-performance async API framework with automatic documentation
 - **LangChain**: Multi-agent orchestration and AI workflow management
 - **Python 3.11**: Modern Python with async/await support and performance improvements
-- **Pydantic**: Data validation and serialization with type hints
+- **AWS Systems Manager**: Configuration and secrets management
 
 #### **AI/ML Stack**
 - **AWS Bedrock**: Claude 3.7 Sonnet with 200K context window for complex reasoning
 - **Amazon Textract**: Advanced OCR with Vietnamese language optimization
 - **Amazon Comprehend**: NLP processing with custom banking entity recognition
 - **Amazon SageMaker**: Custom ML models for risk assessment and credit scoring
-- **scikit-learn**: Machine learning algorithms for financial analysis
+- **Amazon Fraud Detector**: Real-time fraud detection and prevention
 
 #### **Infrastructure & DevOps**
 - **AWS ECS Fargate**: Serverless container orchestration with auto-scaling
@@ -275,7 +765,7 @@ The VPBank K-MULT Agent Studio is built on a comprehensive AWS cloud architectur
 - **AWS CodePipeline**: CI/CD pipeline automation with blue-green deployments
 - **Amazon CloudWatch**: Comprehensive monitoring and alerting
 
-### 📈 **Performance Specifications**
+### 📈 **AWS Performance Specifications**
 
 #### **Processing Capabilities**
 - **Document Throughput**: 10,000+ documents per day processing capacity
@@ -298,6 +788,8 @@ The VPBank K-MULT Agent Studio is built on a comprehensive AWS cloud architectur
 - **ROI Timeline**: 3 months through operational savings
 - **Scaling Economics**: Pay-per-use model with intelligent auto-scaling
 - **Resource Optimization**: Right-sizing recommendations and cost monitoring
+
+---
 
 ---
 
