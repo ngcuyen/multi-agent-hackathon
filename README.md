@@ -189,11 +189,13 @@ The VPBank K-MULT Agent Studio is built on a comprehensive AWS cloud architectur
 
 ### 🏗️ **Architecture Components**
 
-#### **Multi-Agent Compute Layer**
-- **ECS Fargate Cluster**: Containerized agents with auto-scaling
-- **6 Specialized Agents**: Supervisor, Document Intelligence, Risk Assessment, Compliance, Decision Synthesis, Process Automation
-- **Container Registry**: ECR for agent image management
-- **Load Balancing**: Application Load Balancer with health checks
+#### **Multi-Agent Compute Layer (ECS Fargate)**
+- **ECS Fargate Cluster**: Serverless containerized agents with auto-scaling
+- **6 Specialized Banking Agents**: Supervisor, Document Intelligence, Risk Assessment, Compliance, Decision Synthesis, Process Automation
+- **Container Registry**: ECR for agent image management and versioning
+- **Load Balancing**: Application Load Balancer with health checks and SSL termination
+- **Service Discovery**: AWS Cloud Map for inter-agent communication
+- **Auto Scaling**: Target-based scaling for optimal resource utilization
 
 #### **AI/ML Services Integration**
 - **AWS Bedrock**: Claude 3.7 Sonnet for advanced reasoning and Vietnamese NLP
@@ -311,11 +313,11 @@ The VPBank K-MULT system follows enterprise banking architecture standards with 
 - **Least Privilege Access**: IAM roles with minimal required permissions
 - **Access Analytics**: IAM Access Analyzer for continuous permission review
 
-#### **Banking Compliance Framework**
-- **Vietnamese Banking Compliance**: SBV regulations and circular compliance
-- **International Standards**: UCP 600, ISBP 821, and SWIFT message standards
-- **Risk Management**: Basel III capital adequacy and risk assessment models
-- **AML/CFT Compliance**: Anti-Money Laundering and Counter-Terrorism Financing
+#### **Banking Compliance Framework (ECS Fargate)**
+- **Vietnamese Banking Compliance**: SBV regulations and circular compliance validators running on ECS Fargate
+- **International Standards**: UCP 600, ISBP 821, and SWIFT message standards processors on ECS Fargate
+- **Risk Management**: Basel III capital adequacy and risk assessment models on containerized infrastructure
+- **AML/CFT Compliance**: Anti-Money Laundering and Counter-Terrorism Financing engines on ECS Fargate
 
 #### **Data Protection & Encryption**
 - **Encryption at Rest**: AWS KMS with banking-grade encryption keys
