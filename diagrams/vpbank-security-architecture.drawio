@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2025-01-28T17:00:00.000Z" agent="5.0" etag="draw.io" version="24.7.17">
+  <diagram name="VPBank Security Architecture" id="vpbank-security">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- Title -->
+        <mxCell id="title" value="VPBank K-MULT Banking-Grade Security Architecture" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="250" y="20" width="669" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- Internet/External Threats -->
+        <mxCell id="threats-cluster" value="🌐 External Threats & Internet" style="swimlane;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#F44336;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="80" width="250" height="150" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="ddos-attacks" value="⚡ DDoS Attacks" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCDD2;strokeColor=#D32F2F;" vertex="1" parent="threats-cluster">
+          <mxGeometry x="20" y="40" width="100" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="malicious-traffic" value="🦠 Malicious Traffic" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCDD2;strokeColor=#D32F2F;" vertex="1" parent="threats-cluster">
+          <mxGeometry x="130" y="40" width="100" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="bot-attacks" value="🤖 Bot Attacks" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCDD2;strokeColor=#D32F2F;" vertex="1" parent="threats-cluster">
+          <mxGeometry x="20" y="90" width="100" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="data-breaches" value="🔓 Data Breach Attempts" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCDD2;strokeColor=#D32F2F;" vertex="1" parent="threats-cluster">
+          <mxGeometry x="130" y="90" width="100" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- Perimeter Security -->
+        <mxCell id="perimeter-cluster" value="🛡️ Perimeter Security Layer" style="swimlane;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FF9800;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="350" y="80" width="400" height="150" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="aws-shield" value="🛡️ AWS Shield Advanced&#xa;(DDoS Protection)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE0B2;strokeColor=#F57C00;" vertex="1" parent="perimeter-cluster">
+          <mxGeometry x="20" y="40" width="120" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="aws-waf" value="🔥 AWS WAF&#xa;(Web Application Firewall)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE0B2;strokeColor=#F57C00;" vertex="1" parent="perimeter-cluster">
+          <mxGeometry x="150" y="40" width="120" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="cloudfront" value="🌐 CloudFront&#xa;(Global CDN + Security)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE0B2;strokeColor=#F57C00;" vertex="1" parent="perimeter-cluster">
+          <mxGeometry x="280" y="40" width="120" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="rate-limiting" value="⏱️ Rate Limiting&#xa;& Throttling" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE0B2;strokeColor=#F57C00;" vertex="1" parent="perimeter-cluster">
+          <mxGeometry x="20" y="100" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="geo-blocking" value="🌍 Geo-blocking&#xa;& IP Filtering" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE0B2;strokeColor=#F57C00;" vertex="1" parent="perimeter-cluster">
+          <mxGeometry x="150" y="100" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="bot-protection" value="🤖 Bot Protection&#xa;& CAPTCHA" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE0B2;strokeColor=#F57C00;" vertex="1" parent="perimeter-cluster">
+          <mxGeometry x="280" y="100" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- Network Security -->
+        <mxCell id="network-cluster" value="🔒 Network Security Layer" style="swimlane;whiteSpace=wrap;html=1;fillColor=#E8F5E8;strokeColor=#4CAF50;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="800" y="80" width="310" height="150" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="vpc" value="🏠 VPC&#xa;(Isolated Network)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#388E3C;" vertex="1" parent="network-cluster">
+          <mxGeometry x="20" y="40" width="120" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="security-groups" value="🔐 Security Groups&#xa;(Stateful Firewall)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#388E3C;" vertex="1" parent="network-cluster">
+          <mxGeometry x="150" y="40" width="120" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="nacl" value="🚧 Network ACLs&#xa;(Stateless Firewall)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#388E3C;" vertex="1" parent="network-cluster">
+          <mxGeometry x="20" y="100" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="private-subnets" value="🔒 Private Subnets&#xa;(No Internet Access)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#388E3C;" vertex="1" parent="network-cluster">
+          <mxGeometry x="150" y="100" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- Application Security -->
+        <mxCell id="app-security-cluster" value="🔐 Application Security Layer" style="swimlane;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1976D2;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="280" width="520" height="200" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="api-gateway-security" value="🚪 API Gateway&#xa;Authentication & Authorization" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;" vertex="1" parent="app-security-cluster">
+          <mxGeometry x="20" y="40" width="140" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="oauth-jwt" value="🎫 OAuth 2.0 + JWT&#xa;Token-based Auth" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;" vertex="1" parent="app-security-cluster">
+          <mxGeometry x="180" y="40" width="140" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="mfa" value="🔑 Multi-Factor Auth&#xa;(MFA)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;" vertex="1" parent="app-security-cluster">
+          <mxGeometry x="340" y="40" width="140" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="input-validation" value="✅ Input Validation&#xa;& Sanitization" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;" vertex="1" parent="app-security-cluster">
+          <mxGeometry x="20" y="100" width="140" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="sql-injection" value="💉 SQL Injection&#xa;Protection" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;" vertex="1" parent="app-security-cluster">
+          <mxGeometry x="180" y="100" width="140" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="xss-protection" value="🛡️ XSS Protection&#xa;& CSRF Guards" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;" vertex="1" parent="app-security-cluster">
+          <mxGeometry x="340" y="100" width="140" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Data Encryption -->
+        <mxCell id="encryption-cluster" value="🔐 Data Encryption & Key Management" style="swimlane;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#7B1FA2;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="590" y="280" width="520" height="200" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="kms" value="🔑 AWS KMS&#xa;(Key Management Service)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1BEE7;strokeColor=#7B1FA2;" vertex="1" parent="encryption-cluster">
+          <mxGeometry x="20" y="40" width="140" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="cloudhsm" value="🏛️ AWS CloudHSM&#xa;(Hardware Security Module)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1BEE7;strokeColor=#7B1FA2;" vertex="1" parent="encryption-cluster">
+          <mxGeometry x="180" y="40" width="140" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="encryption-transit" value="🚀 Encryption in Transit&#xa;(TLS 1.3)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1BEE7;strokeColor=#7B1FA2;" vertex="1" parent="encryption-cluster">
+          <mxGeometry x="340" y="40" width="140" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="encryption-rest" value="💾 Encryption at Rest&#xa;(AES-256)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1BEE7;strokeColor=#7B1FA2;" vertex="1" parent="encryption-cluster">
+          <mxGeometry x="20" y="100" width="140" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="field-encryption" value="🔒 Field-Level Encryption&#xa;(Sensitive Data)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1BEE7;strokeColor=#7B1FA2;" vertex="1" parent="encryption-cluster">
+          <mxGeometry x="180" y="100" width="140" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="key-rotation" value="🔄 Automatic Key Rotation&#xa;(90-day cycle)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1BEE7;strokeColor=#7B1FA2;" vertex="1" parent="encryption-cluster">
+          <mxGeometry x="340" y="100" width="140" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Identity & Access Management -->
+        <mxCell id="iam-cluster" value="👤 Identity & Access Management" style="swimlane;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#FFC107;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="520" width="520" height="150" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="iam-roles" value="🎭 IAM Roles&#xa;(Least Privilege)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9C4;strokeColor=#F57F17;" vertex="1" parent="iam-cluster">
+          <mxGeometry x="20" y="40" width="120" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="rbac" value="🔐 Role-Based Access&#xa;Control (RBAC)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9C4;strokeColor=#F57F17;" vertex="1" parent="iam-cluster">
+          <mxGeometry x="150" y="40" width="120" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="service-accounts" value="⚙️ Service Accounts&#xa;(Machine Identity)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9C4;strokeColor=#F57F17;" vertex="1" parent="iam-cluster">
+          <mxGeometry x="280" y="40" width="120" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="session-management" value="⏰ Session Management&#xa;& Timeout" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9C4;strokeColor=#F57F17;" vertex="1" parent="iam-cluster">
+          <mxGeometry x="410" y="40" width="120" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="access-logs" value="📝 Access Logs&#xa;& Audit Trail" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9C4;strokeColor=#F57F17;" vertex="1" parent="iam-cluster">
+          <mxGeometry x="85" y="100" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="privilege-escalation" value="⬆️ Privilege Escalation&#xa;Prevention" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9C4;strokeColor=#F57F17;" vertex="1" parent="iam-cluster">
+          <mxGeometry x="215" y="100" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="zero-trust" value="🎯 Zero Trust&#xa;Architecture" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9C4;strokeColor=#F57F17;" vertex="1" parent="iam-cluster">
+          <mxGeometry x="345" y="100" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- Threat Detection & Monitoring -->
+        <mxCell id="monitoring-cluster" value="🔍 Threat Detection & Security Monitoring" style="swimlane;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#F44336;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="590" y="520" width="520" height="150" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="guardduty" value="🛡️ Amazon GuardDuty&#xa;(Threat Detection)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCDD2;strokeColor=#D32F2F;" vertex="1" parent="monitoring-cluster">
+          <mxGeometry x="20" y="40" width="120" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="security-hub" value="🏢 AWS Security Hub&#xa;(Central Dashboard)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCDD2;strokeColor=#D32F2F;" vertex="1" parent="monitoring-cluster">
+          <mxGeometry x="150" y="40" width="120" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="cloudtrail" value="👣 AWS CloudTrail&#xa;(API Audit Logs)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCDD2;strokeColor=#D32F2F;" vertex="1" parent="monitoring-cluster">
+          <mxGeometry x="280" y="40" width="120" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="config" value="⚙️ AWS Config&#xa;(Compliance Monitoring)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCDD2;strokeColor=#D32F2F;" vertex="1" parent="monitoring-cluster">
+          <mxGeometry x="410" y="40" width="120" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="siem" value="📊 SIEM Integration&#xa;(Security Analytics)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCDD2;strokeColor=#D32F2F;" vertex="1" parent="monitoring-cluster">
+          <mxGeometry x="85" y="100" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="incident-response" value="🚨 Incident Response&#xa;Automation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCDD2;strokeColor=#D32F2F;" vertex="1" parent="monitoring-cluster">
+          <mxGeometry x="215" y="100" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="forensics" value="🔬 Digital Forensics&#xa;& Investigation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCDD2;strokeColor=#D32F2F;" vertex="1" parent="monitoring-cluster">
+          <mxGeometry x="345" y="100" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- Banking Compliance -->
+        <mxCell id="banking-compliance" value="🏦 Banking Security Compliance: SBV | Basel III | AML/CFT | PCI DSS | ISO 27001" style="text;html=1;strokeColor=#4CAF50;fillColor=#E8F5E8;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="250" y="700" width="669" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- Security Flow Connections -->
+        <mxCell id="sec-flow1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=3;strokeColor=#F44336;" edge="1" parent="1" source="ddos-attacks" target="aws-shield">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="sec-flow2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=3;strokeColor=#FF9800;" edge="1" parent="1" source="aws-waf" target="vpc">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="sec-flow3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#4CAF50;" edge="1" parent="1" source="vpc" target="api-gateway-security">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="sec-flow4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#1976D2;" edge="1" parent="1" source="oauth-jwt" target="kms">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="sec-flow5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#7B1FA2;" edge="1" parent="1" source="cloudhsm" target="iam-roles">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="sec-flow6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#FFC107;" edge="1" parent="1" source="access-logs" target="guardduty">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

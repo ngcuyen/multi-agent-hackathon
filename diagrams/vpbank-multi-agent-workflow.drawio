@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2025-01-28T17:00:00.000Z" agent="5.0" etag="draw.io" version="24.7.17">
+  <diagram name="VPBank Multi-Agent Workflow" id="vpbank-workflow">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- Title -->
+        <mxCell id="title" value="VPBank K-MULT Multi-Agent Workflow Architecture" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="250" y="20" width="669" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- Input Layer -->
+        <mxCell id="input-cluster" value="Input Layer" style="swimlane;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1976D2;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="80" width="200" height="180" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="doc-upload" value="📄 Document Upload&#xa;(PDF, Images)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;" vertex="1" parent="input-cluster">
+          <mxGeometry x="20" y="40" width="160" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="api-request" value="🔗 API Request&#xa;(REST/GraphQL)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;" vertex="1" parent="input-cluster">
+          <mxGeometry x="20" y="90" width="160" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="batch-process" value="📦 Batch Processing&#xa;(Scheduled Jobs)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;" vertex="1" parent="input-cluster">
+          <mxGeometry x="20" y="140" width="160" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- Supervisor Agent -->
+        <mxCell id="supervisor-cluster" value="🎯 Supervisor Agent (ECS Fargate)" style="swimlane;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#7B1FA2;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="300" y="80" width="200" height="180" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="orchestration" value="🎼 Workflow&#xa;Orchestration" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1BEE7;strokeColor=#7B1FA2;" vertex="1" parent="supervisor-cluster">
+          <mxGeometry x="20" y="40" width="160" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="task-distribution" value="📋 Task Distribution&#xa;& Load Balancing" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1BEE7;strokeColor=#7B1FA2;" vertex="1" parent="supervisor-cluster">
+          <mxGeometry x="20" y="90" width="160" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="monitoring" value="📊 Agent Monitoring&#xa;& Health Checks" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1BEE7;strokeColor=#7B1FA2;" vertex="1" parent="supervisor-cluster">
+          <mxGeometry x="20" y="140" width="160" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- Processing Agents -->
+        <mxCell id="processing-cluster" value="Processing Agents (ECS Fargate Auto-Scaling)" style="swimlane;whiteSpace=wrap;html=1;fillColor=#E8F5E8;strokeColor=#4CAF50;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="550" y="80" width="560" height="300" as="geometry" />
+        </mxCell>
+        
+        <!-- Document Intelligence -->
+        <mxCell id="doc-intel" value="📄 Document Intelligence&#xa;OCR + Vietnamese NLP&#xa;Textract + Comprehend" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#388E3C;" vertex="1" parent="processing-cluster">
+          <mxGeometry x="20" y="40" width="160" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- LC Processing -->
+        <mxCell id="lc-process" value="💳 LC Processing&#xa;UCP 600 + ISBP 821&#xa;Trade Finance Rules" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#388E3C;" vertex="1" parent="processing-cluster">
+          <mxGeometry x="200" y="40" width="160" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Credit Analysis -->
+        <mxCell id="credit-analysis" value="💰 Credit Analysis&#xa;Basel III Compliance&#xa;Risk Scoring Models" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#388E3C;" vertex="1" parent="processing-cluster">
+          <mxGeometry x="380" y="40" width="160" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Compliance Engine -->
+        <mxCell id="compliance-engine" value="⚖️ Compliance Engine&#xa;SBV + AML/CFT&#xa;Regulatory Validation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#388E3C;" vertex="1" parent="processing-cluster">
+          <mxGeometry x="20" y="120" width="160" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Risk Assessment -->
+        <mxCell id="risk-assess" value="📊 Risk Assessment&#xa;ML Fraud Detection&#xa;Anomaly Analysis" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#388E3C;" vertex="1" parent="processing-cluster">
+          <mxGeometry x="200" y="120" width="160" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Decision Synthesis -->
+        <mxCell id="decision-synth" value="🧠 Decision Synthesis&#xa;Claude 3.7 Sonnet&#xa;Evidence-based AI" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#388E3C;" vertex="1" parent="processing-cluster">
+          <mxGeometry x="380" y="120" width="160" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Auto-Scaling Metrics -->
+        <mxCell id="scaling-metrics" value="📈 Auto-Scaling Triggers&#xa;• CPU > 70% • Memory > 80%&#xa;• Queue Depth • Response Time" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#A5D6A7;strokeColor=#2E7D32;fontSize=10;" vertex="1" parent="processing-cluster">
+          <mxGeometry x="20" y="200" width="520" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Integration Layer -->
+        <mxCell id="integration-cluster" value="Integration & Middleware" style="swimlane;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FF9800;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="400" width="500" height="120" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="message-broker" value="📨 Message Broker&#xa;(SQS/SNS)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE0B2;strokeColor=#F57C00;" vertex="1" parent="integration-cluster">
+          <mxGeometry x="20" y="40" width="140" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="event-bus" value="🚌 Event Bus&#xa;(EventBridge)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE0B2;strokeColor=#F57C00;" vertex="1" parent="integration-cluster">
+          <mxGeometry x="180" y="40" width="140" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="workflow-engine" value="⚙️ Workflow Engine&#xa;(Step Functions)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE0B2;strokeColor=#F57C00;" vertex="1" parent="integration-cluster">
+          <mxGeometry x="340" y="40" width="140" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Output Layer -->
+        <mxCell id="output-cluster" value="Output & Integration Layer" style="swimlane;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#F44336;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="600" y="400" width="510" height="120" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="banking-integration" value="🏦 Core Banking&#xa;System Integration" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCDD2;strokeColor=#D32F2F;" vertex="1" parent="output-cluster">
+          <mxGeometry x="20" y="40" width="140" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="notifications" value="📢 Notifications&#xa;& Alerts" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCDD2;strokeColor=#D32F2F;" vertex="1" parent="output-cluster">
+          <mxGeometry x="180" y="40" width="140" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="audit-trail" value="📋 Audit Trail&#xa;& Compliance" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCDD2;strokeColor=#D32F2F;" vertex="1" parent="output-cluster">
+          <mxGeometry x="340" y="40" width="140" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Performance Metrics -->
+        <mxCell id="performance-cluster" value="Performance Metrics & SLA" style="swimlane;whiteSpace=wrap;html=1;fillColor=#F1F8E9;strokeColor=#689F38;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="550" width="1060" height="100" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="throughput" value="📊 Throughput&#xa;10,000+ docs/day" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCEDC8;strokeColor=#558B2F;" vertex="1" parent="performance-cluster">
+          <mxGeometry x="20" y="40" width="120" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="accuracy" value="🎯 OCR Accuracy&#xa;99.5%" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCEDC8;strokeColor=#558B2F;" vertex="1" parent="performance-cluster">
+          <mxGeometry x="160" y="40" width="120" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="response-time" value="⚡ API Response&#xa;< 3 seconds (95%)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCEDC8;strokeColor=#558B2F;" vertex="1" parent="performance-cluster">
+          <mxGeometry x="300" y="40" width="120" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="availability" value="🔄 Availability&#xa;99.99% SLA" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCEDC8;strokeColor=#558B2F;" vertex="1" parent="performance-cluster">
+          <mxGeometry x="440" y="40" width="120" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="concurrent" value="👥 Concurrent Users&#xa;1,000+ simultaneous" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCEDC8;strokeColor=#558B2F;" vertex="1" parent="performance-cluster">
+          <mxGeometry x="580" y="40" width="120" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="error-rate" value="❌ Error Rate&#xa;< 1%" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCEDC8;strokeColor=#558B2F;" vertex="1" parent="performance-cluster">
+          <mxGeometry x="720" y="40" width="120" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="cost" value="💰 AWS Cost&#xa;$442.57/month" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCEDC8;strokeColor=#558B2F;" vertex="1" parent="performance-cluster">
+          <mxGeometry x="860" y="40" width="120" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Agent Scaling Information -->
+        <mxCell id="scaling-info" value="🔄 Agent Auto-Scaling Ranges&#xa;Supervisor: 1-3 | Document: 2-15 | LC: 1-10 | Credit: 2-12 | Compliance: 1-8 | Risk: 2-10 | Decision: 1-5" style="text;html=1;strokeColor=#4CAF50;fillColor=#E8F5E8;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="250" y="680" width="669" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- Workflow Connections -->
+        <mxCell id="flow1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=3;strokeColor=#1976D2;" edge="1" parent="1" source="doc-upload" target="orchestration">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="flow2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=3;strokeColor=#7B1FA2;" edge="1" parent="1" source="orchestration" target="doc-intel">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="flow3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#7B1FA2;" edge="1" parent="1" source="task-distribution" target="lc-process">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="flow4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#7B1FA2;" edge="1" parent="1" source="task-distribution" target="credit-analysis">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="flow5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#7B1FA2;" edge="1" parent="1" source="task-distribution" target="compliance-engine">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="flow6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#7B1FA2;" edge="1" parent="1" source="task-distribution" target="risk-assess">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="flow7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=3;strokeColor=#4CAF50;" edge="1" parent="1" source="decision-synth" target="banking-integration">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="flow8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#FF9800;" edge="1" parent="1" source="orchestration" target="message-broker">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

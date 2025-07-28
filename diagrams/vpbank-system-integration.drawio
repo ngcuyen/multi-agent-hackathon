@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2025-01-28T17:00:00.000Z" agent="5.0" etag="draw.io" version="24.7.17">
+  <diagram name="VPBank System Integration" id="vpbank-integration">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- Title -->
+        <mxCell id="title" value="VPBank K-MULT System Integration Architecture" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="250" y="20" width="669" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- External Banking Systems -->
+        <mxCell id="external-cluster" value="🌐 External Banking Systems" style="swimlane;whiteSpace=wrap;html=1;fillColor=#E8F4FD;strokeColor=#1E88E5;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="80" width="250" height="200" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="swift" value="💼 SWIFT Network&#xa;(MT Messages)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;" vertex="1" parent="external-cluster">
+          <mxGeometry x="20" y="40" width="100" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="correspondent" value="🏦 Correspondent&#xa;Banks" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;" vertex="1" parent="external-cluster">
+          <mxGeometry x="130" y="40" width="100" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="sbv" value="🏛️ State Bank&#xa;of Vietnam (SBV)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;" vertex="1" parent="external-cluster">
+          <mxGeometry x="20" y="120" width="100" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="cic" value="📊 Credit Information&#xa;Center (CIC)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;" vertex="1" parent="external-cluster">
+          <mxGeometry x="130" y="120" width="100" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- API Gateway & Security -->
+        <mxCell id="gateway-cluster" value="🚪 API Gateway & Security" style="swimlane;whiteSpace=wrap;html=1;fillColor=#FFF2E8;strokeColor=#FF9800;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="350" y="80" width="250" height="200" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="waf" value="🛡️ AWS WAF&#xa;(DDoS Protection)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE0B2;strokeColor=#F57C00;" vertex="1" parent="gateway-cluster">
+          <mxGeometry x="20" y="40" width="100" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="api-gateway-ext" value="🌐 External API Gateway&#xa;(Partner Integration)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE0B2;strokeColor=#F57C00;" vertex="1" parent="gateway-cluster">
+          <mxGeometry x="130" y="40" width="100" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="api-gateway-int" value="🔗 Internal API Gateway&#xa;(Microservices)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE0B2;strokeColor=#F57C00;" vertex="1" parent="gateway-cluster">
+          <mxGeometry x="75" y="120" width="100" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- VPBank Core Banking -->
+        <mxCell id="core-cluster" value="🏦 VPBank Core Banking" style="swimlane;whiteSpace=wrap;html=1;fillColor=#F0F8E8;strokeColor=#4CAF50;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="650" y="80" width="460" height="200" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="core-banking" value="🏢 Core Banking System&#xa;(T24/Temenos)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#388E3C;" vertex="1" parent="core-cluster">
+          <mxGeometry x="20" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="loan-mgmt" value="💰 Loan Management&#xa;(Credit Processing)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#388E3C;" vertex="1" parent="core-cluster">
+          <mxGeometry x="150" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="trade-finance" value="💳 Trade Finance&#xa;(LC Management)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#388E3C;" vertex="1" parent="core-cluster">
+          <mxGeometry x="280" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="risk-mgmt" value="📊 Risk Management&#xa;(Basel III)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#388E3C;" vertex="1" parent="core-cluster">
+          <mxGeometry x="410" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- K-MULT Multi-Agent Platform -->
+        <mxCell id="kmult-cluster" value="🤖 K-MULT Multi-Agent Platform (ECS Fargate)" style="swimlane;whiteSpace=wrap;html=1;fillColor=#F8F0FF;strokeColor=#9C27B0;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="320" width="1060" height="150" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="supervisor" value="🎯 Supervisor Service&#xa;(Orchestration)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1BEE7;strokeColor=#7B1FA2;" vertex="1" parent="kmult-cluster">
+          <mxGeometry x="20" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="document" value="📄 Document Service&#xa;(Intelligence)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1BEE7;strokeColor=#7B1FA2;" vertex="1" parent="kmult-cluster">
+          <mxGeometry x="150" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="lc-service" value="💳 LC Service&#xa;(Processing)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1BEE7;strokeColor=#7B1FA2;" vertex="1" parent="kmult-cluster">
+          <mxGeometry x="280" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="credit-service" value="💰 Credit Service&#xa;(Analysis)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1BEE7;strokeColor=#7B1FA2;" vertex="1" parent="kmult-cluster">
+          <mxGeometry x="410" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="compliance-service" value="⚖️ Compliance Service&#xa;(Validation)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1BEE7;strokeColor=#7B1FA2;" vertex="1" parent="kmult-cluster">
+          <mxGeometry x="540" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="risk-service" value="📊 Risk Service&#xa;(Assessment)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1BEE7;strokeColor=#7B1FA2;" vertex="1" parent="kmult-cluster">
+          <mxGeometry x="670" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="decision-service" value="🧠 Decision Service&#xa;(Synthesis)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1BEE7;strokeColor=#7B1FA2;" vertex="1" parent="kmult-cluster">
+          <mxGeometry x="800" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="scaling-info" value="📈 Auto-Scaling: 1-15 instances per service based on load" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#CE93D8;strokeColor=#4A148C;fontSize=10;" vertex="1" parent="kmult-cluster">
+          <mxGeometry x="930" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Integration Middleware -->
+        <mxCell id="middleware-cluster" value="🔄 Integration Middleware" style="swimlane;whiteSpace=wrap;html=1;fillColor=#E8F8F0;strokeColor=#4CAF50;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="500" width="520" height="120" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="message-broker" value="📨 Message Broker&#xa;(SQS/SNS)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#388E3C;" vertex="1" parent="middleware-cluster">
+          <mxGeometry x="20" y="40" width="140" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="event-bus" value="🚌 Event Bus&#xa;(EventBridge)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#388E3C;" vertex="1" parent="middleware-cluster">
+          <mxGeometry x="180" y="40" width="140" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="workflow-engine" value="⚙️ Workflow Engine&#xa;(Step Functions)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#388E3C;" vertex="1" parent="middleware-cluster">
+          <mxGeometry x="340" y="40" width="140" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Data Integration Layer -->
+        <mxCell id="data-cluster" value="💾 Data Integration Layer" style="swimlane;whiteSpace=wrap;html=1;fillColor=#FFF8E8;strokeColor=#FFC107;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="590" y="500" width="520" height="120" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="data-lake" value="🗂️ Data Lake&#xa;(S3)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9C4;strokeColor=#F57F17;" vertex="1" parent="data-cluster">
+          <mxGeometry x="20" y="40" width="100" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="operational-db" value="🗄️ Operational DB&#xa;(PostgreSQL)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9C4;strokeColor=#F57F17;" vertex="1" parent="data-cluster">
+          <mxGeometry x="140" y="40" width="100" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="cache-layer" value="🔄 Cache Layer&#xa;(Redis)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9C4;strokeColor=#F57F17;" vertex="1" parent="data-cluster">
+          <mxGeometry x="260" y="40" width="100" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="search-engine" value="🔍 Search Engine&#xa;(OpenSearch)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9C4;strokeColor=#F57F17;" vertex="1" parent="data-cluster">
+          <mxGeometry x="380" y="40" width="100" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Monitoring & Observability -->
+        <mxCell id="monitoring-cluster" value="📊 Monitoring & Observability" style="swimlane;whiteSpace=wrap;html=1;fillColor=#F0F8FF;strokeColor=#2196F3;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="650" width="1060" height="100" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="cloudwatch" value="📈 CloudWatch&#xa;(Metrics & Logs)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;" vertex="1" parent="monitoring-cluster">
+          <mxGeometry x="20" y="40" width="140" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="xray" value="🔍 X-Ray&#xa;(Distributed Tracing)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;" vertex="1" parent="monitoring-cluster">
+          <mxGeometry x="180" y="40" width="140" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="security-hub" value="🛡️ Security Hub&#xa;(Threat Detection)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;" vertex="1" parent="monitoring-cluster">
+          <mxGeometry x="340" y="40" width="140" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="cost-monitoring" value="💰 Cost Explorer&#xa;(Budget Monitoring)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;" vertex="1" parent="monitoring-cluster">
+          <mxGeometry x="500" y="40" width="140" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="compliance-monitoring" value="⚖️ Compliance Monitoring&#xa;(Config & CloudTrail)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;" vertex="1" parent="monitoring-cluster">
+          <mxGeometry x="660" y="40" width="140" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="performance-metrics" value="⚡ Performance Metrics&#xa;(Custom Dashboards)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;" vertex="1" parent="monitoring-cluster">
+          <mxGeometry x="820" y="40" width="140" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Integration Performance -->
+        <mxCell id="performance-summary" value="📊 Integration Performance: 10,000+ docs/day | 99.99% availability | $442.57/month | Real-time processing" style="text;html=1;strokeColor=#4CAF50;fillColor=#E8F5E8;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="200" y="770" width="769" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- Integration Flow Connections -->
+        <mxCell id="flow1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=3;strokeColor=#1976D2;" edge="1" parent="1" source="swift" target="waf">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="flow2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=3;strokeColor=#FF9800;" edge="1" parent="1" source="api-gateway-int" target="supervisor">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="flow3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#7B1FA2;" edge="1" parent="1" source="supervisor" target="message-broker">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="flow4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#7B1FA2;" edge="1" parent="1" source="document" target="data-lake">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="flow5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#4CAF50;" edge="1" parent="1" source="core-banking" target="supervisor">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="flow6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#4CAF50;" edge="1" parent="1" source="loan-mgmt" target="credit-service">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="flow7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#4CAF50;" edge="1" parent="1" source="trade-finance" target="lc-service">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="flow8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#2196F3;" edge="1" parent="1" source="supervisor" target="cloudwatch">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

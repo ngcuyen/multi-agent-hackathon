@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2025-01-28T17:00:00.000Z" agent="5.0" etag="draw.io" version="24.7.17">
+  <diagram name="VPBank Cost Optimization" id="vpbank-cost">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- Title -->
+        <mxCell id="title" value="VPBank K-MULT Cost Optimization & Auto-Scaling Architecture" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="200" y="20" width="769" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- Total Cost Overview -->
+        <mxCell id="cost-overview" value="💰 Total AWS Cost: $442.57/month | 60-80% cost reduction vs traditional infrastructure" style="text;html=1;strokeColor=#4CAF50;fillColor=#E8F5E8;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="200" y="70" width="769" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- AI/ML Services Cost -->
+        <mxCell id="ai-cost-cluster" value="🤖 AI/ML Services - $180/month (40.7%)" style="swimlane;whiteSpace=wrap;html=1;fillColor=#E8F5E8;strokeColor=#4CAF50;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="130" width="520" height="180" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="bedrock-cost" value="🧠 Amazon Bedrock&#xa;Claude 3.7 Sonnet&#xa;$85/month" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#388E3C;" vertex="1" parent="ai-cost-cluster">
+          <mxGeometry x="20" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="textract-cost" value="📄 Amazon Textract&#xa;OCR Processing&#xa;$45/month" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#388E3C;" vertex="1" parent="ai-cost-cluster">
+          <mxGeometry x="150" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="comprehend-cost" value="🔤 Amazon Comprehend&#xa;Vietnamese NLP&#xa;$30/month" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#388E3C;" vertex="1" parent="ai-cost-cluster">
+          <mxGeometry x="280" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="sagemaker-cost" value="🔬 Amazon SageMaker&#xa;ML Models&#xa;$20/month" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#388E3C;" vertex="1" parent="ai-cost-cluster">
+          <mxGeometry x="410" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Cost Optimization Strategies -->
+        <mxCell id="ai-optimization" value="💡 Optimization Strategies:&#xa;• Batch processing for non-urgent requests&#xa;• Model caching and result reuse&#xa;• Request throttling and queuing" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#A5D6A7;strokeColor=#2E7D32;fontSize=10;" vertex="1" parent="ai-cost-cluster">
+          <mxGeometry x="20" y="110" width="480" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Compute Services Cost -->
+        <mxCell id="compute-cost-cluster" value="⚙️ Compute Services - $165/month (37.3%)" style="swimlane;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1976D2;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="590" y="130" width="520" height="180" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="fargate-cost" value="🐳 ECS Fargate&#xa;Multi-Agent Platform&#xa;$120/month" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;" vertex="1" parent="compute-cost-cluster">
+          <mxGeometry x="20" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="lambda-cost" value="⚡ AWS Lambda&#xa;Event Processing&#xa;$25/month" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;" vertex="1" parent="compute-cost-cluster">
+          <mxGeometry x="150" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="step-functions-cost" value="🔄 Step Functions&#xa;Workflow Orchestration&#xa;$15/month" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;" vertex="1" parent="compute-cost-cluster">
+          <mxGeometry x="280" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="api-gateway-cost" value="🚪 API Gateway&#xa;Request Processing&#xa;$5/month" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;" vertex="1" parent="compute-cost-cluster">
+          <mxGeometry x="410" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Compute Optimization -->
+        <mxCell id="compute-optimization" value="💡 Auto-Scaling Optimization:&#xa;• Target tracking scaling (CPU 70%, Memory 80%)&#xa;• Scheduled scaling for predictable loads&#xa;• Spot instances for non-critical workloads" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#90CAF9;strokeColor=#0D47A1;fontSize=10;" vertex="1" parent="compute-cost-cluster">
+          <mxGeometry x="20" y="110" width="480" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Storage Services Cost -->
+        <mxCell id="storage-cost-cluster" value="💾 Storage Services - $55/month (12.4%)" style="swimlane;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#FFC107;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="340" width="520" height="180" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="s3-cost" value="🗂️ Amazon S3&#xa;Data Lake Storage&#xa;$25/month" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9C4;strokeColor=#F57F17;" vertex="1" parent="storage-cost-cluster">
+          <mxGeometry x="20" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="rds-cost" value="🗄️ Amazon RDS&#xa;PostgreSQL Database&#xa;$18/month" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9C4;strokeColor=#F57F17;" vertex="1" parent="storage-cost-cluster">
+          <mxGeometry x="150" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="dynamodb-cost" value="⚡ DynamoDB&#xa;NoSQL Database&#xa;$8/month" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9C4;strokeColor=#F57F17;" vertex="1" parent="storage-cost-cluster">
+          <mxGeometry x="280" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="redis-cost" value="🔄 ElastiCache Redis&#xa;Caching Layer&#xa;$4/month" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9C4;strokeColor=#F57F17;" vertex="1" parent="storage-cost-cluster">
+          <mxGeometry x="410" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Storage Optimization -->
+        <mxCell id="storage-optimization" value="💡 Storage Lifecycle Optimization:&#xa;• S3 Intelligent Tiering (30% cost reduction)&#xa;• Automated archival to Glacier (90 days)&#xa;• Database connection pooling and read replicas" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFECB3;strokeColor=#FF8F00;fontSize=10;" vertex="1" parent="storage-cost-cluster">
+          <mxGeometry x="20" y="110" width="480" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Network Services Cost -->
+        <mxCell id="network-cost-cluster" value="🌐 Network Services - $42.57/month (9.6%)" style="swimlane;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FF9800;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="590" y="340" width="520" height="180" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="cloudfront-cost" value="🌍 CloudFront CDN&#xa;Global Distribution&#xa;$18/month" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE0B2;strokeColor=#F57C00;" vertex="1" parent="network-cost-cluster">
+          <mxGeometry x="20" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="vpc-cost" value="🏠 VPC & NAT Gateway&#xa;Network Infrastructure&#xa;$12/month" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE0B2;strokeColor=#F57C00;" vertex="1" parent="network-cost-cluster">
+          <mxGeometry x="150" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="monitoring-cost" value="📊 CloudWatch&#xa;Monitoring & Logs&#xa;$8.57/month" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE0B2;strokeColor=#F57C00;" vertex="1" parent="network-cost-cluster">
+          <mxGeometry x="280" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="security-cost" value="🛡️ Security Services&#xa;WAF, Shield, GuardDuty&#xa;$4/month" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE0B2;strokeColor=#F57C00;" vertex="1" parent="network-cost-cluster">
+          <mxGeometry x="410" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Network Optimization -->
+        <mxCell id="network-optimization" value="💡 Network Cost Optimization:&#xa;• CloudFront edge caching (40% bandwidth reduction)&#xa;• VPC endpoints for AWS services&#xa;• Log retention policies and filtering" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCC80;strokeColor=#E65100;fontSize=10;" vertex="1" parent="network-cost-cluster">
+          <mxGeometry x="20" y="110" width="480" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Auto-Scaling Configuration -->
+        <mxCell id="autoscaling-cluster" value="📈 Auto-Scaling Configuration & Cost Control" style="swimlane;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#7B1FA2;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="550" width="1060" height="150" as="geometry" />
+        </mxCell>
+        
+        <!-- Agent Scaling Ranges -->
+        <mxCell id="supervisor-scaling" value="🎯 Supervisor&#xa;1-3 instances&#xa;$15-45/month" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1BEE7;strokeColor=#7B1FA2;" vertex="1" parent="autoscaling-cluster">
+          <mxGeometry x="20" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="document-scaling" value="📄 Document&#xa;2-15 instances&#xa;$20-150/month" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1BEE7;strokeColor=#7B1FA2;" vertex="1" parent="autoscaling-cluster">
+          <mxGeometry x="150" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="lc-scaling" value="💳 LC Processing&#xa;1-10 instances&#xa;$12-120/month" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1BEE7;strokeColor=#7B1FA2;" vertex="1" parent="autoscaling-cluster">
+          <mxGeometry x="280" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="credit-scaling" value="💰 Credit Analysis&#xa;2-12 instances&#xa;$18-144/month" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1BEE7;strokeColor=#7B1FA2;" vertex="1" parent="autoscaling-cluster">
+          <mxGeometry x="410" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="compliance-scaling" value="⚖️ Compliance&#xa;1-8 instances&#xa;$10-80/month" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1BEE7;strokeColor=#7B1FA2;" vertex="1" parent="autoscaling-cluster">
+          <mxGeometry x="540" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="risk-scaling" value="📊 Risk Assessment&#xa;2-10 instances&#xa;$16-100/month" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1BEE7;strokeColor=#7B1FA2;" vertex="1" parent="autoscaling-cluster">
+          <mxGeometry x="670" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="decision-scaling" value="🧠 Decision Synthesis&#xa;1-5 instances&#xa;$8-40/month" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1BEE7;strokeColor=#7B1FA2;" vertex="1" parent="autoscaling-cluster">
+          <mxGeometry x="800" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="cost-monitoring" value="💰 Cost Monitoring&#xa;Real-time Budgets&#xa;$2/month" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1BEE7;strokeColor=#7B1FA2;" vertex="1" parent="autoscaling-cluster">
+          <mxGeometry x="930" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Scaling Triggers -->
+        <mxCell id="scaling-triggers" value="📊 Scaling Triggers: CPU > 70% | Memory > 80% | Queue Depth | Response Time > 3s | Custom Banking Metrics" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#CE93D8;strokeColor=#4A148C;fontSize=11;fontStyle=1;" vertex="1" parent="autoscaling-cluster">
+          <mxGeometry x="20" y="110" width="1020" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- Cost Savings Summary -->
+        <mxCell id="savings-cluster" value="💡 Cost Optimization Results" style="swimlane;whiteSpace=wrap;html=1;fillColor=#E8F5E8;strokeColor=#4CAF50;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="730" width="1060" height="80" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="traditional-cost" value="🏢 Traditional Infrastructure&#xa;$2,200-2,800/month" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCDD2;strokeColor=#D32F2F;" vertex="1" parent="savings-cluster">
+          <mxGeometry x="20" y="30" width="150" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="arrow" value="➡️" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=24;" vertex="1" parent="savings-cluster">
+          <mxGeometry x="190" y="35" width="30" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="optimized-cost" value="☁️ AWS Optimized&#xa;$442.57/month" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#388E3C;" vertex="1" parent="savings-cluster">
+          <mxGeometry x="240" y="30" width="150" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="savings-amount" value="💰 Monthly Savings&#xa;$1,757-2,357" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#A5D6A7;strokeColor=#2E7D32;fontStyle=1;" vertex="1" parent="savings-cluster">
+          <mxGeometry x="420" y="30" width="150" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="savings-percentage" value="📊 Cost Reduction&#xa;80-84%" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#81C784;strokeColor=#1B5E20;fontStyle=1;" vertex="1" parent="savings-cluster">
+          <mxGeometry x="600" y="30" width="150" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="roi" value="📈 ROI Timeline&#xa;3 months" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#66BB6A;strokeColor=#0D5016;fontStyle=1;" vertex="1" parent="savings-cluster">
+          <mxGeometry x="780" y="30" width="150" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="annual-savings" value="💎 Annual Savings&#xa;$21,084-28,284" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4CAF50;strokeColor=#0A4D0A;fontStyle=1;color=white;" vertex="1" parent="savings-cluster">
+          <mxGeometry x="960" y="30" width="150" height="40" as="geometry" />
+        </mxCell>
+        
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
