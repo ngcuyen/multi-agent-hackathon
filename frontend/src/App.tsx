@@ -4,7 +4,10 @@ import {
   AppLayout, 
   TopNavigation, 
   Flashbar,
-  FlashbarProps
+  FlashbarProps,
+  Alert,
+  StatusIndicator,
+  Badge
 } from '@cloudscape-design/components';
 import '@cloudscape-design/global-styles/index.css';
 
@@ -19,13 +22,37 @@ import CreditAssessmentPage from './pages/Credit/CreditAssessmentPage';
 
 // Components
 import Navigation from './components/Navigation/Navigation';
-import { healthAPI } from './services/api';
 
 function App() {
   const [navigationOpen, setNavigationOpen] = useState(false);
   const [flashbarItems, setFlashbarItems] = useState<FlashbarProps.MessageDefinition[]>([]);
   const [agents, setAgents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [systemHealth, setSystemHealth] = useState<'healthy' | 'unhealthy' | 'checking'>('checking');
+
+  // Check system health
+  useEffect(() => {
+    const checkHealth = async () => {
+      try {
+        const response = await fetch('/mutil_agent/public/api/v1/health-check/health');
+        if (response.ok) {
+          const data = await response.json();
+          setSystemHealth(data.status === 'healthy' ? 'healthy' : 'unhealthy');
+        } else {
+          setSystemHealth('unhealthy');
+        }
+      } catch (error) {
+        console.error('Health check failed:', error);
+        setSystemHealth('unhealthy');
+      }
+    };
+
+    checkHealth();
+    // Check health every 30 seconds
+    const healthInterval = setInterval(checkHealth, 30000);
+    
+    return () => clearInterval(healthInterval);
+  }, []);
 
   // Mock agents data for VPBank K-MULT
   useEffect(() => {
@@ -121,6 +148,18 @@ function App() {
     }, 5000);
   };
 
+  // Get health status indicator
+  const getHealthIndicator = () => {
+    switch (systemHealth) {
+      case 'healthy':
+        return <StatusIndicator type="success">System Operational</StatusIndicator>;
+      case 'unhealthy':
+        return <StatusIndicator type="error">System Issues</StatusIndicator>;
+      default:
+        return <StatusIndicator type="loading">Checking Status</StatusIndicator>;
+    }
+  };
+
   return (
     <Router>
       <div id="app">
@@ -150,9 +189,28 @@ function App() {
               href: "/text-summary"
             },
             {
-              type: "button",
-              text: "System Health",
-              href: "/health"
+              type: "menu-dropdown",
+              text: getHealthIndicator(),
+              items: [
+                {
+                  id: "health-check",
+                  text: "System Health Check",
+                  href: "/mutil_agent/public/api/v1/health-check/health",
+                  external: true
+                },
+                {
+                  id: "api-docs",
+                  text: "API Documentation",
+                  href: "/docs",
+                  external: true
+                },
+                {
+                  id: "github",
+                  text: "Source Repository",
+                  href: "https://github.com/ngcuyen/multi-agent-hackathon",
+                  external: true
+                }
+              ]
             }
           ]}
         />
@@ -162,21 +220,40 @@ function App() {
           onNavigationChange={({ detail }) => setNavigationOpen(detail.open)}
           navigation={<Navigation />}
           notifications={<Flashbar items={flashbarItems} />}
+          toolsHide
           content={
-            <div style={{ flex: 1, overflow: 'hidden' }}>
+            <>
+              {/* System Health Alert */}
+              {systemHealth === 'unhealthy' && (
+                <Alert
+                  statusIconAriaLabel="Error"
+                  type="error"
+                  header="System Warning"
+                  dismissible
+                  onDismiss={() => setSystemHealth('checking')}
+                >
+                  The backend system is experiencing issues. Some features may not work properly.
+                  Please try again later or contact the system administrator.
+                </Alert>
+              )}
+              
               <Routes>
-                <Route path="/" element={<HomePage agents={agents} loading={loading} />} />
+                <Route 
+                  path="/" 
+                  element={
+                    <HomePage 
+                      agents={agents} 
+                      loading={loading} 
+                    />
+                  } 
+                />
                 <Route 
                   path="/text-summary" 
-                  element={<TextSummaryPage onShowSnackbar={showFlashbar} />} 
-                />
-                <Route 
-                  path="/lc-processing" 
-                  element={<LCProcessingPage onShowSnackbar={showFlashbar} />} 
-                />
-                <Route 
-                  path="/credit-assessment" 
-                  element={<CreditAssessmentPage onShowSnackbar={showFlashbar} />} 
+                  element={
+                    <TextSummaryPage 
+                      onShowSnackbar={showFlashbar}
+                    />
+                  } 
                 />
                 <Route 
                   path="/chat" 
@@ -193,17 +270,37 @@ function App() {
                   element={
                     <AgentsPage 
                       agents={agents}
-                      setAgents={setAgents}
+                      loading={loading}
+                      onShowSnackbar={showFlashbar}
+                    />
+                  } 
+                />
+                <Route 
+                  path="/lc-processing" 
+                  element={
+                    <LCProcessingPage 
+                      onShowSnackbar={showFlashbar}
+                    />
+                  } 
+                />
+                <Route 
+                  path="/credit-assessment" 
+                  element={
+                    <CreditAssessmentPage 
                       onShowSnackbar={showFlashbar}
                     />
                   } 
                 />
                 <Route 
                   path="/settings" 
-                  element={<SettingsPage onShowSnackbar={showFlashbar} />} 
+                  element={
+                    <SettingsPage 
+                      onShowSnackbar={showFlashbar}
+                    />
+                  } 
                 />
               </Routes>
-            </div>
+            </>
           }
         />
       </div>
