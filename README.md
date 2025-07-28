@@ -77,21 +77,30 @@ cp backend/app/mutil_agent/.env-template backend/app/mutil_agent/.env
 
 ### 🏗️ **Architecture Diagrams**
 
-#### **Core System Architecture**
+#### **🎯 Enterprise Architecture Overview**
 | Diagram | Description | File |
 |---------|-------------|------|
-| 📊 **Complete AWS Architecture** | Full system overview with all AWS services | [`vpbank-kmult-aws-architecture.png`](./generated-diagrams/vpbank-kmult-aws-architecture.png) |
-| 🔄 **Data Processing Pipeline** | Document processing workflow and agent coordination | [`vpbank-kmult-data-pipeline.png`](./generated-diagrams/vpbank-kmult-data-pipeline.png) |
-| 🔒 **Security & Compliance** | Banking-grade security and regulatory compliance | [`vpbank-kmult-security-architecture.png`](./generated-diagrams/vpbank-kmult-security-architecture.png) |
-| 💰 **Cost & Scalability** | Auto-scaling and cost optimization architecture | [`vpbank-kmult-cost-scalability.png`](./generated-diagrams/vpbank-kmult-cost-scalability.png) |
+| 🏢 **Enterprise Banking Architecture** | Complete enterprise-grade banking system with multi-agent platform | [`vpbank-kmult-enterprise-architecture.png`](./generated-diagrams/vpbank-kmult-enterprise-architecture.png) |
+| 🧠 **Intelligent Data Pipeline** | AI-powered document processing with multi-agent coordination | [`vpbank-intelligent-data-pipeline.png`](./generated-diagrams/vpbank-intelligent-data-pipeline.png) |
+| 🛡️ **Comprehensive Security Architecture** | Banking-grade security with multi-layer protection and compliance | [`vpbank-comprehensive-security-architecture.png`](./generated-diagrams/vpbank-comprehensive-security-architecture.png) |
+| 🔄 **Enterprise HA & Disaster Recovery** | Multi-region high availability with automated failover | [`vpbank-enterprise-ha-dr-architecture.png`](./generated-diagrams/vpbank-enterprise-ha-dr-architecture.png) |
+| 💰 **Cost Optimization & Auto-Scaling** | Intelligent cost management with performance optimization | [`vpbank-cost-optimization-architecture.png`](./generated-diagrams/vpbank-cost-optimization-architecture.png) |
 
-#### **Banking Standard Architecture**
+#### **🏦 Banking Standard Architecture (Legacy)**
 | Diagram | Description | File |
 |---------|-------------|------|
 | 🏦 **Banking Standard Architecture** | Enterprise banking architecture with DMZ, security perimeter, and compliance | [`vpbank-banking-standard-architecture.png`](./generated-diagrams/vpbank-banking-standard-architecture.png) |
 | ⚖️ **Regulatory Compliance Architecture** | Comprehensive compliance framework for SBV, Basel III, UCP 600, and AML/CFT | [`vpbank-regulatory-compliance-architecture.png`](./generated-diagrams/vpbank-regulatory-compliance-architecture.png) |
 | 🔄 **High Availability & Disaster Recovery** | Multi-region, multi-AZ architecture with automated failover | [`vpbank-ha-disaster-recovery.png`](./generated-diagrams/vpbank-ha-disaster-recovery.png) |
 | 🏢 **Banking Operations Workflow** | End-to-end banking process from customer input to system integration | [`vpbank-banking-operations-workflow.png`](./generated-diagrams/vpbank-banking-operations-workflow.png) |
+
+#### **📊 Core System Architecture (Original)**
+| Diagram | Description | File |
+|---------|-------------|------|
+| 📊 **Complete AWS Architecture** | Full system overview with all AWS services | [`vpbank-kmult-aws-architecture.png`](./generated-diagrams/vpbank-kmult-aws-architecture.png) |
+| 🔄 **Data Processing Pipeline** | Document processing workflow and agent coordination | [`vpbank-kmult-data-pipeline.png`](./generated-diagrams/vpbank-kmult-data-pipeline.png) |
+| 🔒 **Security & Compliance** | Banking-grade security and regulatory compliance | [`vpbank-kmult-security-architecture.png`](./generated-diagrams/vpbank-kmult-security-architecture.png) |
+| 💰 **Cost & Scalability** | Auto-scaling and cost optimization architecture | [`vpbank-kmult-cost-scalability.png`](./generated-diagrams/vpbank-kmult-cost-scalability.png) |
 
 ## 🎯 **Key Features**
 

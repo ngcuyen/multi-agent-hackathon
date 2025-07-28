@@ -219,7 +219,7 @@ const TextSummaryPage: React.FC<TextSummaryPageProps> = ({ onShowSnackbar }) => 
                   Download Summary
                 </Button>
               </SpaceBetween>
-            }
+            )
           }
         >
           Summarization Complete
