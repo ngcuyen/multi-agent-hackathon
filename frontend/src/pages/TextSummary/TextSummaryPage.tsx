@@ -91,13 +91,13 @@ const TextSummaryPage: React.FC<TextSummaryPageProps> = ({ onShowSnackbar }) => 
     try {
       console.log('Starting document summary...');
       onShowSnackbar('Đang xử lý tài liệu, vui lòng chờ...', 'info');
-      
+
       const response = await textAPI.summarizeDocument(documentForm.file!, documentForm.summary_type, documentForm.language);
-      
+
       console.log('Document summary response:', response);
       console.log('Response status:', response.status);
       console.log('Response data:', response.data);
-      
+
       if (response.status === 'success' && response.data) {
         setResult(response.data);
         onShowSnackbar('Tóm tắt tài liệu thành công!', 'success');
@@ -113,7 +113,7 @@ const TextSummaryPage: React.FC<TextSummaryPageProps> = ({ onShowSnackbar }) => 
         message: error instanceof Error ? error.message : 'Unknown error',
         stack: error instanceof Error ? error.stack : 'No stack trace'
       });
-      
+
       if (error instanceof Error && error.name === 'AbortError') {
         onShowSnackbar('Quá trình xử lý tài liệu mất quá nhiều thời gian. Vui lòng thử lại với tài liệu nhỏ hơn.', 'error');
       } else {
@@ -167,9 +167,9 @@ const TextSummaryPage: React.FC<TextSummaryPageProps> = ({ onShowSnackbar }) => 
                         <FormField label="Loại tóm tắt">
                           <Select
                             selectedOption={summaryTypeOptions.find(opt => opt.value === textForm.summary_type) || null}
-                            onChange={({ detail }) => setTextForm({ 
-                              ...textForm, 
-                              summary_type: detail.selectedOption.value as SummaryType 
+                            onChange={({ detail }) => setTextForm({
+                              ...textForm,
+                              summary_type: detail.selectedOption.value as SummaryType
                             })}
                             options={summaryTypeOptions}
                             disabled={loading}
@@ -179,9 +179,9 @@ const TextSummaryPage: React.FC<TextSummaryPageProps> = ({ onShowSnackbar }) => 
                         <FormField label="Ngôn ngữ">
                           <Select
                             selectedOption={languageOptions.find(opt => opt.value === textForm.language) || null}
-                            onChange={({ detail }) => setTextForm({ 
-                              ...textForm, 
-                              language: detail.selectedOption.value as Language 
+                            onChange={({ detail }) => setTextForm({
+                              ...textForm,
+                              language: detail.selectedOption.value as Language
                             })}
                             options={languageOptions}
                             disabled={loading}
@@ -192,8 +192,8 @@ const TextSummaryPage: React.FC<TextSummaryPageProps> = ({ onShowSnackbar }) => 
                           <Input
                             type="number"
                             value={textForm.max_length.toString()}
-                            onChange={({ detail }) => setTextForm({ 
-                              ...textForm, 
+                            onChange={({ detail }) => setTextForm({
+                              ...textForm,
                               max_length: Math.max(50, Math.min(1000, parseInt(detail.value) || 300))
                             })}
                             disabled={loading}
@@ -232,9 +232,9 @@ const TextSummaryPage: React.FC<TextSummaryPageProps> = ({ onShowSnackbar }) => 
                         description="Chọn tài liệu cần tóm tắt"
                       >
                         <FileUpload
-                          onChange={({ detail }) => setDocumentForm({ 
-                            ...documentForm, 
-                            file: detail.value[0] || null 
+                          onChange={({ detail }) => setDocumentForm({
+                            ...documentForm,
+                            file: detail.value[0] || null
                           })}
                           value={documentForm.file ? [documentForm.file] : []}
                           i18nStrings={{
@@ -257,9 +257,9 @@ const TextSummaryPage: React.FC<TextSummaryPageProps> = ({ onShowSnackbar }) => 
                         <FormField label="Loại tóm tắt">
                           <Select
                             selectedOption={summaryTypeOptions.find(opt => opt.value === documentForm.summary_type) || null}
-                            onChange={({ detail }) => setDocumentForm({ 
-                              ...documentForm, 
-                              summary_type: detail.selectedOption.value as SummaryType 
+                            onChange={({ detail }) => setDocumentForm({
+                              ...documentForm,
+                              summary_type: detail.selectedOption.value as SummaryType
                             })}
                             options={summaryTypeOptions}
                             disabled={loading}
@@ -269,9 +269,9 @@ const TextSummaryPage: React.FC<TextSummaryPageProps> = ({ onShowSnackbar }) => 
                         <FormField label="Ngôn ngữ">
                           <Select
                             selectedOption={languageOptions.find(opt => opt.value === documentForm.language) || null}
-                            onChange={({ detail }) => setDocumentForm({ 
-                              ...documentForm, 
-                              language: detail.selectedOption.value as Language 
+                            onChange={({ detail }) => setDocumentForm({
+                              ...documentForm,
+                              language: detail.selectedOption.value as Language
                             })}
                             options={languageOptions}
                             disabled={loading}
@@ -328,7 +328,7 @@ const TextSummaryPage: React.FC<TextSummaryPageProps> = ({ onShowSnackbar }) => 
               <div style={{ border: '1px solid #e9ebed', borderRadius: '8px', backgroundColor: '#fafbfc' }}>
                 <Box padding="l">
                   <Header variant="h3">📝 Nội dung tóm tắt</Header>
-                  <div style={{ 
+                  <div style={{
                     whiteSpace: 'pre-wrap',
                     lineHeight: '1.6',
                     fontSize: '14px'
@@ -375,10 +375,22 @@ const TextSummaryPage: React.FC<TextSummaryPageProps> = ({ onShowSnackbar }) => 
                       <div>{result.model_used}</div>
                     </div>
                     <div>
-                      <Box variant="awsui-key-label">Loại tài liệu</Box>
-                      <div>{result.document_analysis.document_category}</div>
+                      <Box variant="awsui-key-label">Phương thức xử lý</Box>
+                      <div>{result.processing_method || 'Không xác định'}</div>
                     </div>
                   </ColumnLayout>
+
+                  {result.document_info && (
+                    <Box>
+                      <Box variant="awsui-key-label">Thông tin tài liệu</Box>
+                      <ColumnLayout columns={2}>
+                        <div>Tên file: {result.document_info.filename}</div>
+                        <div>Kích thước: {(result.document_info.file_size / 1024).toFixed(1)} KB</div>
+                        <div>Loại file: {result.document_info.file_type}</div>
+                        <div>Độ dài văn bản: {result.document_info.extracted_text_length.toLocaleString()} ký tự</div>
+                      </ColumnLayout>
+                    </Box>
+                  )}
 
                   <Box>
                     <Box variant="awsui-key-label">Số từ</Box>
@@ -388,7 +400,7 @@ const TextSummaryPage: React.FC<TextSummaryPageProps> = ({ onShowSnackbar }) => 
                     </ColumnLayout>
                   </Box>
 
-                  {result.document_analysis.recommendations && (
+                  {result.document_analysis?.recommendations && (
                     <Box>
                       <Box variant="awsui-key-label">Gợi ý</Box>
                       <div style={{ fontSize: '14px', color: '#5f6b7a' }}>
