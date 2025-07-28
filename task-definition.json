@@ -1,0 +1,40 @@
+{
+    "family": "vpbank-kmult-task",
+    "networkMode": "awsvpc",
+    "requiresCompatibilities": ["FARGATE"],
+    "cpu": "1024",
+    "memory": "2048",
+    "executionRoleArn": "arn:aws:iam::536697254280:role/ecsTaskExecutionRole",
+    "taskRoleArn": "arn:aws:iam::536697254280:role/ecsTaskRole",
+    "containerDefinitions": [
+        {
+            "name": "vpbank-kmult-backend",
+            "image": "536697254280.dkr.ecr.us-east-1.amazonaws.com/vpbank-kmult-backend:latest",
+            "portMappings": [
+                {
+                    "containerPort": 8080,
+                    "protocol": "tcp"
+                }
+            ],
+            "essential": true,
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/vpbank-kmult",
+                    "awslogs-region": "us-east-1",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            },
+            "environment": [
+                {
+                    "name": "AWS_DEFAULT_REGION",
+                    "value": "us-east-1"
+                },
+                {
+                    "name": "ENVIRONMENT",
+                    "value": "production"
+                }
+            ]
+        }
+    ]
+}
