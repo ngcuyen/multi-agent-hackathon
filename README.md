@@ -80,27 +80,26 @@ cp backend/app/mutil_agent/.env-template backend/app/mutil_agent/.env
 #### **🎯 Enterprise Architecture Overview**
 | Diagram | Description | File |
 |---------|-------------|------|
-| 🏢 **Enterprise Banking Architecture** | Complete enterprise-grade banking system with multi-agent platform | [`vpbank-kmult-enterprise-architecture.png`](./generated-diagrams/vpbank-kmult-enterprise-architecture.png) |
-| 🧠 **Intelligent Data Pipeline** | AI-powered document processing with multi-agent coordination | [`vpbank-intelligent-data-pipeline.png`](./generated-diagrams/vpbank-intelligent-data-pipeline.png) |
-| 🛡️ **Comprehensive Security Architecture** | Banking-grade security with multi-layer protection and compliance | [`vpbank-comprehensive-security-architecture.png`](./generated-diagrams/vpbank-comprehensive-security-architecture.png) |
-| 🔄 **Enterprise HA & Disaster Recovery** | Multi-region high availability with automated failover | [`vpbank-enterprise-ha-dr-architecture.png`](./generated-diagrams/vpbank-enterprise-ha-dr-architecture.png) |
-| 💰 **Cost Optimization & Auto-Scaling** | Intelligent cost management with performance optimization | [`vpbank-cost-optimization-architecture.png`](./generated-diagrams/vpbank-cost-optimization-architecture.png) |
+| 🏢 **Enterprise Banking Architecture** | Complete enterprise-grade banking system with multi-agent platform on ECS Fargate | [`vpbank-kmult-enterprise-architecture.png`](./generated-diagrams/vpbank-kmult-enterprise-architecture.png) |
+| 🧠 **Intelligent Data Pipeline** | AI-powered document processing with containerized multi-agent coordination | [`vpbank-intelligent-data-pipeline.png`](./generated-diagrams/vpbank-intelligent-data-pipeline.png) |
+| 🛡️ **Comprehensive Security Architecture** | Banking-grade security with multi-layer protection and containerized compliance | [`vpbank-comprehensive-security-architecture.png`](./generated-diagrams/vpbank-comprehensive-security-architecture.png) |
+| 🔄 **Enterprise HA & Disaster Recovery** | Multi-region high availability with containerized services and automated failover | [`vpbank-enterprise-ha-dr-architecture.png`](./generated-diagrams/vpbank-enterprise-ha-dr-architecture.png) |
+| 💰 **Cost Optimization & Auto-Scaling** | Intelligent ECS Fargate scaling with performance optimization | [`vpbank-cost-optimization-architecture.png`](./generated-diagrams/vpbank-cost-optimization-architecture.png) |
 
-#### **🏦 Banking Standard Architecture (Legacy)**
+#### **🏦 Banking Standard Architecture**
 | Diagram | Description | File |
 |---------|-------------|------|
-| 🏦 **Banking Standard Architecture** | Enterprise banking architecture with DMZ, security perimeter, and compliance | [`vpbank-banking-standard-architecture.png`](./generated-diagrams/vpbank-banking-standard-architecture.png) |
-| ⚖️ **Regulatory Compliance Architecture** | Comprehensive compliance framework for SBV, Basel III, UCP 600, and AML/CFT | [`vpbank-regulatory-compliance-architecture.png`](./generated-diagrams/vpbank-regulatory-compliance-architecture.png) |
-| 🔄 **High Availability & Disaster Recovery** | Multi-region, multi-AZ architecture with automated failover | [`vpbank-ha-disaster-recovery.png`](./generated-diagrams/vpbank-ha-disaster-recovery.png) |
-| 🏢 **Banking Operations Workflow** | End-to-end banking process from customer input to system integration | [`vpbank-banking-operations-workflow.png`](./generated-diagrams/vpbank-banking-operations-workflow.png) |
+| 🏦 **Banking Standard Architecture** | Enterprise banking architecture with DMZ, security perimeter, and ECS Fargate compliance | [`vpbank-banking-standard-architecture.png`](./generated-diagrams/vpbank-banking-standard-architecture.png) |
+| ⚖️ **Regulatory Compliance Architecture** | Comprehensive compliance framework with containerized SBV, Basel III, UCP 600, and AML/CFT | [`vpbank-regulatory-compliance-architecture.png`](./generated-diagrams/vpbank-regulatory-compliance-architecture.png) |
+| 🏢 **Banking Operations Workflow** | End-to-end banking process with containerized agents from customer input to system integration | [`vpbank-banking-operations-workflow.png`](./generated-diagrams/vpbank-banking-operations-workflow.png) |
 
-#### **📊 Core System Architecture (Original)**
+#### **📊 Core System Architecture**
 | Diagram | Description | File |
 |---------|-------------|------|
-| 📊 **Complete AWS Architecture** | Full system overview with all AWS services | [`vpbank-kmult-aws-architecture.png`](./generated-diagrams/vpbank-kmult-aws-architecture.png) |
-| 🔄 **Data Processing Pipeline** | Document processing workflow and agent coordination | [`vpbank-kmult-data-pipeline.png`](./generated-diagrams/vpbank-kmult-data-pipeline.png) |
-| 🔒 **Security & Compliance** | Banking-grade security and regulatory compliance | [`vpbank-kmult-security-architecture.png`](./generated-diagrams/vpbank-kmult-security-architecture.png) |
-| 💰 **Cost & Scalability** | Auto-scaling and cost optimization architecture | [`vpbank-kmult-cost-scalability.png`](./generated-diagrams/vpbank-kmult-cost-scalability.png) |
+| 📊 **Complete AWS Architecture** | Full system overview with ECS Fargate multi-agent platform | [`vpbank-kmult-aws-architecture.png`](./generated-diagrams/vpbank-kmult-aws-architecture.png) |
+| 🔄 **Data Processing Pipeline** | Document processing workflow with containerized agent coordination | [`vpbank-kmult-data-pipeline.png`](./generated-diagrams/vpbank-kmult-data-pipeline.png) |
+| 🔒 **Security & Compliance** | Banking-grade security with containerized regulatory compliance | [`vpbank-kmult-security-architecture.png`](./generated-diagrams/vpbank-kmult-security-architecture.png) |
+| 💰 **Cost & Scalability** | ECS Fargate auto-scaling and cost optimization architecture | [`vpbank-kmult-cost-scalability.png`](./generated-diagrams/vpbank-kmult-cost-scalability.png) |
 
 ## 🎯 **Key Features**
 
@@ -172,111 +171,133 @@ Our solution implements a **6-agent collaborative architecture** with specialize
 
 ### 🎯 AWS Cloud Architecture Overview
 
-The VPBank K-MULT Agent Studio is built on a comprehensive AWS cloud architecture designed for enterprise-grade banking operations with multi-agent AI collaboration.
+The VPBank K-MULT Agent Studio is built on a comprehensive AWS cloud architecture designed for enterprise-grade banking operations with containerized multi-agent AI collaboration.
 
-#### 📊 **Complete System Architecture**
-![VPBank K-MULT AWS Architecture](./generated-diagrams/vpbank-kmult-aws-architecture.png)
+#### 🏢 **Enterprise Banking Architecture**
+![VPBank K-MULT Enterprise Architecture](./generated-diagrams/vpbank-kmult-enterprise-architecture.png)
 
-*Complete AWS infrastructure showing multi-agent compute layer, AI/ML services, data storage, security, and networking components.*
+*Complete enterprise-grade banking system featuring external banking ecosystem, security perimeter, identity management, containerized multi-agent platform, AI/ML intelligence layer, banking compliance framework, and enterprise data layer.*
 
-#### 🔄 **Data Processing Pipeline**
-![VPBank K-MULT Data Pipeline](./generated-diagrams/vpbank-kmult-data-pipeline.png)
+#### 🧠 **Intelligent Data Processing Pipeline**
+![VPBank Intelligent Data Pipeline](./generated-diagrams/vpbank-intelligent-data-pipeline.png)
 
-*End-to-end document processing workflow from OCR extraction to multi-agent analysis and decision synthesis.*
+*AI-powered document processing workflow from customer touchpoints through intelligent document gateway, AI-powered intelligence, containerized multi-agent processing, banking intelligence analytics, compliance validation, to output integration.*
 
-#### 🔒 **Security & Compliance Architecture**
-![VPBank K-MULT Security Architecture](./generated-diagrams/vpbank-kmult-security-architecture.png)
+#### 🛡️ **Comprehensive Security & Compliance Architecture**
+![VPBank Comprehensive Security Architecture](./generated-diagrams/vpbank-comprehensive-security-architecture.png)
 
-*Banking-grade security implementation with compliance validation for UCP 600, ISBP 821, and SBV regulations.*
+*Banking-grade security implementation with multi-layer security perimeter, identity & access management framework, banking-grade encryption, comprehensive compliance framework, advanced threat detection, and secure data architecture.*
 
-#### 💰 **Cost Optimization & Scalability**
-![VPBank K-MULT Cost & Scalability](./generated-diagrams/vpbank-kmult-cost-scalability.png)
+#### 🔄 **Enterprise High Availability & Disaster Recovery**
+![VPBank Enterprise HA & DR Architecture](./generated-diagrams/vpbank-enterprise-ha-dr-architecture.png)
 
-*Auto-scaling architecture with cost breakdown showing $442.57 monthly AWS operational cost.*
+*Multi-region high availability architecture with global infrastructure, primary region (Singapore) with 3-AZ deployment, DR region (Tokyo) with hot standby, automated backup strategy, and business continuity management.*
+
+#### 💰 **Cost Optimization & Auto-Scaling Architecture**
+![VPBank Cost Optimization Architecture](./generated-diagrams/vpbank-cost-optimization-architecture.png)
+
+*Intelligent cost management with traffic & demand management, auto-scaling ECS Fargate multi-agent platform, cost optimization services, storage optimization, AI/ML cost optimization, and detailed monthly cost breakdown ($442.57 total).*
 
 ---
 
 ### 🏗️ **Architecture Components**
 
 #### **Multi-Agent Compute Layer (ECS Fargate)**
-- **ECS Fargate Cluster**: Serverless containerized agents with auto-scaling
-- **6 Specialized Banking Agents**: Supervisor, Document Intelligence, Risk Assessment, Compliance, Decision Synthesis, Process Automation
-- **Container Registry**: ECR for agent image management and versioning
-- **Load Balancing**: Application Load Balancer with health checks and SSL termination
-- **Service Discovery**: AWS Cloud Map for inter-agent communication
-- **Auto Scaling**: Target-based scaling for optimal resource utilization
+- **ECS Fargate Cluster**: Serverless containerized agents with auto-scaling capabilities
+- **7 Specialized Banking Agents**: Supervisor, Document Intelligence, LC Processing, Credit Analysis, Compliance Engine, Risk Assessment, Decision Synthesis
+- **Container Registry**: Amazon ECR for secure agent image management and versioning
+- **Load Balancing**: Application Load Balancer with SSL termination and health checks
+- **Service Discovery**: AWS Cloud Map for seamless inter-agent communication
+- **Auto Scaling**: Target-based scaling with custom metrics for optimal resource utilization
+- **Container Orchestration**: ECS service management with rolling deployments
 
 #### **AI/ML Services Integration**
-- **AWS Bedrock**: Claude 3.7 Sonnet for advanced reasoning and Vietnamese NLP
-- **Amazon Textract**: 99.5% OCR accuracy for document processing
+- **AWS Bedrock**: Claude 3.7 Sonnet for advanced reasoning and Vietnamese NLP processing
+- **Amazon Textract**: 99.5% OCR accuracy for Vietnamese banking document processing
 - **Amazon Comprehend**: Vietnamese language processing and sentiment analysis
-- **SageMaker**: Custom risk assessment and credit scoring models
+- **Amazon SageMaker**: Custom risk assessment and credit scoring models
+- **Amazon Fraud Detector**: Real-time transaction monitoring and anomaly detection
 
 #### **Data Storage & Management**
-- **Amazon S3**: Document storage with lifecycle policies (Standard → IA → Glacier)
-- **DynamoDB**: Session management and conversation history with on-demand scaling
-- **RDS PostgreSQL**: Analytics, audit trails, and structured data
-- **ElastiCache Redis**: High-performance caching and session storage
+- **Amazon S3**: Document storage with intelligent tiering (Standard → IA → Glacier → Deep Archive)
+- **Amazon DynamoDB**: Session management and conversation history with on-demand scaling
+- **Amazon RDS PostgreSQL**: Analytics, audit trails, and structured banking data
+- **Amazon ElastiCache Redis**: High-performance caching and session storage
+- **Amazon Redshift**: Data warehouse for banking analytics and reporting
 
 #### **Security & Compliance**
-- **AWS WAF + Shield**: DDoS protection and web application firewall
-- **Amazon Cognito**: User authentication and authorization
-- **AWS KMS**: Encryption key management for data at rest and in transit
-- **CloudTrail + Config**: Comprehensive audit logging and compliance monitoring
-- **GuardDuty + Security Hub**: Threat detection and centralized security management
+- **AWS WAF + Shield Advanced**: DDoS protection and web application firewall
+- **Amazon Cognito**: User authentication with mandatory multi-factor authentication
+- **AWS KMS + CloudHSM**: Banking-grade encryption key management with hardware security modules
+- **AWS CloudTrail + Config**: Comprehensive audit logging and compliance monitoring
+- **Amazon GuardDuty + Security Hub**: Threat detection and centralized security management
+- **AWS IAM**: Least privilege access with role-based permissions
 
 #### **Networking & Connectivity**
-- **VPC**: Isolated network environment with public/private subnets
-- **CloudFront**: Global CDN for frontend delivery and API acceleration
-- **API Gateway**: Rate limiting, throttling, and API management
+- **Amazon VPC**: Isolated network environment with public/private/database subnets
+- **Amazon CloudFront**: Global CDN for frontend delivery and API acceleration
+- **Amazon API Gateway**: Rate limiting, throttling, and API management
 - **NAT Gateway**: Secure outbound internet access for private resources
+- **AWS Transit Gateway**: Inter-region connectivity for disaster recovery
 
 ### 💡 **Technology Stack**
 
+#### **Containerized Multi-Agent Platform**
+- **ECS Fargate**: Serverless container orchestration for banking agents
+- **Docker**: Containerization for consistent deployments across environments
+- **Amazon ECR**: Secure container image registry with vulnerability scanning
+- **AWS Cloud Map**: Service discovery for containerized microservices
+- **Application Load Balancer**: Layer 7 load balancing with SSL termination
+
 #### **Frontend Layer**
-- **React 18.2.0**: Modern UI framework with hooks and context
-- **AWS CloudScape**: Enterprise-grade UI components
-- **TypeScript**: Type-safe development
-- **Responsive Design**: Mobile and desktop optimization
+- **React 18.2.0**: Modern UI framework with hooks and context API
+- **AWS CloudScape**: Enterprise-grade UI components for banking applications
+- **TypeScript**: Type-safe development with enhanced code quality
+- **Responsive Design**: Mobile-first design with desktop optimization
 
 #### **Backend Services**
-- **FastAPI 0.115.2**: High-performance async API framework
+- **FastAPI 0.115.2**: High-performance async API framework with automatic documentation
 - **LangChain**: Multi-agent orchestration and AI workflow management
-- **Python 3.11**: Modern Python with async/await support
-- **Pydantic**: Data validation and serialization
+- **Python 3.11**: Modern Python with async/await support and performance improvements
+- **Pydantic**: Data validation and serialization with type hints
 
 #### **AI/ML Stack**
-- **AWS Bedrock**: Claude 3.7 Sonnet with 200K context window
-- **Tesseract OCR**: Vietnamese language optimization
-- **spaCy**: Advanced NLP processing
-- **scikit-learn**: Machine learning models for risk assessment
+- **AWS Bedrock**: Claude 3.7 Sonnet with 200K context window for complex reasoning
+- **Amazon Textract**: Advanced OCR with Vietnamese language optimization
+- **Amazon Comprehend**: NLP processing with custom banking entity recognition
+- **Amazon SageMaker**: Custom ML models for risk assessment and credit scoring
+- **scikit-learn**: Machine learning algorithms for financial analysis
 
 #### **Infrastructure & DevOps**
-- **Docker**: Containerization for consistent deployments
-- **AWS ECS Fargate**: Serverless container orchestration
-- **CloudFormation**: Infrastructure as Code (IaC)
-- **GitHub Actions**: CI/CD pipeline automation
+- **AWS ECS Fargate**: Serverless container orchestration with auto-scaling
+- **AWS CloudFormation**: Infrastructure as Code (IaC) for consistent deployments
+- **Amazon ECR**: Container registry with image scanning and lifecycle policies
+- **AWS CodePipeline**: CI/CD pipeline automation with blue-green deployments
+- **Amazon CloudWatch**: Comprehensive monitoring and alerting
 
 ### 📈 **Performance Specifications**
 
 #### **Processing Capabilities**
-- **Document Throughput**: 1,000+ documents per hour
+- **Document Throughput**: 10,000+ documents per day processing capacity
 - **OCR Accuracy**: 99.5% for Vietnamese banking documents
-- **Response Time**: < 3 seconds for API calls
-- **Concurrent Users**: 500+ simultaneous users
-- **Agent Scaling**: 1-50 instances per agent type
+- **API Response Time**: < 3 seconds for 95% of requests
+- **Concurrent Users**: 1,000+ simultaneous users supported
+- **Agent Scaling**: 1-50 instances per agent type based on demand
+- **Processing Time**: < 30 minutes for LC processing (vs. 8-12 hours manual)
 
 #### **Availability & Reliability**
-- **Uptime SLA**: 99.9% availability
-- **Multi-AZ Deployment**: High availability across availability zones
+- **System Uptime**: 99.99% availability SLA with multi-AZ deployment
+- **Multi-Region Setup**: Primary (Singapore) + DR (Tokyo) regions
 - **Auto-Recovery**: Automatic failover and health checks
 - **Backup Strategy**: Automated daily backups with point-in-time recovery
+- **RTO/RPO**: Recovery Time < 4 hours, Recovery Point < 1 hour
 
 #### **Cost Efficiency**
-- **Monthly AWS Cost**: $442.57 (Annual: $5,310.84)
+- **Monthly AWS Cost**: $442.57 with detailed breakdown by service
 - **Cost per Document**: ~$0.015 per processed document
 - **ROI Timeline**: 3 months through operational savings
-- **Scaling Economics**: Pay-per-use model with auto-scaling
+- **Scaling Economics**: Pay-per-use model with intelligent auto-scaling
+- **Resource Optimization**: Right-sizing recommendations and cost monitoring
 
 ---
 
@@ -382,7 +403,7 @@ The VPBank K-MULT system follows enterprise banking architecture standards with 
 - **AWS Config**: Continuous compliance monitoring and configuration management
 
 #### **Incident Response Framework**
-- **Automated Response**: Lambda-based automated incident response
+- **Automated Response**: ECS Fargate-based automated incident response
 - **Security Orchestration**: Step Functions for complex response workflows
 - **Forensic Analysis**: CloudTrail and VPC Flow Logs for investigation
 - **Communication**: SNS-based alerting and notification system
@@ -496,7 +517,7 @@ docker-compose up -d frontend       # Frontend only
 
 ## 📊 API Endpoints
 
-### Core Banking Operations
+### Core Banking Operations (ECS Fargate)
 
 #### Letter of Credit Processing
 ```bash
@@ -534,7 +555,7 @@ language: "vietnamese"
 max_length: 300
 ```
 
-### Multi-Agent Coordination
+### Multi-Agent Coordination (ECS Fargate)
 ```bash
 POST /mutil_agent/api/v1/agents/coordinate
 Content-Type: application/json
@@ -545,6 +566,14 @@ Content-Type: application/json
   "priority": "high",
   "agents": ["document-intelligence", "compliance-validation", "risk-assessment"]
 }
+```
+
+### Containerized Agent Health Checks
+```bash
+GET /mutil_agent/api/v1/agents/health
+GET /mutil_agent/api/v1/agents/supervisor/status
+GET /mutil_agent/api/v1/agents/document-intelligence/metrics
+GET /mutil_agent/api/v1/agents/compliance/status
 ```
 
 ---
