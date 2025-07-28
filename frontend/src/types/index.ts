@@ -72,20 +72,11 @@ export interface SummaryResponse {
     original: number;
     summary: number;
   };
-  max_length_used?: number;
-  processing_method?: string;
   processing_time: number;
   model_used: string;
-  document_info?: {
-    filename: string;
-    file_size: number;
-    file_type: string;
-    extracted_text_length: number;
-    max_pages_processed: string;
-  };
-  document_analysis?: {
-    document_category?: string;
-    recommendations?: {
+  document_analysis: {
+    document_category: string;
+    recommendations: {
       suggested_types: string[];
       note: string;
     };
