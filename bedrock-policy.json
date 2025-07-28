@@ -1,0 +1,25 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "bedrock:InvokeModel",
+                "bedrock:InvokeModelWithResponseStream",
+                "bedrock:ListFoundationModels",
+                "bedrock:GetFoundationModel"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "textract:AnalyzeDocument",
+                "textract:DetectDocumentText",
+                "comprehend:DetectSentiment",
+                "comprehend:DetectEntities"
+            ],
+            "Resource": "*"
+        }
+    ]
+}

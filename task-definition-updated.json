@@ -1,0 +1,52 @@
+{
+  "family": "VPBankKMultStackBackendServiceTaskDef5AD716F9",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "1024",
+  "memory": "2048",
+  "executionRoleArn": "arn:aws:iam::536697254280:role/VPBankKMultStack-BackendServiceTaskDefExecutionRole-dDvtLST1KzjM",
+  "taskRoleArn": "arn:aws:iam::536697254280:role/VPBankKMultStack-BackendServiceTaskDefTaskRoleD63B9-kcC5J4ETPRbP",
+  "containerDefinitions": [
+    {
+      "name": "web",
+      "image": "536697254280.dkr.ecr.us-east-1.amazonaws.com/vpbank-kmult-backend:latest",
+      "portMappings": [
+        {
+          "containerPort": 8080,
+          "protocol": "tcp"
+        }
+      ],
+      "essential": true,
+      "environment": [
+        {"name": "AWS_REGION", "value": "us-east-1"},
+        {"name": "AWS_DEFAULT_REGION", "value": "us-east-1"},
+        {"name": "AWS_BEDROCK_REGION", "value": "us-east-1"},
+        {"name": "ENVIRONMENT", "value": "production"},
+        {"name": "VERIFY_HTTPS", "value": "False"},
+        {"name": "CONVERSATION_CHAT_TEMPERATURE", "value": "0.7"},
+        {"name": "DEFAULT_MODEL_NAME", "value": "claude-37-sonnet"},
+        {"name": "CONVERSATION_CHAT_MODEL_NAME", "value": "claude-37-sonnet"},
+        {"name": "CONVERSATION_CHAT_TOP_P", "value": "0.9"}
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/vpbank-kmult-backend",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "ecs",
+          "awslogs-create-group": "true"
+        }
+      },
+      "healthCheck": {
+        "command": [
+          "CMD-SHELL",
+          "curl -f http://localhost:8080/mutil_agent/public/api/v1/health-check/health || exit 1"
+        ],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 60
+      }
+    }
+  ]
+}
