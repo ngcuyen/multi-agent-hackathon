@@ -33,6 +33,15 @@ from app.mutil_agent.databases.dynamodb import initiate_dynamodb
 from app.mutil_agent.models.message_dynamodb import MessageDynamoDB
 from app.mutil_agent.config import AWS_REGION, DEFAULT_MODEL_NAME
 
+# Import Strands Agent routes
+try:
+    from app.mutil_agent.routes.v1.strands_agent_routes import router as strands_router
+    STRANDS_AGENTS_AVAILABLE = True
+    print("[STARTUP] ✅ Strands Agents system loaded successfully")
+except ImportError as e:
+    STRANDS_AGENTS_AVAILABLE = False
+    print(f"[STARTUP] ⚠️  Strands Agents not available: {e}")
+
 # Import Pure Strands Agents router
 try:
     from app.mutil_agent.routes.pure_strands_routes import pure_strands_router
@@ -230,6 +239,20 @@ app.include_router(
     prefix="/mutil_agent/api", 
     tags=["Private APIs"]
 )
+
+# Include Strands Agent routes
+if STRANDS_AGENTS_AVAILABLE:
+    app.include_router(
+        strands_router, 
+        prefix="/mutil_agent/api/v1/strands", 
+        tags=["Strands Agents"]
+    )
+    print("[STARTUP] ✅ Strands Agents API endpoints registered")
+    print("[STARTUP] 🔍 Compliance Agent: /mutil_agent/api/v1/strands/compliance/validate")
+    print("[STARTUP] 📊 Risk Agent: /mutil_agent/api/v1/strands/risk/assess")
+    print("[STARTUP] 📄 Document Agent: /mutil_agent/api/v1/strands/document/analyze")
+    print("[STARTUP] 🎯 Supervisor Agent: /mutil_agent/api/v1/strands/supervisor/process")
+    print("[STARTUP] 🔧 Management: /mutil_agent/api/v1/strands/agents/status")
 
 # Include VPBank Pure Strands Agents router
 if PURE_STRANDS_AVAILABLE:
