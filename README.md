@@ -46,19 +46,19 @@
 *Multi-region resilience: Singapore (Primary) + Tokyo (DR), RTO < 4h, RPO < 1h, automated failover*
 
 #### 🌐 **Full-Stack Architecture with S3 Frontend**
-![Full-Stack Architecture](./generated-diagrams/vpbank-kmult-fullstack-architecture.png)
+![Full-Stack Architecture](./docs/architecture/vpbank-kmult-fullstack-architecture.png)
 *Complete full-stack system: S3 static hosting, CloudFront CDN, API Gateway, Strands multi-agent backend*
-📐 [Edit in Draw.io](./generated-diagrams/vpbank-kmult-fullstack-architecture.drawio)
+📐 [Edit in Draw.io](./docs/architecture/vpbank-kmult-fullstack-architecture.drawio)
 
 #### 🚀 **Strands-Enhanced Multi-Agent Architecture**
-![Strands Enhanced Architecture](./generated-diagrams/vpbank-kmult-strands-enhanced-architecture.png)
+![Strands Enhanced Architecture](./docs/architecture/vpbank-kmult-strands-enhanced-architecture.png)
 *Advanced multi-agent system: Strands orchestration, enhanced reasoning, consensus building, shared context management*
-📐 [Edit in Draw.io](./generated-diagrams/vpbank-kmult-strands-enhanced-architecture.drawio)
+📐 [Edit in Draw.io](./docs/architecture/vpbank-kmult-strands-enhanced-architecture.drawio)
 
 #### 🏗️ **High-Level AWS ECS Fargate Architecture**
-![High Level Architecture](./generated-diagrams/vpbank-kmult-high-level-architecture.png)
+![High Level Architecture](./docs/architecture/vpbank-kmult-high-level-architecture.png)
 *Complete AWS infrastructure: ECS Fargate multi-agent platform, AI/ML services, data layer, security monitoring*
-📐 [Edit in Draw.io](./generated-diagrams/vpbank-kmult-high-level-architecture.drawio)
+📐 [Edit in Draw.io](./docs/architecture/vpbank-kmult-high-level-architecture.drawio)
 
 ### 🏦 **Banking Standard Architecture**
 
@@ -327,12 +327,12 @@ Frontend (React) → CloudFront → WAF → API Gateway → ECS Fargate
 ```bash
 git clone https://github.com/ngcuyen/multi-agent-hackathon.git
 cd multi-agent-hackathon
-./setup.sh
+./scripts/setup.sh
 ```
 
 ### **2. Start Application (Local Development)**
 ```bash
-./run.sh up
+./scripts/run.sh up
 ```
 
 ### **3. Access Services**
@@ -344,18 +344,68 @@ cd multi-agent-hackathon
 
 ### **4. AWS Deployment (Production)**
 ```bash
-./deploy.sh production ap-southeast-1 full
+./scripts/deploy.sh production ap-southeast-1 full
 ```
 
 ## 🎯 **Management Commands**
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| `./setup.sh` | Initial project setup | `./setup.sh` |
-| `./run.sh` | Start/manage application | `./run.sh [up\|stop\|restart\|logs\|status]` |
-| `./build.sh` | Build Docker images | `./build.sh [development\|production]` |
-| `./test.sh` | Run comprehensive tests | `./test.sh [all\|health\|api\|agents\|performance]` |
-| `./deploy.sh` | Deploy to AWS | `./deploy.sh [staging\|production] [region]` |
+| `./scripts/setup.sh` | Initial project setup | `./scripts/setup.sh` |
+| `./scripts/run.sh` | Start/manage application | `./scripts/run.sh [up\|stop\|restart\|logs\|status]` |
+| `./scripts/build.sh` | Build Docker images | `./scripts/build.sh [development\|production]` |
+| `./scripts/test.sh` | Run comprehensive tests | `./scripts/test.sh [all\|health\|api\|agents\|performance]` |
+| `./scripts/deploy.sh` | Deploy to AWS | `./scripts/deploy.sh [staging\|production] [region]` |
+| `./scripts/export-diagrams.sh` | Export architecture diagrams | `./scripts/export-diagrams.sh` |
+
+---
+
+## 🏗️ **Project Structure**
+
+```
+vpbank-kmult-agent-studio/
+├── 📂 src/                    # Source Code
+│   ├── 📂 backend/            # FastAPI Backend Services
+│   ├── 📂 frontend/           # React Frontend Application
+│   ├── 📂 agents/             # 7 Specialized Banking Agents
+│   ├── 📂 shared/             # Common Libraries & Utilities
+│   ├── 📂 data/               # Data Files & Schemas
+│   └── 📂 tools/              # Development Tools
+│
+├── 📂 docs/                   # Documentation
+│   ├── 📂 architecture/       # Architecture Diagrams (PNG + .drawio)
+│   ├── 📂 api/                # API Documentation
+│   ├── 📂 user-guide/         # User & Admin Guides
+│   └── 📂 examples/           # Code Examples
+│
+├── 📂 config/                 # Configuration Files
+│   ├── 🔧 docker-compose.yml  # Container Orchestration
+│   ├── 🔧 task-definition.json # ECS Configuration
+│   └── 🔧 *.json              # AWS Policies & Configs
+│
+├── 📂 scripts/                # Automation Scripts
+│   ├── 🚀 setup.sh            # Project Setup
+│   ├── 🚀 run.sh              # Development Server
+│   ├── 🚀 deploy.sh           # Production Deployment
+│   └── 🚀 test.sh             # Test Runner
+│
+├── 📂 tests/                  # Test Suite
+│   ├── 📂 unit/               # Unit Tests
+│   ├── 📂 integration/        # Integration Tests
+│   └── 📂 e2e/               # End-to-End Tests
+│
+├── 📂 deployments/            # Infrastructure
+│   ├── 📂 aws/                # AWS Deployment Configs
+│   ├── 📂 docker/             # Docker Configurations
+│   └── 📂 infrastructure/     # Infrastructure as Code
+│
+└── 📂 monitoring/             # Observability
+    ├── 📂 logs/               # Application Logs
+    ├── 📂 metrics/            # Performance Metrics
+    └── 📂 alerts/             # Alert Configurations
+```
+
+📋 **Detailed Structure**: See [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md) for complete directory organization.
 
 ---
 

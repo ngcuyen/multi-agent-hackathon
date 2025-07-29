@@ -6,7 +6,7 @@
 echo "🏦 VPBank K-MULT Agent Studio - Architecture Diagram Export"
 echo "============================================================"
 
-DIAGRAMS_DIR="./generated-diagrams"
+DIAGRAMS_DIR="./docs/architecture"
 
 # Check if diagrams directory exists
 if [ ! -d "$DIAGRAMS_DIR" ]; then
@@ -47,6 +47,15 @@ echo "   2. Click 'Create New Diagram'"
 echo "   3. File → Import → Choose .drawio file"
 echo "   4. Edit as needed"
 echo "   5. File → Export as → Select desired format"
+echo ""
+
+echo "🏗️ Project Structure:"
+echo "   • Architecture diagrams: docs/architecture/"
+echo "   • Source code: src/"
+echo "   • Configuration: config/"
+echo "   • Scripts: scripts/"
+echo "   • Tests: tests/"
+echo "   • Deployments: deployments/"
 echo ""
 
 echo "✅ Export completed successfully!"

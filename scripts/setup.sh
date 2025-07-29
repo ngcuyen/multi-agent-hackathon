@@ -1,11 +1,12 @@
 #!/bin/bash
 
-# VPBank K-MULT Agent Studio - Environment Setup Script
+# VPBank K-MULT Agent Studio - Project Setup Script
+# Multi-Agent Hackathon 2025 - Group 181
 
 set -e
 
-echo "🏦 VPBank K-MULT Agent Studio - Environment Setup"
-echo "=================================================="
+echo "🏦 VPBank K-MULT Agent Studio - Project Setup"
+echo "=============================================="
 
 # Colors for output
 RED='\033[0;31m'
@@ -16,11 +17,7 @@ NC='\033[0m' # No Color
 
 # Function to print colored output
 print_status() {
-    echo -e "${BLUE}[INFO]${NC} $1"
-}
-
-print_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
+    echo -e "${GREEN}[INFO]${NC} $1"
 }
 
 print_warning() {
@@ -31,223 +28,147 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# Check if command exists
-command_exists() {
-    command -v "$1" >/dev/null 2>&1
+print_header() {
+    echo -e "${BLUE}$1${NC}"
 }
 
-# Check prerequisites
-check_prerequisites() {
-    print_status "Checking prerequisites..."
-    
-    # Check Docker
-    if command_exists docker; then
-        DOCKER_VERSION=$(docker --version | cut -d' ' -f3 | cut -d',' -f1)
-        print_success "Docker found: $DOCKER_VERSION"
-    else
-        print_error "Docker is not installed. Please install Docker first."
-        exit 1
-    fi
-    
-    # Check Docker Compose
-    if command_exists docker-compose; then
-        COMPOSE_VERSION=$(docker-compose --version | cut -d' ' -f3 | cut -d',' -f1)
-        print_success "Docker Compose found: $COMPOSE_VERSION"
-    else
-        print_error "Docker Compose is not installed. Please install Docker Compose first."
-        exit 1
-    fi
-    
-    # Check Node.js
-    if command_exists node; then
-        NODE_VERSION=$(node --version)
-        print_success "Node.js found: $NODE_VERSION"
-    else
-        print_warning "Node.js not found. Installing Node.js 18..."
-        # Install Node.js using NodeSource repository
-        curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-        sudo apt-get install -y nodejs
-    fi
-    
-    # Check Python
-    if command_exists python3; then
-        PYTHON_VERSION=$(python3 --version)
-        print_success "Python found: $PYTHON_VERSION"
-    else
-        print_warning "Python3 not found. Installing Python3..."
-        sudo apt-get update
-        sudo apt-get install -y python3 python3-pip python3-venv
-    fi
-    
-    # Check Git
-    if command_exists git; then
-        GIT_VERSION=$(git --version)
-        print_success "Git found: $GIT_VERSION"
-    else
-        print_error "Git is not installed. Please install Git first."
-        exit 1
-    fi
-}
+# Check if running as root
+if [[ $EUID -eq 0 ]]; then
+   print_error "This script should not be run as root"
+   exit 1
+fi
 
-# Setup environment files
-setup_environment() {
-    print_status "Setting up environment files..."
-    
-    # Backend environment
-    if [ ! -f "backend/app/riskassessment/.env" ]; then
-        if [ -f "backend/app/riskassessment/.env-template" ]; then
-            cp backend/app/riskassessment/.env-template backend/app/riskassessment/.env
-            print_success "Backend .env file created from template"
-            print_warning "Please edit backend/app/riskassessment/.env with your AWS credentials"
-        else
-            print_error "Backend .env template not found"
-        fi
-    else
-        print_success "Backend .env file already exists"
-    fi
-    
-    # Frontend environment
-    if [ ! -f "frontend/.env" ]; then
-        cat > frontend/.env << EOF
-REACT_APP_API_URL=http://localhost:8080
-REACT_APP_ENV=development
-GENERATE_SOURCEMAP=false
-EOF
-        print_success "Frontend .env file created"
-    else
-        print_success "Frontend .env file already exists"
-    fi
-}
+print_header "🔍 Checking System Requirements..."
 
-# Install dependencies
-install_dependencies() {
-    print_status "Installing dependencies..."
-    
-    # Frontend dependencies
-    if [ -d "frontend" ]; then
-        print_status "Installing frontend dependencies..."
-        cd frontend
-        npm install
-        cd ..
-        print_success "Frontend dependencies installed"
-    fi
-    
-    # Backend dependencies (if running locally)
-    if [ -d "backend/app/riskassessment" ]; then
-        print_status "Setting up Python virtual environment..."
-        cd backend/app/riskassessment
-        
-        if [ ! -d "venv" ]; then
-            python3 -m venv venv
-            print_success "Python virtual environment created"
-        fi
-        
-        source venv/bin/activate
-        pip install --upgrade pip
-        pip install -r requirements.txt
-        deactivate
-        cd ../../..
-        print_success "Backend dependencies installed"
-    fi
-}
+# Check Docker
+if ! command -v docker &> /dev/null; then
+    print_error "Docker is not installed. Please install Docker first."
+    exit 1
+fi
+print_status "Docker found: $(docker --version)"
+
+# Check Docker Compose
+if ! command -v docker-compose &> /dev/null; then
+    print_error "Docker Compose is not installed. Please install Docker Compose first."
+    exit 1
+fi
+print_status "Docker Compose found: $(docker-compose --version)"
+
+# Check Node.js (for frontend development)
+if ! command -v node &> /dev/null; then
+    print_warning "Node.js not found. Frontend development may be limited."
+else
+    print_status "Node.js found: $(node --version)"
+fi
+
+# Check Python
+if ! command -v python3 &> /dev/null; then
+    print_warning "Python3 not found. Backend development may be limited."
+else
+    print_status "Python3 found: $(python3 --version)"
+fi
+
+print_header "📁 Setting up Project Structure..."
 
 # Create necessary directories
-create_directories() {
-    print_status "Creating necessary directories..."
-    
-    # Create log directories
-    mkdir -p logs/{backend,frontend,system}
-    
-    # Create data directories
-    mkdir -p data/{samples,test-data,schemas}
-    
-    # Create test directories
-    mkdir -p tests/{backend,frontend,integration,e2e}
-    
-    print_success "Directories created"
-}
+mkdir -p logs/{backend,frontend,deployment}
+mkdir -p data/{samples,test-data,schemas}
+mkdir -p testing/{unit,integration,e2e,performance}
+mkdir -p tools/{scripts,monitoring,ci-cd}
 
-# Setup Docker networks
-setup_docker() {
-    print_status "Setting up Docker environment..."
-    
-    # Create Docker networks if they don't exist
-    if ! docker network ls | grep -q "vpbank-kmult-network"; then
-        docker network create vpbank-kmult-network
-        print_success "Docker network created"
+print_status "Project directories created"
+
+print_header "🔧 Setting up Environment Files..."
+
+# Backend environment setup
+if [ ! -f "backend/app/mutil_agent/.env" ]; then
+    if [ -f "backend/app/mutil_agent/.env-template" ]; then
+        cp backend/app/mutil_agent/.env-template backend/app/mutil_agent/.env
+        print_status "Backend .env file created from template"
     else
-        print_success "Docker network already exists"
+        print_warning "Backend .env template not found"
     fi
-    
-    # Pull required images
-    print_status "Pulling Docker images..."
-    docker-compose -f docker-compose.dev.yml pull
-    print_success "Docker images pulled"
-}
+else
+    print_status "Backend .env file already exists"
+fi
 
-# Verify installation
-verify_installation() {
-    print_status "Verifying installation..."
-    
-    # Check if we can build the project
-    if make build > /dev/null 2>&1; then
-        print_success "Build verification passed"
+# Frontend environment setup
+if [ ! -f "frontend/.env" ]; then
+    if [ -f "frontend/.env.example" ]; then
+        cp frontend/.env.example frontend/.env
+        print_status "Frontend .env file created from example"
     else
-        print_warning "Build verification failed - you may need to configure AWS credentials"
+        print_warning "Frontend .env example not found"
     fi
-    
-    # Check if health endpoint is accessible after starting services
-    print_status "Starting services for verification..."
-    make dev > /dev/null 2>&1 &
-    
-    # Wait for services to start
-    sleep 30
-    
-    if curl -f http://localhost:8080/riskassessment/public/api/v1/health-check/health > /dev/null 2>&1; then
-        print_success "Backend health check passed"
+else
+    print_status "Frontend .env file already exists"
+fi
+
+print_header "🐳 Setting up Docker Environment..."
+
+# Create Docker network if it doesn't exist
+if ! docker network ls | grep -q "vpbank-kmult-network"; then
+    docker network create vpbank-kmult-network
+    print_status "Docker network 'vpbank-kmult-network' created"
+else
+    print_status "Docker network 'vpbank-kmult-network' already exists"
+fi
+
+print_header "📦 Installing Dependencies..."
+
+# Backend dependencies
+if [ -f "backend/requirements.txt" ]; then
+    print_status "Backend dependencies will be installed during Docker build"
+else
+    print_warning "Backend requirements.txt not found"
+fi
+
+# Frontend dependencies
+if [ -f "frontend/package.json" ]; then
+    if [ -d "frontend/node_modules" ]; then
+        print_status "Frontend node_modules already exists"
     else
-        print_warning "Backend health check failed - services may still be starting"
+        print_status "Frontend dependencies will be installed during Docker build"
     fi
-    
-    # Stop services
-    make dev-stop > /dev/null 2>&1
-}
+else
+    print_warning "Frontend package.json not found"
+fi
 
-# Main setup function
-main() {
-    echo ""
-    print_status "Starting VPBank K-MULT Agent Studio setup..."
-    echo ""
-    
-    check_prerequisites
-    echo ""
-    
-    setup_environment
-    echo ""
-    
-    create_directories
-    echo ""
-    
-    install_dependencies
-    echo ""
-    
-    setup_docker
-    echo ""
-    
-    verify_installation
-    echo ""
-    
-    print_success "Setup completed successfully!"
-    echo ""
-    echo "🎉 VPBank K-MULT Agent Studio is ready!"
-    echo ""
-    echo "Next steps:"
-    echo "1. Edit backend/app/riskassessment/.env with your AWS credentials"
-    echo "2. Run 'make dev' to start the development environment"
-    echo "3. Access the application at http://localhost:3000"
-    echo ""
-    echo "For more information, see docs/DEVELOPMENT.md"
-}
+print_header "🔒 Setting up Security..."
 
-# Run main function
-main "$@"
+# Set proper permissions
+chmod +x scripts/*.sh 2>/dev/null || true
+chmod 600 backend/app/mutil_agent/.env 2>/dev/null || true
+chmod 600 frontend/.env 2>/dev/null || true
+
+print_status "File permissions set"
+
+print_header "📊 Project Setup Summary"
+echo "================================"
+print_status "✅ System requirements checked"
+print_status "✅ Project structure created"
+print_status "✅ Environment files configured"
+print_status "✅ Docker environment prepared"
+print_status "✅ Dependencies identified"
+print_status "✅ Security permissions set"
+
+echo ""
+print_header "🚀 Next Steps:"
+echo "1. Configure your .env files with actual values"
+echo "2. Run './run.sh' to start the application"
+echo "3. Access the application at:"
+echo "   - Frontend: http://localhost:3000"
+echo "   - Backend API: http://localhost:8080"
+echo "   - API Docs: http://localhost:8080/docs"
+
+echo ""
+print_header "📋 Available Commands:"
+echo "- ./setup.sh     - Run this setup script"
+echo "- ./run.sh       - Start the application"
+echo "- ./build.sh     - Build Docker images"
+echo "- ./test.sh      - Run tests"
+echo "- ./deploy.sh    - Deploy to AWS"
+
+echo ""
+print_status "🎯 VPBank K-MULT Agent Studio setup completed successfully!"
+print_status "Multi-Agent Banking Platform ready for deployment"

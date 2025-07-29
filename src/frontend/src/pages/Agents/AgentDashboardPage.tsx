@@ -780,8 +780,6 @@ const AgentDashboardPage: React.FC<AgentDashboardPageProps> = ({ onShowSnackbar 
                   onChange={({ detail }) =>
                     setCoordinationForm({ ...coordinationForm, agents_required: parseInt(detail.value) || 1 })
                   }
-                  min={1}
-                  max={agents.length}
                 />
               </FormField>
 

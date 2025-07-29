@@ -192,8 +192,8 @@ const PureStrandsInterface: React.FC<PureStrandsInterfaceProps> = ({ onShowSnack
     }
   };
 
-  const handleKeyPress = (event: React.KeyboardEvent) => {
-    if (event.key === 'Enter' && !event.shiftKey) {
+  const handleKeyPress = (event: any) => {
+    if (event.detail.key === 'Enter' && !event.detail.shiftKey) {
       event.preventDefault();
       handleSendMessage();
     }
@@ -216,7 +216,7 @@ const PureStrandsInterface: React.FC<PureStrandsInterfaceProps> = ({ onShowSnack
   const getAgentBadgeColor = (agent: string) => {
     if (agent.includes('text_summary')) return 'blue';
     if (agent.includes('compliance')) return 'green';
-    if (agent.includes('risk')) return 'orange';
+    if (agent.includes('risk')) return 'red';
     return 'grey';
   };
 
