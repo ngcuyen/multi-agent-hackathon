@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   Container,
   Header,
@@ -11,12 +11,7 @@ import {
   StatusIndicator,
   ProgressBar,
   Cards,
-  Link,
-  Alert,
-  Tiles,
-  KeyValuePairs,
-  TextContent,
-  ExpandableSection
+  Link
 } from '@cloudscape-design/components';
 import { useNavigate } from 'react-router-dom';
 
@@ -37,88 +32,7 @@ interface HomePageProps {
 
 const HomePage: React.FC<HomePageProps> = ({ agents, loading }) => {
   const navigate = useNavigate();
-  const [systemStats, setSystemStats] = useState({
-    totalProcessed: 1247,
-    successRate: 99.5,
-    avgProcessingTime: 2.3,
-    activeAgents: 6
-  });
 
-  // Welcome banner with key features
-  const welcomeContent = (
-    <Alert
-      statusIconAriaLabel="Info"
-      header="Welcome to VPBank K-MULT Agent Studio"
-      type="info"
-    >
-      <TextContent>
-        <p>
-          <strong>Advanced Multi-Agent AI System</strong> designed to automate complex banking processes.
-          With specialized Vietnamese NLP capabilities and 99.5% accuracy, we reduce processing time by 60-80%.
-        </p>
-        <ul>
-          <li><strong>6 Specialized AI Agents</strong> working collaboratively</li>
-          <li><strong>Letter of Credit Processing</strong>: 8-12 hours reduced to under 30 minutes</li>
-          <li><strong>Automated Credit Assessment</strong> with high accuracy scoring</li>
-          <li><strong>Compliance Validation</strong> per UCP 600, ISBP 821, SBV standards</li>
-        </ul>
-      </TextContent>
-    </Alert>
-  );
-
-  // Quick action tiles
-  const quickActions = [
-    {
-      label: "Document Summarization",
-      description: "Upload and summarize Vietnamese documents with 99.5% accuracy",
-      value: "document-summary",
-      href: "/text-summary"
-    },
-    {
-      label: "AI Assistant",
-      description: "Interact with our intelligent multi-agent system",
-      value: "ai-chat", 
-      href: "/chat"
-    },
-    {
-      label: "LC Processing",
-      description: "Automated Letter of Credit processing and validation",
-      value: "lc-processing",
-      href: "/lc-processing"
-    },
-    {
-      label: "Credit Assessment",
-      description: "Risk analysis and credit scoring automation",
-      value: "credit-assessment",
-      href: "/credit-assessment"
-    }
-  ];
-
-  // System performance metrics
-  const performanceMetrics = [
-    {
-      label: "Documents Processed",
-      value: systemStats.totalProcessed.toLocaleString(),
-      info: "Total documents successfully processed"
-    },
-    {
-      label: "Success Rate",
-      value: `${systemStats.successRate}%`,
-      info: "Accuracy in processing and analysis"
-    },
-    {
-      label: "Average Processing Time",
-      value: `${systemStats.avgProcessingTime}s`,
-      info: "Average system response time"
-    },
-    {
-      label: "Active Agents",
-      value: systemStats.activeAgents.toString(),
-      info: "Number of AI agents ready to serve"
-    }
-  ];
-
-  // Banking agents overview
   const bankingAgents = [
     {
       id: 'supervisor',
@@ -127,268 +41,269 @@ const HomePage: React.FC<HomePageProps> = ({ agents, loading }) => {
       status: 'active' as const,
       capabilities: ['Workflow Management', 'Agent Coordination', 'Task Distribution'],
       accuracy: '99.8%',
-      processingTime: 'Under 1 minute'
+      processingTime: '< 1 min'
     },
     {
       id: 'document-intelligence',
       name: 'Document Intelligence Agent',
       description: 'Advanced OCR with deep Vietnamese NLP capabilities',
       status: 'active' as const,
-      capabilities: ['Vietnamese OCR', 'Information Extraction', 'Document Classification'],
+      capabilities: ['OCR Processing', 'Vietnamese NLP', 'Document Classification'],
       accuracy: '99.5%',
-      processingTime: 'Under 30 seconds'
+      processingTime: '2-5 min'
     },
     {
       id: 'risk-assessment',
       name: 'Risk Assessment Agent',
-      description: 'Financial risk analysis and predictive modeling',
+      description: 'Automated financial analysis and predictive risk modeling',
       status: 'active' as const,
-      capabilities: ['Credit Scoring', 'Financial Analysis', 'Risk Prediction'],
-      accuracy: '97.2%',
-      processingTime: 'Under 2 minutes'
+      capabilities: ['Financial Analysis', 'Risk Modeling', 'Credit Scoring'],
+      accuracy: '95.2%',
+      processingTime: '3-8 min'
     },
     {
       id: 'compliance-validation',
       name: 'Compliance Validation Agent',
-      description: 'Banking regulation compliance checking',
+      description: 'Validates against UCP 600, ISBP 821, and SBV regulations',
       status: 'active' as const,
-      capabilities: ['UCP 600', 'ISBP 821', 'SBV Regulations'],
-      accuracy: '98.9%',
-      processingTime: 'Under 1 minute'
+      capabilities: ['UCP 600 Validation', 'ISBP 821 Compliance', 'SBV Regulations'],
+      accuracy: '98.7%',
+      processingTime: '1-3 min'
     },
     {
       id: 'decision-synthesis',
       name: 'Decision Synthesis Agent',
-      description: 'Evidence-based recommendation generation',
+      description: 'Generates evidence-based recommendations with confidence scores',
       status: 'active' as const,
-      capabilities: ['Comprehensive Analysis', 'Decision Recommendations', 'Detailed Reports'],
-      accuracy: '99.1%',
-      processingTime: 'Under 45 seconds'
+      capabilities: ['Decision Making', 'Confidence Scoring', 'Report Generation'],
+      accuracy: '97.3%',
+      processingTime: '2-4 min'
     },
     {
       id: 'process-automation',
       name: 'Process Automation Agent',
-      description: 'End-to-end workflow automation',
+      description: 'End-to-end automation for banking workflows',
       status: 'active' as const,
-      capabilities: ['LC Automation', 'Credit Workflows', 'System Integration'],
-      accuracy: '98.7%',
-      processingTime: 'Under 5 minutes'
+      capabilities: ['LC Processing', 'Credit Proposals', 'Workflow Automation'],
+      accuracy: '96.8%',
+      processingTime: '5-15 min'
     }
   ];
 
-  const handleQuickAction = (href: string) => {
-    navigate(href);
-  };
+  const performanceMetrics = [
+    { label: 'Processing Time Reduction', value: '60-80%', trend: 'positive' },
+    { label: 'Operational Cost Reduction', value: '40-50%', trend: 'positive' },
+    { label: 'Error Rate Reduction', value: '< 1%', trend: 'positive' },
+    { label: 'Documents Processed Today', value: '1,247', trend: 'neutral' }
+  ];
+
+  const quickActions = [
+    {
+      title: 'Letter of Credit Processing',
+      description: 'Process LC documents with automated validation',
+      action: () => navigate('/lc-processing'),
+      icon: '📄',
+      badge: 'New'
+    },
+    {
+      title: 'Credit Proposal Assessment',
+      description: 'Automated credit risk analysis and recommendations',
+      action: () => navigate('/credit-assessment'),
+      icon: '💰',
+      badge: 'Popular'
+    },
+    {
+      title: 'Document Intelligence',
+      description: 'OCR and Vietnamese NLP document processing',
+      action: () => navigate('/text-summary'),
+      icon: '🔍',
+      badge: null
+    },
+    {
+      title: 'Risk Dashboard',
+      description: 'Real-time risk monitoring and analytics',
+      action: () => navigate('/risk-dashboard'),
+      icon: '📊',
+      badge: 'Beta'
+    }
+  ];
 
   return (
-    <SpaceBetween size="l">
-      {/* Welcome Section */}
-      <Container>
-        {welcomeContent}
-      </Container>
+    <Container>
+      <SpaceBetween direction="vertical" size="l">
+        {/* Header */}
+        <Header
+          variant="h1"
+          description="Multi-Agent AI for Banking Process Automation"
+          actions={
+            <SpaceBetween direction="horizontal" size="xs">
+              <Button variant="primary" onClick={() => navigate('/agents')}>
+                Manage Agents
+              </Button>
+              <Button onClick={() => navigate('/settings')}>
+                Settings
+              </Button>
+            </SpaceBetween>
+          }
+        >
+          🏦 VPBank K-MULT Agent Studio
+        </Header>
 
-      {/* Quick Actions */}
-      <Container
-        header={
-          <Header
-            variant="h2"
-            description="Choose the feature you want to use"
-          >
-            Quick Start
-          </Header>
-        }
-      >
-        <Tiles
-          onChange={({ detail }) => handleQuickAction(detail.value)}
-          value=""
-          items={quickActions}
-        />
-      </Container>
-
-      {/* System Performance */}
-      <Container
-        header={
-          <Header
-            variant="h2"
-            description="Real-time system performance metrics"
-          >
-            System Statistics
-          </Header>
-        }
-      >
-        <ColumnLayout columns={4} variant="text-grid">
-          {performanceMetrics.map((metric, index) => (
-            <div key={index}>
-              <Box variant="awsui-key-label">{metric.label}</Box>
-              <Box variant="h2" color="text-status-success">
-                {metric.value}
+        {/* Performance Metrics */}
+        <Box>
+          <Header variant="h2">Performance Overview</Header>
+          <ColumnLayout columns={4}>
+            {performanceMetrics.map((metric, index) => (
+              <Box key={index} padding="m">
+                <SpaceBetween direction="vertical" size="xs">
+                  <Box fontSize="heading-s" color="text-status-success">
+                    {metric.value}
+                  </Box>
+                  <Box fontSize="body-s" color="text-body-secondary">
+                    {metric.label}
+                  </Box>
+                  {metric.trend === 'positive' && (
+                    <StatusIndicator type="success">Improved</StatusIndicator>
+                  )}
+                </SpaceBetween>
               </Box>
-              <Box variant="small" color="text-status-subdued">
-                {metric.info}
-              </Box>
-            </div>
-          ))}
-        </ColumnLayout>
-      </Container>
+            ))}
+          </ColumnLayout>
+        </Box>
 
-      {/* Multi-Agent System Overview */}
-      <Container
-        header={
-          <Header
+        {/* Quick Actions */}
+        <Box>
+          <Header variant="h2">Quick Actions</Header>
+          <Grid gridDefinition={[{ colspan: 6 }, { colspan: 6 }, { colspan: 6 }, { colspan: 6 }]}>
+            {quickActions.map((action, index) => (
+              <Box key={index} padding="s">
+                <Box
+                  padding="m"
+                  
+                  
+                >
+                  <SpaceBetween direction="vertical" size="s">
+                    <SpaceBetween direction="horizontal" size="xs" alignItems="center">
+                      <Box fontSize="heading-m">{action.icon}</Box>
+                      {action.badge && (
+                        <Badge color={action.badge === 'New' ? 'green' : action.badge === 'Popular' ? 'blue' : 'grey'}>
+                          {action.badge}
+                        </Badge>
+                      )}
+                    </SpaceBetween>
+                    <Box fontSize="heading-s">{action.title}</Box>
+                    <Box fontSize="body-s" color="text-body-secondary">
+                      {action.description}
+                    </Box>
+                    <Button variant="primary" onClick={action.action} fullWidth>
+                      Get Started
+                    </Button>
+                  </SpaceBetween>
+                </Box>
+              </Box>
+            ))}
+          </Grid>
+        </Box>
+
+        {/* Agent Status */}
+        <Box>
+          <Header 
             variant="h2"
-            description="6 specialized AI agents working together"
             actions={
-              <Button
-                variant="primary"
-                onClick={() => navigate('/agents')}
-              >
-                View Details
+              <Button onClick={() => navigate('/agents')}>
+                View All Agents
               </Button>
             }
           >
-            Multi-Agent System
+            AI Agents Status
           </Header>
-        }
-      >
-        <Cards
-          ariaLabels={{
-            itemSelectionLabel: (e, t) => `select ${t.name}`,
-            selectionGroupLabel: "Item selection"
-          }}
-          cardDefinition={{
-            header: item => (
-              <Link fontSize="heading-m">
-                {item.name}
-              </Link>
-            ),
-            sections: [
-              {
-                id: "description",
-                content: item => item.description
-              },
-              {
-                id: "capabilities",
-                header: "Capabilities",
-                content: item => (
-                  <SpaceBetween direction="horizontal" size="xs">
-                    {item.capabilities.map((capability: string, index: number) => (
-                      <Badge key={index} color="blue">
-                        {capability}
-                      </Badge>
-                    ))}
-                  </SpaceBetween>
-                )
-              },
-              {
-                id: "performance",
-                header: "Performance",
-                content: item => (
-                  <ColumnLayout columns={2} variant="text-grid">
-                    <div>
-                      <Box variant="awsui-key-label">Accuracy</Box>
-                      <StatusIndicator type="success">
-                        {item.accuracy}
-                      </StatusIndicator>
-                    </div>
-                    <div>
-                      <Box variant="awsui-key-label">Processing Time</Box>
-                      <Box>{item.processingTime}</Box>
-                    </div>
-                  </ColumnLayout>
-                )
-              }
-            ]
-          }}
-          cardsPerRow={[
-            { cards: 1 },
-            { minWidth: 500, cards: 2 },
-            { minWidth: 800, cards: 3 }
-          ]}
-          items={bankingAgents}
-          loading={loading}
-          loadingText="Loading agent information..."
-          empty={
-            <Box textAlign="center" color="inherit">
-              <b>No agents available</b>
-              <Box
-                padding={{ bottom: "s" }}
-                variant="p"
-                color="inherit"
-              >
-                No agents have been configured in the system.
+          <Cards
+            cardDefinition={{
+              header: item => (
+                <SpaceBetween direction="horizontal" size="xs" alignItems="center">
+                  <Link href="#" fontSize="heading-s">{item.name}</Link>
+                  <StatusIndicator type={item.status === 'active' ? 'success' : 'pending'}>
+                    {item.status === 'active' ? 'Active' : 'Inactive'}
+                  </StatusIndicator>
+                </SpaceBetween>
+              ),
+              sections: [
+                {
+                  id: "description",
+                  content: item => item.description
+                },
+                {
+                  id: "metrics",
+                  content: item => (
+                    <ColumnLayout columns={2}>
+                      <SpaceBetween direction="vertical" size="xs">
+                        <Box fontSize="body-s" color="text-body-secondary">Accuracy</Box>
+                        <Box fontSize="heading-s" color="text-status-success">{item.accuracy}</Box>
+                      </SpaceBetween>
+                      <SpaceBetween direction="vertical" size="xs">
+                        <Box fontSize="body-s" color="text-body-secondary">Processing Time</Box>
+                        <Box fontSize="heading-s">{item.processingTime}</Box>
+                      </SpaceBetween>
+                    </ColumnLayout>
+                  )
+                },
+                {
+                  id: "capabilities",
+                  content: item => (
+                    <SpaceBetween direction="horizontal" size="xs">
+                      {item.capabilities.slice(0, 3).map((capability, index) => (
+                        <Badge key={index} color="blue">{capability}</Badge>
+                      ))}
+                    </SpaceBetween>
+                  )
+                }
+              ]
+            }}
+            cardsPerRow={[
+              { cards: 1 },
+              { minWidth: 500, cards: 2 },
+              { minWidth: 800, cards: 3 }
+            ]}
+            items={bankingAgents.slice(0, 6)}
+            loading={loading}
+            loadingText="Loading agents..."
+            empty={
+              <Box textAlign="center" color="inherit">
+                <Box variant="strong" textAlign="center" color="inherit">
+                  No agents available
+                </Box>
+                <Box variant="p" padding={{ bottom: "s" }} color="inherit">
+                  Configure your AI agents to get started.
+                </Box>
+                <Button onClick={() => navigate('/agents')}>Create Agent</Button>
               </Box>
-            </Box>
-          }
-        />
-      </Container>
+            }
+          />
+        </Box>
 
-      {/* Getting Started Guide */}
-      <Container
-        header={
-          <Header
-            variant="h2"
-            description="Learn how to use the system effectively"
-          >
-            Getting Started Guide
-          </Header>
-        }
-      >
-        <ExpandableSection headerText="How to Use the System" defaultExpanded>
-          <SpaceBetween size="m">
-            <Alert
-              statusIconAriaLabel="Success"
-              type="success"
-              header="Step 1: Choose a Feature"
-            >
-              Use the "Quick Start" section above to select the feature you need: document summarization, AI assistant, LC processing, or credit assessment.
-            </Alert>
-            
-            <Alert
-              statusIconAriaLabel="Info"
-              type="info"
-              header="Step 2: Upload Documents (if needed)"
-            >
-              For document processing features, upload PDF, DOCX, or image files. The system supports Vietnamese with 99.5% accuracy.
-            </Alert>
-            
-            <Alert
-              statusIconAriaLabel="Warning"
-              type="warning"
-              header="Step 3: Review Results"
-            >
-              The system will process and return results within seconds to minutes depending on document complexity.
-            </Alert>
-          </SpaceBetween>
-        </ExpandableSection>
-
-        <ExpandableSection headerText="Best Practices">
-          <TextContent>
-            <ul>
-              <li><strong>Document Quality:</strong> Use high-resolution PDF files or images for best OCR results</li>
-              <li><strong>Language Support:</strong> System is optimized for Vietnamese but also supports English</li>
-              <li><strong>File Size Limits:</strong> Maximum 50MB per file upload</li>
-              <li><strong>Supported Formats:</strong> PDF, DOCX, TXT, JPG, PNG, TIFF</li>
-              <li><strong>Security:</strong> All data is encrypted and processed securely</li>
-            </ul>
-          </TextContent>
-        </ExpandableSection>
-
-        <ExpandableSection headerText="API Integration">
-          <TextContent>
-            <p>Developers can integrate with our system using these key endpoints:</p>
-            <ul>
-              <li><strong>Pure Strands API:</strong> <code>POST /mutil_agent/api/pure-strands/process</code></li>
-              <li><strong>Document Summary:</strong> <code>POST /mutil_agent/api/v1/text/summary/document</code></li>
-              <li><strong>Health Check:</strong> <code>GET /mutil_agent/public/api/v1/health-check/health</code></li>
-              <li><strong>Risk Assessment:</strong> <code>POST /mutil_agent/api/v1/risk/assess</code></li>
-            </ul>
-            <p>
-              Visit our <Link href="/docs" external>API Documentation</Link> for complete integration guides and examples.
-            </p>
-          </TextContent>
-        </ExpandableSection>
-      </Container>
-    </SpaceBetween>
+        {/* System Status */}
+        <Box>
+          <Header variant="h2">System Status</Header>
+          <ColumnLayout columns={3}>
+            <SpaceBetween direction="vertical" size="s">
+              <Box fontSize="body-s" color="text-body-secondary">AWS Bedrock</Box>
+              <StatusIndicator type="success">Operational</StatusIndicator>
+              <ProgressBar value={98} additionalInfo="Claude 3.7 Sonnet" />
+            </SpaceBetween>
+            <SpaceBetween direction="vertical" size="s">
+              <Box fontSize="body-s" color="text-body-secondary">Document Processing</Box>
+              <StatusIndicator type="success">Operational</StatusIndicator>
+              <ProgressBar value={95} additionalInfo="OCR & NLP Services" />
+            </SpaceBetween>
+            <SpaceBetween direction="vertical" size="s">
+              <Box fontSize="body-s" color="text-body-secondary">Database</Box>
+              <StatusIndicator type="success">Operational</StatusIndicator>
+              <ProgressBar value={99} additionalInfo="DynamoDB & MongoDB" />
+            </SpaceBetween>
+          </ColumnLayout>
+        </Box>
+      </SpaceBetween>
+    </Container>
   );
 };
 

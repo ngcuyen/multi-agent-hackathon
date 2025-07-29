@@ -15,13 +15,13 @@ const Navigation: React.FC = () => {
           type: "link" as const,
           text: "Dashboard",
           href: "/",
-          info: "System overview and analytics"
+          info: <span>🏠</span>
         },
         {
           type: "link" as const, 
           text: "AI Agents",
           href: "/agents",
-          info: "Multi-agent system management"
+          info: <span>🤖</span>
         }
       ]
     },
@@ -31,21 +31,21 @@ const Navigation: React.FC = () => {
       items: [
         {
           type: "link" as const,
-          text: "Letter of Credit Processing",
+          text: "LC Processing",
           href: "/lc-processing",
-          info: "LC document processing and validation"
+          info: <span>📄</span>
         },
         {
           type: "link" as const,
-          text: "Credit Risk Assessment", 
+          text: "Credit Assessment", 
           href: "/credit-assessment",
-          info: "Credit scoring and risk analysis"
+          info: <span>💰</span>
         },
         {
           type: "link" as const,
           text: "Document Intelligence",
           href: "/text-summary",
-          info: "Document analysis and summarization"
+          info: <span>🔍</span>
         }
       ]
     },
@@ -55,74 +55,37 @@ const Navigation: React.FC = () => {
       items: [
         {
           type: "link" as const,
-          text: "AI Assistant",
+          text: "Chat Interface",
           href: "/chat",
-          info: "Interactive AI consultation"
+          info: <span>💬</span>
+        },
+        {
+          type: "link" as const,
+          text: "Risk Dashboard",
+          href: "/risk-dashboard",
+          info: <span>📊</span>
         }
       ]
     },
     {
-      type: "divider" as const
-    },
-    {
       type: "section" as const,
-      text: "System Administration",
+      text: "System",
       items: [
         {
           type: "link" as const,
           text: "Settings",
           href: "/settings",
-          info: "System configuration"
+          info: <span>⚙️</span>
         },
         {
           type: "link" as const,
-          text: "Analytics & Reports",
-          href: "/analytics",
-          info: "Performance analytics and reporting"
-        },
-        {
-          type: "link" as const,
-          text: "Documentation",
-          href: "/documentation",
-          info: "User guides and technical documentation"
-        }
-      ]
-    },
-    {
-      type: "section" as const,
-      text: "External Resources",
-      items: [
-        {
-          type: "link" as const,
-          text: "API Documentation",
-          href: "http://localhost:8080/docs",
-          external: true,
-          info: "REST API documentation"
-        },
-        {
-          type: "link" as const,
-          text: "System Health",
-          href: "http://localhost:8080/mutil_agent/public/api/v1/health-check/health",
-          external: true,
-          info: "Real-time system monitoring"
-        },
-        {
-          type: "link" as const,
-          text: "Source Repository",
-          href: "https://github.com/ngcuyen/multi-agent-hackathon",
-          external: true,
-          info: "Project source code and documentation"
+          text: "Health Check",
+          href: "/health",
+          info: <span>🔧</span>
         }
       ]
     }
   ];
-
-  const handleFollow = (event: any) => {
-    if (!event.detail.external) {
-      event.preventDefault();
-      navigate(event.detail.href);
-    }
-  };
 
   return (
     <SideNavigation
@@ -131,8 +94,13 @@ const Navigation: React.FC = () => {
         href: "/",
         text: "VPBank K-MULT"
       }}
+      onFollow={(event) => {
+        if (!event.detail.external) {
+          event.preventDefault();
+          navigate(event.detail.href);
+        }
+      }}
       items={navigationItems}
-      onFollow={handleFollow}
     />
   );
 };

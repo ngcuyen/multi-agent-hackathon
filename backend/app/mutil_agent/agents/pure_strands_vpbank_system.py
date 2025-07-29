@@ -77,15 +77,18 @@ bedrock_model = BedrockModel(
 @tool
 def text_summary_agent(query: str, file_data: Optional[Dict[str, Any]] = None) -> str:
     """
-    Text summarization using exact logic from text_summary_node
+    Text summarization using DIRECT CALL to text_summary_node logic
     """
     try:
         logger.info(f"[TEXT_SUMMARY_AGENT] Processing: {query[:100]}...")
         
+        # Import the actual node function
+        from app.mutil_agent.agents.conversation_agent.nodes.text_summary_node import _extract_text_from_message
+        
         # Initialize services (giống node)
         text_service = TextSummaryService()
         
-        # Extract text to summarize (giống node logic)
+        # Extract text to summarize using node logic
         text_to_summarize = ""
         filename = "unknown"
         
@@ -124,20 +127,20 @@ def text_summary_agent(query: str, file_data: Optional[Dict[str, Any]] = None) -
                 logger.error(f"[TEXT_SUMMARY_AGENT] Content extraction error: {extract_error}")
                 return f"❌ **Lỗi trích xuất nội dung**\n\nKhông thể đọc file {filename}: {str(extract_error)}"
         else:
-            # Extract from query if no file (giống node)
-            text_to_summarize = query
+            # Use EXACT node logic for text extraction
+            text_to_summarize = _extract_text_from_message(query)
         
-        # Check if we have text to summarize (giống node logic)
+        # Check if we have text to summarize (EXACT node logic)
         if not text_to_summarize or len(text_to_summarize.strip()) < 10:
             return "Xin lỗi, tôi không tìm thấy văn bản nào để tóm tắt. Vui lòng cung cấp văn bản cần tóm tắt."
         
-        # Use TextSummaryService với parameters giống node
+        # Use TextSummaryService với EXACT parameters từ node
         try:
             async def summarize_with_service():
                 return await text_service.summarize_text(
                     text=text_to_summarize,
                     summary_type="general",
-                    max_length=200,  # ← Giống node (200)
+                    max_length=200,  # ← EXACT từ node (200)
                     language="vietnamese"
                 )
             
@@ -159,7 +162,7 @@ def text_summary_agent(query: str, file_data: Optional[Dict[str, Any]] = None) -
                 else:
                     raise e
             
-            # Format response giống node
+            # Format response EXACT giống node
             response = f"📄 **Tóm tắt văn bản:**\n\n{summary_result['summary']}\n\n"
             response += f"📊 **Thống kê:** {summary_result['word_count']['original']} từ → {summary_result['word_count']['summary']} từ "
             response += f"(tỷ lệ nén: {summary_result['compression_ratio']})"
@@ -169,7 +172,7 @@ def text_summary_agent(query: str, file_data: Optional[Dict[str, Any]] = None) -
                 response += f"📊 **Thống kê:** {summary_result['word_count']['original']} từ → {summary_result['word_count']['summary']} từ "
                 response += f"(tỷ lệ nén: {summary_result['compression_ratio']})"
             
-            logger.info("[TEXT_SUMMARY_AGENT] Successfully processed with TextSummaryService")
+            logger.info("[TEXT_SUMMARY_AGENT] Successfully processed with DIRECT node logic")
             return response
             
         except Exception as e:
@@ -184,10 +187,18 @@ def text_summary_agent(query: str, file_data: Optional[Dict[str, Any]] = None) -
 @tool
 def compliance_knowledge_agent(query: str, file_data: Optional[Dict[str, Any]] = None) -> str:
     """
-    Compliance checking using existing compliance API endpoint
+    Compliance checking using DIRECT CALL to compliance_node logic
     """
     try:
         logger.info(f"🔧 [COMPLIANCE_AGENT] TOOL CALLED with query: {query[:100]}...")
+        
+        # Import the actual node functions
+        from app.mutil_agent.agents.conversation_agent.nodes.compliance_node import (
+            _determine_query_type,
+            _handle_regulation_query,
+            _handle_compliance_help,
+            _handle_general_compliance_chat
+        )
         
         # If file data is provided, use existing compliance validation
         if file_data and file_data.get('raw_bytes'):
@@ -272,9 +283,41 @@ def compliance_knowledge_agent(query: str, file_data: Optional[Dict[str, Any]] =
                 return f"❌ **Lỗi kiểm tra tuân thủ**: {str(api_error)}"
         
         else:
-            # Handle text-based compliance queries with existing logic
-            return _handle_general_compliance_chat(query, None)
-
+            # Handle text-based compliance queries using DIRECT node logic
+            try:
+                # Use EXACT node logic for query type determination
+                query_type = _determine_query_type(query)
+                
+                async def handle_compliance_query():
+                    if query_type == "regulation_query":
+                        return await _handle_regulation_query(query)
+                    elif query_type == "compliance_help":
+                        return await _handle_compliance_help(query)
+                    else:
+                        return await _handle_general_compliance_chat(query)
+                
+                # Execute async function
+                try:
+                    response = asyncio.run(handle_compliance_query())
+                except RuntimeError as e:
+                    if "cannot be called from a running event loop" in str(e):
+                        import concurrent.futures
+                        
+                        def run_in_thread():
+                            return asyncio.run(handle_compliance_query())
+                        
+                        with concurrent.futures.ThreadPoolExecutor() as executor:
+                            future = executor.submit(run_in_thread)
+                            response = future.result()
+                    else:
+                        raise e
+                
+                logger.info("🔧 [COMPLIANCE_AGENT] Successfully processed with DIRECT node logic")
+                return response
+                
+            except Exception as node_error:
+                logger.error(f"🔧 [COMPLIANCE_AGENT] Node logic error: {node_error}")
+                return f"❌ **Lỗi xử lý tuân thủ**: {str(node_error)}"
 
     except Exception as e:
         logger.error(f"🔧 [COMPLIANCE_AGENT] Tool error: {str(e)}")
@@ -302,19 +345,19 @@ async def _handle_general_compliance_chat(message: str, compliance_service) -> s
 @tool
 def risk_analysis_agent(query: str, file_data: Optional[Dict[str, Any]] = None) -> str:
     """
-    Risk analysis using existing risk API endpoint
+    Risk analysis using DIRECT CALL to existing risk API endpoint
     """
     try:
         logger.info(f"🔧 [RISK_AGENT] TOOL CALLED with query: {query[:100]}...")
         
-        # Use existing risk assessment endpoint
+        # Use existing risk assessment endpoint DIRECTLY
         from app.mutil_agent.routes.v1.risk_routes import assess_risk_endpoint
         
         # Extract basic info from query for risk assessment
         financial_data = _extract_basic_risk_data_from_query(query)
         
         async def call_existing_risk_api():
-            # Create request body matching existing API
+            # Create request body matching EXACT existing API
             risk_request_body = {
                 "entity_id": f"entity_{uuid4().hex[:8]}",
                 "entity_type": "doanh nghiệp",
@@ -330,7 +373,7 @@ def risk_analysis_agent(query: str, file_data: Optional[Dict[str, Any]] = None) 
                 "collateral_type": financial_data.get('collateral_type', 'Không tài sản đảm bảo')
             }
             
-            # Call existing risk assessment endpoint
+            # Call EXACT existing risk assessment endpoint
             return await assess_risk_endpoint(risk_request_body)
         
         # Execute async function - Simple fix with asyncio.run
@@ -350,7 +393,7 @@ def risk_analysis_agent(query: str, file_data: Optional[Dict[str, Any]] = None) 
             else:
                 raise e
         
-        # Format response using existing API result
+        # Format response using EXACT existing API result
         if risk_result and hasattr(risk_result, 'data'):
             data = risk_result.data
             response = f"""📊 **Phân tích rủi ro - VPBank K-MULT**
@@ -394,7 +437,7 @@ def risk_analysis_agent(query: str, file_data: Optional[Dict[str, Any]] = None) 
 *🤖 VPBank K-MULT Agent Studio*
 *⏰ {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}*"""
         
-        logger.info("🔧 [RISK_AGENT] Successfully processed with existing API")
+        logger.info("🔧 [RISK_AGENT] Successfully processed with DIRECT API call")
         return response
         
     except Exception as e:
@@ -457,23 +500,28 @@ def _extract_basic_risk_data_from_query(query: str) -> Dict[str, Any]:
 # ================================
 
 SUPERVISOR_PROMPT = """
-You are a VPBank K-MULT STRICT routing supervisor. Your ONLY job is tool selection - you CANNOT provide any direct answers.
+You are a VPBank K-MULT STRICT routing supervisor with DIRECT NODE INTEGRATION. Your ONLY job is tool selection - you CANNOT provide any direct answers.
 
 CRITICAL CONSTRAINTS:
 - You MUST call exactly ONE tool for EVERY request
 - You are FORBIDDEN from providing direct responses
 - You CANNOT say "I apologize" or give explanations
-- You MUST delegate ALL work to specialist tools
+- You MUST delegate ALL work to specialist tools that call DIRECT node logic
 
-MANDATORY TOOL SELECTION RULES:
-1. ANY mention of "kiểm tra", "tuân thủ", "compliance", "check", "validate", "verify" → compliance_knowledge_agent
-2. ANY mention of "tóm tắt", "summarize", "summary", "analyze", "extract" → text_summary_agent  
-3. ANY mention of "phân tích", "rủi ro", "risk", "assess", "credit", "financial" → risk_analysis_agent
+MANDATORY TOOL SELECTION RULES (with DIRECT node calls):
+1. ANY mention of "kiểm tra", "tuân thủ", "compliance", "check", "validate", "verify" → compliance_knowledge_agent (calls compliance_node DIRECTLY)
+2. ANY mention of "tóm tắt", "summarize", "summary", "analyze", "extract" → text_summary_agent (calls text_summary_node DIRECTLY)  
+3. ANY mention of "phân tích", "rủi ro", "risk", "assess", "credit", "financial" → risk_analysis_agent (calls risk API DIRECTLY)
+
+DIRECT NODE INTEGRATION:
+- compliance_knowledge_agent → Uses compliance_node functions (_determine_query_type, _handle_regulation_query, etc.)
+- text_summary_agent → Uses text_summary_node functions (_extract_text_from_message, TextSummaryService)
+- risk_analysis_agent → Uses risk API endpoint (assess_risk_endpoint) DIRECTLY
 
 EXAMPLES OF CORRECT BEHAVIOR:
-User: "kiểm tra tuân thủ" → Call compliance_knowledge_agent (NO other response)
-User: "tóm tắt tài liệu" → Call text_summary_agent (NO other response)
-User: "phân tích rủi ro" → Call risk_analysis_agent (NO other response)
+User: "kiểm tra tuân thủ" → Call compliance_knowledge_agent (executes compliance_node logic)
+User: "tóm tắt tài liệu" → Call text_summary_agent (executes text_summary_node logic)
+User: "phân tích rủi ro" → Call risk_analysis_agent (executes risk API logic)
 
 FORBIDDEN BEHAVIORS:
 ❌ "I'll help you..." → WRONG, call tool instead
@@ -506,7 +554,7 @@ supervisor_agent = Agent(
 # ================================
 
 class PureStrandsVPBankSystem:
-    """VPBank K-MULT Agent Studio - Clean Pure Strands Implementation"""
+    """VPBank K-MULT Agent Studio - Clean Pure Strands Implementation with DIRECT NODE INTEGRATION"""
     
     def __init__(self):
         self.supervisor = supervisor_agent
@@ -529,31 +577,31 @@ class PureStrandsVPBankSystem:
         context: Optional[Dict[str, Any]] = None,
         uploaded_file: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
-        """Process user request with MANUAL ROUTING for reliability"""
+        """Process user request with MANUAL ROUTING + DIRECT NODE INTEGRATION for reliability"""
         try:
             self.processing_stats["total_requests"] += 1
             start_time = datetime.now()
             
             logger.info(f"[PURE_STRANDS] Processing request for conversation {conversation_id}")
             
-            # MANUAL ROUTING - Primary approach for reliability
+            # MANUAL ROUTING - Primary approach for reliability with DIRECT NODE CALLS
             message_lower = user_message.lower()
             selected_agent = None
             
             # Determine primary intent with manual keyword detection
             if any(keyword in message_lower for keyword in ['kiểm tra', 'tuân thủ', 'compliance', 'check', 'validate', 'verify', 'conform']):
                 selected_agent = "compliance"
-                logger.info("[PURE_STRANDS] Manual routing: COMPLIANCE detected")
+                logger.info("[PURE_STRANDS] Manual routing: COMPLIANCE detected (will call compliance_node DIRECTLY)")
             elif any(keyword in message_lower for keyword in ['tóm tắt', 'summarize', 'summary', 'analyze document', 'extract', 'document analysis']):
                 selected_agent = "summary"
-                logger.info("[PURE_STRANDS] Manual routing: SUMMARY detected")
+                logger.info("[PURE_STRANDS] Manual routing: SUMMARY detected (will call text_summary_node DIRECTLY)")
             elif any(keyword in message_lower for keyword in ['phân tích', 'rủi ro', 'risk', 'analysis', 'credit', 'assess', 'financial']):
                 selected_agent = "risk"
-                logger.info("[PURE_STRANDS] Manual routing: RISK detected")
+                logger.info("[PURE_STRANDS] Manual routing: RISK detected (will call risk API DIRECTLY)")
             
-            # Execute single agent with MANUAL ROUTING (Primary approach)
+            # Execute single agent with MANUAL ROUTING + DIRECT NODE CALLS (Primary approach)
             if selected_agent:
-                logger.info(f"[PURE_STRANDS] Using MANUAL routing to {selected_agent} agent")
+                logger.info(f"[PURE_STRANDS] Using MANUAL routing to {selected_agent} agent with DIRECT node integration")
                 
                 try:
                     if selected_agent == "compliance":
@@ -566,7 +614,7 @@ class PureStrandsVPBankSystem:
                         response = risk_analysis_agent(user_message, file_data=uploaded_file)
                         agent_used = "risk_analysis_agent"
                     
-                    logger.info(f"[PURE_STRANDS] Manual routing successful: {agent_used}")
+                    logger.info(f"[PURE_STRANDS] Manual routing successful with DIRECT node integration: {agent_used}")
                     
                     # Validate response is not empty
                     if not response or len(str(response).strip()) < 10:
@@ -708,15 +756,20 @@ class PureStrandsVPBankSystem:
                 return "supervisor_direct"
     
     def get_system_status(self) -> Dict[str, Any]:
-        """Get system status"""
+        """Get system status with DIRECT NODE INTEGRATION info"""
         return {
-            "system": "VPBank K-MULT Pure Strands Clean",
+            "system": "VPBank K-MULT Pure Strands with DIRECT NODE INTEGRATION",
             "supervisor_status": "active",
             "available_agents": [
-                "text_summary_agent",
-                "compliance_knowledge_agent", 
-                "risk_analysis_agent"
+                "text_summary_agent (→ text_summary_node DIRECT)",
+                "compliance_knowledge_agent (→ compliance_node DIRECT)", 
+                "risk_analysis_agent (→ risk API DIRECT)"
             ],
+            "node_integration": {
+                "text_summary_agent": "Uses text_summary_node._extract_text_from_message + TextSummaryService",
+                "compliance_knowledge_agent": "Uses compliance_node functions (_determine_query_type, _handle_regulation_query, etc.)",
+                "risk_analysis_agent": "Uses risk_routes.assess_risk_endpoint DIRECTLY"
+            },
             "active_sessions": len(self.session_data),
             "processing_stats": self.processing_stats,
             "last_updated": datetime.now().isoformat()
