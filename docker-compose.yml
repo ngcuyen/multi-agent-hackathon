@@ -53,8 +53,7 @@ services:
 
 networks:
   vpbank-kmult-network:
-    driver: bridge
-    name: vpbank-kmult-network
+    external: true
 
 volumes:
   backend-logs:

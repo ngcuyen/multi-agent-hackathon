@@ -379,7 +379,6 @@ const TextSummaryPage: React.FC<TextSummaryPageProps> = ({ onShowSnackbar }) => 
                       <div>{result.document_analysis.document_category}</div>
                     </div>
                   </ColumnLayout>
-
                   <Box>
                     <Box variant="awsui-key-label">Số từ</Box>
                     <ColumnLayout columns={2}>
@@ -387,8 +386,8 @@ const TextSummaryPage: React.FC<TextSummaryPageProps> = ({ onShowSnackbar }) => 
                       <div>Tóm tắt: {result.word_count.summary.toLocaleString()} từ</div>
                     </ColumnLayout>
                   </Box>
-
                   {result.document_analysis.recommendations && (
+
                     <Box>
                       <Box variant="awsui-key-label">Gợi ý</Box>
                       <div style={{ fontSize: '14px', color: '#5f6b7a' }}>

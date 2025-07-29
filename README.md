@@ -214,25 +214,38 @@ sequenceDiagram
 
 ## 🚀 **Quick Start**
 
-### **1. Infrastructure Deployment**
+### **1. Project Setup (One-time)**
 ```bash
-# Deploy AWS infrastructure
-cd deployment/aws
-cdk bootstrap --profile vpbank
-cdk deploy VPBankKMultStack --profile vpbank
+git clone https://github.com/ngcuyen/multi-agent-hackathon.git
+cd multi-agent-hackathon
+./setup.sh
 ```
 
-### **2. Application Deployment**
+### **2. Start Application (Local Development)**
 ```bash
-# Build and deploy containers
-./deployment/scripts/build-and-push.sh
-./deployment/scripts/deploy-services.sh
+./run.sh up
 ```
 
 ### **3. Access Services**
-- **Web Interface**: https://vpbank-kmult.example.com
-- **API Docs**: https://api.vpbank-kmult.example.com/docs
-- **Health Check**: https://api.vpbank-kmult.example.com/health
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:8080
+- **API Documentation**: http://localhost:8080/docs
+- **Health Check**: http://localhost:8080/mutil_agent/public/api/v1/health-check/health
+
+### **4. AWS Deployment (Production)**
+```bash
+./deploy.sh production ap-southeast-1 full
+```
+
+## 🎯 **Management Commands**
+
+| Command | Description | Usage |
+|---------|-------------|-------|
+| `./setup.sh` | Initial project setup | `./setup.sh` |
+| `./run.sh` | Start/manage application | `./run.sh [up\|stop\|restart\|logs\|status]` |
+| `./build.sh` | Build Docker images | `./build.sh [development\|production]` |
+| `./test.sh` | Run comprehensive tests | `./test.sh [all\|health\|api\|agents\|performance]` |
+| `./deploy.sh` | Deploy to AWS | `./deploy.sh [staging\|production] [region]` |
 
 ---
 
