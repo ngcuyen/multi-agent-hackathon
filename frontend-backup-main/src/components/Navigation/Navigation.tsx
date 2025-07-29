@@ -19,9 +19,9 @@ const Navigation: React.FC = () => {
         },
         {
           type: "link" as const, 
-          text: "System Monitor",
-          href: "/system-dashboard",
-          info: <span>🖥️</span>
+          text: "AI Agents",
+          href: "/agents",
+          info: <span>🤖</span>
         }
       ]
     },
@@ -33,7 +33,7 @@ const Navigation: React.FC = () => {
           type: "link" as const,
           text: "LC Processing",
           href: "/lc-processing",
-          info: <span>💳</span>
+          info: <span>📄</span>
         },
         {
           type: "link" as const,
@@ -45,55 +45,25 @@ const Navigation: React.FC = () => {
           type: "link" as const,
           text: "Document Intelligence",
           href: "/text-summary",
-          info: <span>📄</span>
+          info: <span>🔍</span>
         }
       ]
     },
     {
       type: "section" as const,
-      text: "AI & Analytics",
+      text: "AI Services",
       items: [
-        {
-          type: "link" as const,
-          text: "Pure Strands AI",
-          href: "/ai-assistant",
-          info: <span>⚡</span>
-        },
-        {
-          type: "link" as const,
-          text: "Risk Analytics",
-          href: "/risk-analytics",
-          info: <span>📊</span>
-        },
-        {
-          type: "link" as const,
-          text: "Knowledge Base",
-          href: "/knowledge",
-          info: <span>🧠</span>
-        }
-      ]
-    },
-    {
-      type: "section" as const,
-      text: "Management",
-      items: [
-        {
-          type: "link" as const,
-          text: "Agent Dashboard",
-          href: "/agent-dashboard",
-          info: <span>🤖</span>
-        },
-        {
-          type: "link" as const,
-          text: "Legacy Agents",
-          href: "/agents",
-          info: <span>🔧</span>
-        },
         {
           type: "link" as const,
           text: "Chat Interface",
           href: "/chat",
           info: <span>💬</span>
+        },
+        {
+          type: "link" as const,
+          text: "Risk Dashboard",
+          href: "/risk-dashboard",
+          info: <span>📊</span>
         }
       ]
     },
@@ -106,6 +76,12 @@ const Navigation: React.FC = () => {
           text: "Settings",
           href: "/settings",
           info: <span>⚙️</span>
+        },
+        {
+          type: "link" as const,
+          text: "Health Check",
+          href: "/health",
+          info: <span>🔧</span>
         }
       ]
     }

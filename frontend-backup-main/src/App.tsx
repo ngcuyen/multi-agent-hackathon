@@ -17,13 +17,6 @@ import SettingsPage from './pages/Settings/SettingsPage';
 import LCProcessingPage from './pages/LC/LCProcessingPage';
 import CreditAssessmentPage from './pages/Credit/CreditAssessmentPage';
 
-// New Pages
-import KnowledgeBasePage from './pages/Knowledge/KnowledgeBasePage';
-import AgentDashboardPage from './pages/Agents/AgentDashboardPage';
-import RiskAnalyticsDashboard from './pages/Risk/RiskAnalyticsDashboard';
-import PureStrandsInterface from './pages/AI/PureStrandsInterface';
-import SystemDashboard from './pages/System/SystemDashboard';
-
 // Components
 import Navigation from './components/Navigation/Navigation';
 import { healthAPI } from './services/api';
@@ -204,27 +197,6 @@ function App() {
                       onShowSnackbar={showFlashbar}
                     />
                   } 
-                />
-                {/* New Routes */}
-                <Route 
-                  path="/knowledge" 
-                  element={<KnowledgeBasePage onShowSnackbar={showFlashbar} />} 
-                />
-                <Route 
-                  path="/agent-dashboard" 
-                  element={<AgentDashboardPage onShowSnackbar={showFlashbar} />} 
-                />
-                <Route 
-                  path="/risk-analytics" 
-                  element={<RiskAnalyticsDashboard onShowSnackbar={showFlashbar} />} 
-                />
-                <Route 
-                  path="/ai-assistant" 
-                  element={<PureStrandsInterface onShowSnackbar={showFlashbar} />} 
-                />
-                <Route 
-                  path="/system-dashboard" 
-                  element={<SystemDashboard onShowSnackbar={showFlashbar} />} 
                 />
                 <Route 
                   path="/settings" 
