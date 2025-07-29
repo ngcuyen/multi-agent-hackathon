@@ -71,70 +71,6 @@ bedrock_model = BedrockModel(
 )
 
 # ================================
-# ASYNC HELPER FUNCTION
-# ================================
-
-def _run_async_safely(async_func):
-    """
-    Safely run async function in sync context
-    """
-    try:
-        logger.info(f"[ASYNC_WRAPPER] Starting async function: {async_func.__name__ if hasattr(async_func, '__name__') else 'unknown'}")
-        
-        # Try to get current event loop
-        loop = asyncio.get_event_loop()
-        if loop.is_running():
-            # We're in an async context, use thread executor
-            import concurrent.futures
-            import threading
-            
-            logger.info("[ASYNC_WRAPPER] Running in thread executor due to existing event loop")
-            
-            def run_in_thread():
-                # Create new event loop for this thread
-                new_loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(new_loop)
-                try:
-                    logger.info("[ASYNC_WRAPPER] Created new event loop in thread")
-                    result = new_loop.run_until_complete(async_func())
-                    logger.info("[ASYNC_WRAPPER] Async function completed successfully in thread")
-                    return result
-                except Exception as e:
-                    logger.error(f"[ASYNC_WRAPPER] Error in thread execution: {e}")
-                    raise e
-                finally:
-                    new_loop.close()
-            
-            with concurrent.futures.ThreadPoolExecutor() as executor:
-                future = executor.submit(run_in_thread)
-                try:
-                    result = future.result(timeout=120)  # 120 second timeout for compliance operations
-                    logger.info("[ASYNC_WRAPPER] Thread executor completed successfully")
-                    return result
-                except concurrent.futures.TimeoutError:
-                    logger.error("[ASYNC_WRAPPER] Thread executor timed out after 120 seconds")
-                    raise Exception("Operation timed out after 120 seconds")
-        else:
-            # No running loop, safe to use asyncio.run
-            logger.info("[ASYNC_WRAPPER] Running with asyncio.run (no existing loop)")
-            result = asyncio.run(async_func())
-            logger.info("[ASYNC_WRAPPER] asyncio.run completed successfully")
-            return result
-    except RuntimeError as e:
-        if "no running event loop" in str(e).lower():
-            # No event loop, safe to use asyncio.run
-            logger.info("[ASYNC_WRAPPER] No event loop detected, using asyncio.run")
-            result = asyncio.run(async_func())
-            logger.info("[ASYNC_WRAPPER] asyncio.run completed successfully (fallback)")
-            return result
-        else:
-            logger.error(f"[ASYNC_WRAPPER] RuntimeError: {e}")
-            raise e
-    except Exception as e:
-        logger.error(f"[ASYNC_WRAPPER] Unexpected error: {e}")
-        raise e
-
-# ================================
 # AGENT TOOLS USING EXISTING SERVICES
 # ================================
 
@@ -208,8 +144,23 @@ def text_summary_agent(query: str, file_data: Optional[Dict[str, Any]] = None) -
                     language="vietnamese"
                 )
             
-            # Execute async function with safe wrapper
-            summary_result = _run_async_safely(summarize_with_service)
+            # Execute async function - Simple fix with asyncio.run
+            try:
+                summary_result = asyncio.run(summarize_with_service())
+            except RuntimeError as e:
+                if "cannot be called from a running event loop" in str(e):
+                    # We're in an async context, use thread executor
+                    import concurrent.futures
+                    import threading
+                    
+                    def run_in_thread():
+                        return asyncio.run(summarize_with_service())
+                    
+                    with concurrent.futures.ThreadPoolExecutor() as executor:
+                        future = executor.submit(run_in_thread)
+                        summary_result = future.result()
+                else:
+                    raise e
             
             # Format response EXACT giống node
             response = f"📄 **Tóm tắt văn bản:**\n\n{summary_result['summary']}\n\n"
@@ -236,112 +187,106 @@ def text_summary_agent(query: str, file_data: Optional[Dict[str, Any]] = None) -
 @tool
 def compliance_knowledge_agent(query: str, file_data: Optional[Dict[str, Any]] = None) -> str:
     """
-    Compliance checking using DIRECT CALL to compliance/document endpoint
-    Enhanced with better error handling and validation
+    Compliance checking using DIRECT CALL to compliance_node logic
     """
     try:
         logger.info(f"🔧 [COMPLIANCE_AGENT] TOOL CALLED with query: {query[:100]}...")
         
-        # If file data is provided, use compliance/document endpoint DIRECTLY
+        # Import the actual node functions
+        from app.mutil_agent.agents.conversation_agent.nodes.compliance_node import (
+            _determine_query_type,
+            _handle_regulation_query,
+            _handle_compliance_help,
+            _handle_general_compliance_chat
+        )
+        
+        # If file data is provided, use existing compliance validation
         if file_data and file_data.get('raw_bytes'):
-            logger.info(f"🔧 [COMPLIANCE_AGENT] Processing file: {file_data.get('filename')} ({len(file_data.get('raw_bytes', b''))} bytes)")
+            logger.info(f"🔧 [COMPLIANCE_AGENT] Processing file: {file_data.get('filename')}")
             
-            # Validate file data
-            if len(file_data.get('raw_bytes', b'')) == 0:
-                return "❌ **Lỗi kiểm tra tuân thủ**: File rỗng hoặc không hợp lệ"
-            
-            # Import the EXACT service instead of endpoint
-            from app.mutil_agent.services.compliance_service import ComplianceValidationService
-            from app.mutil_agent.services.text_service import TextSummaryService
+            # Use existing compliance validation logic from routes
+            from app.mutil_agent.routes.v1.compliance_routes import validate_document_file
+            from fastapi import UploadFile
+            import io
             
             try:
-                # Initialize services
-                compliance_service = ComplianceValidationService()
-                text_service = TextSummaryService()
+                # Create UploadFile object from file_data
+                file_obj = UploadFile(
+                    filename=file_data.get('filename', 'document.pdf'),
+                    file=io.BytesIO(file_data.get('raw_bytes'))
+                )
                 
-                # Extract text from document using text service
-                raw_bytes = file_data.get('raw_bytes')
-                filename = file_data.get('filename', 'document.pdf')
-                content_type = file_data.get('content_type', 'application/pdf')
-                
-                # Get file extension
-                import os
-                file_extension = os.path.splitext(filename)[1].lower()
-                
-                logger.info(f"🔧 [COMPLIANCE_AGENT] Extracting text from {filename} ({file_extension})")
-                
-                # Wrap both text extraction and compliance service in async function
-                async def extract_and_validate():
-                    # Extract text using text service
-                    extracted_text = await text_service.extract_text_from_document(
-                        file_content=raw_bytes,
-                        file_extension=file_extension,
-                        filename=filename
-                    )
-                    
-                    if not extracted_text or len(extracted_text.strip()) < 50:
-                        raise Exception("Không thể trích xuất đủ văn bản từ file để kiểm tra tuân thủ")
-                    
-                    logger.info(f"🔧 [COMPLIANCE_AGENT] Extracted {len(extracted_text)} characters from {filename}")
-                    
-                    # Call compliance service directly
-                    return await compliance_service.validate_document_compliance(
-                        ocr_text=extracted_text,
+                # Call existing endpoint logic
+                async def call_existing_compliance():
+                    return await validate_document_file(
+                        file=file_obj,
                         document_type=None  # Auto-detect
                     )
-                
-                # Execute async function with safe wrapper
-                data = _run_async_safely(extract_and_validate)
-                
-                # Validate data exists
-                if not data or not isinstance(data, dict):
-                    logger.error(f"🔧 [COMPLIANCE_AGENT] Invalid or empty data: {type(data)}")
-                    return "❌ **Lỗi kiểm tra tuân thủ**: Không thể xử lý tài liệu - dữ liệu không hợp lệ"
-                
-                logger.info(f"🔧 [COMPLIANCE_AGENT] Successfully got compliance data: {list(data.keys())}")
-                
-                # Return raw JSON data instead of formatted text
-                import json
+                # Execute async function - Simple fix with asyncio.run
                 try:
-                    # Create response structure matching the endpoint format
-                    response_data = {
-                        "status": "success",
-                        "data": data,
-                        "message": f"Kiểm tra tuân thủ file {file_data.get('filename', 'unknown')} hoàn tất"
-                    }
-                    
-                    # Return as formatted JSON string for better readability
-                    json_response = json.dumps(response_data, ensure_ascii=False, indent=2)
-                    
-                    logger.info("🔧 [COMPLIANCE_AGENT] Successfully processed with DIRECT service call - returning JSON")
-                    return json_response
-                    
-                except Exception as json_error:
-                    logger.error(f"🔧 [COMPLIANCE_AGENT] JSON serialization error: {json_error}")
-                    return f"❌ **Lỗi JSON serialization**: {str(json_error)}"
+                    result = asyncio.run(call_existing_compliance())
+                except RuntimeError as e:
+                    if "cannot be called from a running event loop" in str(e):
+                        # We're in an async context, use thread executor
+                        import concurrent.futures
+                        
+                        def run_in_thread():
+                            return asyncio.run(call_existing_compliance())
+                        
+                        with concurrent.futures.ThreadPoolExecutor() as executor:
+                            future = executor.submit(run_in_thread)
+                            result = future.result()
+                    else:
+                        raise e
                 
-                # NOTE: Removed formatted response fallback - we only want JSON response
+                # Format response from existing API result
+                if result and hasattr(result, 'data'):
+                    data = result.data
+                    response = f"""⚖️ **Kiểm tra tuân thủ - VPBank K-MULT**
+
+**Tài liệu:** {file_data.get('filename', 'Unknown')}
+
+**Trạng thái tuân thủ:** {data.get('compliance_status', 'UNKNOWN')}
+**Độ tin cậy:** {data.get('confidence_score', 0):.2f}
+**Loại tài liệu:** {data.get('document_type', 'Unknown')}
+
+**Phân tích:**
+{data.get('document_analysis', {}).get('document_category', {}).get('business_purpose', 'Đang phân tích tài liệu...')}
+
+**Vi phạm phát hiện:**"""
                     
-            except Exception as service_error:
-                logger.error(f"🔧 [COMPLIANCE_AGENT] Direct service call error: {service_error}")
-                return f"❌ **Lỗi kiểm tra tuân thủ**: {str(service_error)}"
+                    violations = data.get('violations', [])
+                    if violations:
+                        for violation in violations:
+                            response += f"\n• **{violation.get('type', 'Unknown')}**: {violation.get('description', 'N/A')} (Mức độ: {violation.get('severity', 'UNKNOWN')})"
+                    else:
+                        response += "\n• Không phát hiện vi phạm"
+                    
+                    response += "\n\n**Khuyến nghị:**"
+                    recommendations = data.get('recommendations', [])
+                    if recommendations:
+                        for rec in recommendations:
+                            response += f"\n• {rec.get('description', 'N/A')} (Ưu tiên: {rec.get('priority', 'MEDIUM')})"
+                    else:
+                        response += "\n• Tài liệu tuân thủ tốt"
+                    
+                    response += f"\n\n**Quy định áp dụng:** {', '.join(data.get('document_analysis', {}).get('applicable_regulations', [{}])[0].get('regulation', 'UCP 600'))}"
+                    response += f"\n**Thời gian xử lý:** {data.get('processing_time', 0):.1f}s"
+                    
+                    logger.info("🔧 [COMPLIANCE_AGENT] Successfully processed with existing API")
+                    return response
+                else:
+                    return "❌ **Lỗi kiểm tra tuân thủ**: Không thể xử lý tài liệu"
+                    
+            except Exception as api_error:
+                logger.error(f"🔧 [COMPLIANCE_AGENT] API call error: {api_error}")
+                return f"❌ **Lỗi kiểm tra tuân thủ**: {str(api_error)}"
         
         else:
             # Handle text-based compliance queries using DIRECT node logic
             try:
-                # Import the actual node functions
-                from app.mutil_agent.agents.conversation_agent.nodes.compliance_node import (
-                    _determine_query_type,
-                    _handle_regulation_query,
-                    _handle_compliance_help,
-                    _handle_general_compliance_chat,
-                    _handle_compliance_help,
-                    _handle_general_compliance_chat
-                )
-                
                 # Use EXACT node logic for query type determination
                 query_type = _determine_query_type(query)
-                logger.info(f"🔧 [COMPLIANCE_AGENT] Query type determined: {query_type}")
                 
                 async def handle_compliance_query():
                     if query_type == "regulation_query":
@@ -351,8 +296,21 @@ def compliance_knowledge_agent(query: str, file_data: Optional[Dict[str, Any]] =
                     else:
                         return await _handle_general_compliance_chat(query)
                 
-                # Execute async function with safe wrapper
-                response = _run_async_safely(handle_compliance_query)
+                # Execute async function
+                try:
+                    response = asyncio.run(handle_compliance_query())
+                except RuntimeError as e:
+                    if "cannot be called from a running event loop" in str(e):
+                        import concurrent.futures
+                        
+                        def run_in_thread():
+                            return asyncio.run(handle_compliance_query())
+                        
+                        with concurrent.futures.ThreadPoolExecutor() as executor:
+                            future = executor.submit(run_in_thread)
+                            response = future.result()
+                    else:
+                        raise e
                 
                 logger.info("🔧 [COMPLIANCE_AGENT] Successfully processed with DIRECT node logic")
                 return response
@@ -418,8 +376,22 @@ def risk_analysis_agent(query: str, file_data: Optional[Dict[str, Any]] = None) 
             # Call EXACT existing risk assessment endpoint
             return await assess_risk_endpoint(risk_request_body)
         
-        # Execute async function with safe wrapper
-        risk_result = _run_async_safely(call_existing_risk_api)
+        # Execute async function - Simple fix with asyncio.run
+        try:
+            risk_result = asyncio.run(call_existing_risk_api())
+        except RuntimeError as e:
+            if "cannot be called from a running event loop" in str(e):
+                # We're in an async context, use thread executor
+                import concurrent.futures
+                
+                def run_in_thread():
+                    return asyncio.run(call_existing_risk_api())
+                
+                with concurrent.futures.ThreadPoolExecutor() as executor:
+                    future = executor.submit(run_in_thread)
+                    risk_result = future.result()
+            else:
+                raise e
         
         # Format response using EXACT existing API result
         if risk_result and hasattr(risk_result, 'data'):
@@ -565,6 +537,7 @@ CRITICAL INSTRUCTIONS:
 - If unclear, default to compliance_knowledge_agent for banking-related queries
 
 Your response should ONLY be the tool execution result. No additional commentary.
+"""
 
 EMERGENCY PROTOCOL:
 If you cannot determine which tool to use, call compliance_knowledge_agent as default.

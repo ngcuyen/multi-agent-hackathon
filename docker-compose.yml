@@ -4,14 +4,14 @@ services:
   # Backend Multi-Agent Service
   mutil-agent:
     build:
-      context: ./backend
+      context: ./src/backend
       dockerfile: app/mutil_agent/Dockerfile
     image: mutil-agent-backend
     container_name: vpbank-kmult-backend
     ports:
       - '8080:8080'
     env_file:
-      - ./backend/app/mutil_agent/.env
+      - ./src/backend/app/mutil_agent/.env
     volumes:
       - ./logs/backend:/app/logs
       - ./data:/app/data
@@ -34,7 +34,7 @@ services:
   # Frontend React Application
   frontend:
     build:
-      context: ./frontend
+      context: ./src/frontend
       dockerfile: Dockerfile
     image: mutil-agent-frontend
     container_name: vpbank-kmult-frontend

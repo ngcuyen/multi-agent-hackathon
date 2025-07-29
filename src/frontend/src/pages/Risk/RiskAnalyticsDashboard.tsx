@@ -706,11 +706,11 @@ const RiskAnalyticsDashboard: React.FC<RiskAnalyticsDashboardProps> = ({ onShowS
                 <Input
                   type="number"
                   value={alertForm.threshold.toString()}
-                  onChange={({ detail }) =>
-                    setAlertForm({ ...alertForm, threshold: parseInt(detail.value) || 70 })
-                  }
-                  min={0}
-                  max={100}
+                  onChange={({ detail }) => {
+                    const value = parseInt(detail.value) || 70;
+                    const clampedValue = Math.min(Math.max(value, 0), 100);
+                    setAlertForm({ ...alertForm, threshold: clampedValue });
+                  }}
                 />
               </FormField>
 

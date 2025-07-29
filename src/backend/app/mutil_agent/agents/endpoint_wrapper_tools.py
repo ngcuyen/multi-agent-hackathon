@@ -1,0 +1,477 @@
+"""
+VPBank K-MULT - Endpoint Wrapper Tools
+Wraps existing API endpoints as Strands tools for supervisor agent
+"""
+
+from strands import tool
+import asyncio
+import logging
+import io
+from typing import Dict, Any, Optional
+from fastapi import UploadFile
+from datetime import datetime
+
+logger = logging.getLogger(__name__)
+
+@tool
+def compliance_document_tool(query: str, file_data: Optional[Dict[str, Any]] = None) -> str:
+    """
+    Compliance document validation tool - wraps /compliance/document endpoint
+    Preserves EXACT logic from compliance_routes.py
+    """
+    try:
+        logger.info(f"🔧 [COMPLIANCE_TOOL] Processing: {query[:100]}...")
+        
+        if file_data and file_data.get('raw_bytes'):
+            # Import EXACT endpoint function
+            from app.mutil_agent.routes.v1.compliance_routes import validate_document_file
+            
+            try:
+                # Create UploadFile object - EXACT same as endpoint expects
+                file_obj = UploadFile(
+                    filename=file_data.get('filename', 'document.pdf'),
+                    file=io.BytesIO(file_data.get('raw_bytes')),
+                    size=len(file_data.get('raw_bytes', b'')),
+                    headers={"content-type": file_data.get('content_type', 'application/pdf')}
+                )
+                
+                # Reset file pointer
+                file_obj.file.seek(0)
+                
+                # Call EXACT endpoint function with EXACT parameters
+                async def call_endpoint():
+                    return await validate_document_file(
+                        file=file_obj,
+                        document_type=None  # Auto-detect as in endpoint
+                    )
+                
+                # Execute with proper async handling
+                try:
+                    result = asyncio.run(call_endpoint())
+                except RuntimeError as e:
+                    if "cannot be called from a running event loop" in str(e):
+                        import concurrent.futures
+                        def run_in_thread():
+                            return asyncio.run(call_endpoint())
+                        with concurrent.futures.ThreadPoolExecutor() as executor:
+                            future = executor.submit(run_in_thread)
+                            result = future.result(timeout=30)
+                    else:
+                        raise e
+                
+                # Format response using EXACT endpoint result structure
+                if result and isinstance(result, dict):
+                    data = result
+                    
+                    response = f"""⚖️ **Kiểm tra tuân thủ - VPBank K-MULT**
+
+**📄 Tài liệu:** {file_data.get('filename', 'Unknown')}
+**📊 Loại tài liệu:** {data.get('document_type', 'Unknown')}
+**✅ Trạng thái:** {data.get('compliance_status', 'UNKNOWN')}
+**🎯 Độ tin cậy:** {data.get('confidence_score', 0):.1%}
+
+**📋 Phân tích:**"""
+                    
+                    # Add document analysis
+                    doc_analysis = data.get('document_analysis', {})
+                    if doc_analysis:
+                        category = doc_analysis.get('document_category', {})
+                        if category.get('business_purpose'):
+                            response += f"\n• **Mục đích:** {category['business_purpose']}"
+                    
+                    # Add violations
+                    response += "\n\n**⚠️ Vi phạm:**"
+                    violations = data.get('violations', [])
+                    if violations:
+                        for i, v in enumerate(violations[:5], 1):
+                            response += f"\n{i}. **{v.get('type', 'Unknown')}**: {v.get('description', 'N/A')}"
+                    else:
+                        response += "\n✅ Không phát hiện vi phạm"
+                    
+                    # Add recommendations
+                    response += "\n\n**💡 Khuyến nghị:**"
+                    recommendations = data.get('recommendations', [])
+                    if recommendations:
+                        for i, r in enumerate(recommendations[:3], 1):
+                            response += f"\n{i}. {r.get('description', 'N/A')}"
+                    else:
+                        response += "\n✅ Tài liệu tuân thủ tốt"
+                    
+                    response += f"\n\n**⏱️ Thời gian:** {data.get('processing_time', 0):.1f}s"
+                    response += f"\n*🤖 VPBank K-MULT Compliance Engine*"
+                    
+                    return response
+                else:
+                    return "❌ **Lỗi**: Không thể xử lý tài liệu"
+                    
+            except Exception as e:
+                logger.error(f"🔧 [COMPLIANCE_TOOL] Error: {e}")
+                return f"❌ **Lỗi kiểm tra tuân thủ**: {str(e)}"
+        else:
+            # Handle text-based queries using compliance node logic
+            try:
+                from app.mutil_agent.agents.conversation_agent.nodes.compliance_node import (
+                    _determine_query_type,
+                    _handle_regulation_query,
+                    _handle_compliance_help,
+                    _handle_general_compliance_chat
+                )
+                
+                query_type = _determine_query_type(query)
+                
+                async def handle_query():
+                    if query_type == "regulation_query":
+                        return await _handle_regulation_query(query)
+                    elif query_type == "compliance_help":
+                        return await _handle_compliance_help(query)
+                    else:
+                        return await _handle_general_compliance_chat(query)
+                
+                try:
+                    response = asyncio.run(handle_query())
+                except RuntimeError as e:
+                    if "cannot be called from a running event loop" in str(e):
+                        import concurrent.futures
+                        def run_in_thread():
+                            return asyncio.run(handle_query())
+                        with concurrent.futures.ThreadPoolExecutor() as executor:
+                            future = executor.submit(run_in_thread)
+                            response = future.result(timeout=15)
+                    else:
+                        raise e
+                
+                return response
+                
+            except Exception as e:
+                logger.error(f"🔧 [COMPLIANCE_TOOL] Node error: {e}")
+                return f"❌ **Lỗi xử lý tuân thủ**: {str(e)}"
+
+    except Exception as e:
+        logger.error(f"🔧 [COMPLIANCE_TOOL] Tool error: {e}")
+        return f"❌ **Lỗi kiểm tra tuân thủ**: {str(e)}"
+
+
+@tool
+def text_summary_document_tool(query: str, file_data: Optional[Dict[str, Any]] = None) -> str:
+    """
+    Text summary document tool - wraps /text/summary/document endpoint
+    Preserves EXACT logic from text_routes.py
+    """
+    try:
+        logger.info(f"📄 [TEXT_SUMMARY_TOOL] Processing: {query[:100]}...")
+        
+        if file_data and file_data.get('raw_bytes'):
+            # Import EXACT endpoint function
+            from app.mutil_agent.routes.v1.text_routes import summarize_document
+            
+            try:
+                # Create UploadFile object - EXACT same as endpoint expects
+                file_obj = UploadFile(
+                    filename=file_data.get('filename', 'document.pdf'),
+                    file=io.BytesIO(file_data.get('raw_bytes')),
+                    size=len(file_data.get('raw_bytes', b'')),
+                    headers={"content-type": file_data.get('content_type', 'application/pdf')}
+                )
+                
+                # Reset file pointer
+                file_obj.file.seek(0)
+                
+                # Call EXACT endpoint function with EXACT parameters from endpoint
+                async def call_endpoint():
+                    return await summarize_document(
+                        file=file_obj,
+                        summary_type="general",  # Default from endpoint
+                        max_length=300,         # Default from endpoint
+                        language="vietnamese",   # Default from endpoint
+                        max_pages=None          # Default from endpoint
+                    )
+                
+                # Execute with proper async handling
+                try:
+                    result = asyncio.run(call_endpoint())
+                except RuntimeError as e:
+                    if "cannot be called from a running event loop" in str(e):
+                        import concurrent.futures
+                        def run_in_thread():
+                            return asyncio.run(call_endpoint())
+                        with concurrent.futures.ThreadPoolExecutor() as executor:
+                            future = executor.submit(run_in_thread)
+                            result = future.result(timeout=60)  # Longer timeout for large files
+                    else:
+                        raise e
+                
+                # Format response using EXACT endpoint result structure
+                if result and isinstance(result, dict):
+                    data = result
+                    
+                    response = f"""📄 **Tóm tắt tài liệu: {file_data.get('filename', 'Unknown')}**
+
+**📝 Nội dung tóm tắt:**
+{data.get('summary', 'Không thể tóm tắt')}
+
+**📊 Thống kê:**"""
+                    
+                    # Add statistics from endpoint response
+                    if 'word_count' in data:
+                        word_count = data['word_count']
+                        response += f"\n• **Từ gốc:** {word_count.get('original', 0):,} từ"
+                        response += f"\n• **Từ tóm tắt:** {word_count.get('summary', 0):,} từ"
+                    
+                    if 'compression_ratio' in data:
+                        response += f"\n• **Tỷ lệ nén:** {data['compression_ratio']}"
+                    
+                    # Add document info from endpoint response
+                    if 'document_info' in data:
+                        doc_info = data['document_info']
+                        if doc_info.get('pages'):
+                            response += f"\n• **Số trang:** {doc_info['pages']}"
+                        if doc_info.get('file_size'):
+                            response += f"\n• **Kích thước:** {doc_info['file_size']:,} bytes"
+                    
+                    response += f"\n• **Thời gian:** {data.get('processing_time', 0):.1f}s"
+                    response += f"\n\n*🤖 VPBank K-MULT Text Intelligence*"
+                    
+                    return response
+                else:
+                    return f"❌ **Lỗi**: Không thể tóm tắt file {file_data.get('filename', 'Unknown')}"
+                    
+            except Exception as e:
+                logger.error(f"📄 [TEXT_SUMMARY_TOOL] Error: {e}")
+                return f"❌ **Lỗi tóm tắt tài liệu**: {str(e)}"
+        else:
+            # Handle text-based queries using text summary node logic
+            try:
+                from app.mutil_agent.agents.conversation_agent.nodes.text_summary_node import _extract_text_from_message
+                from app.mutil_agent.services.text_service import TextSummaryService
+                
+                # Extract text using EXACT node logic
+                text_to_summarize = _extract_text_from_message(query)
+                
+                if not text_to_summarize or len(text_to_summarize.strip()) < 10:
+                    return """❌ **Không tìm thấy văn bản để tóm tắt**
+
+**Hướng dẫn:**
+• Gửi văn bản: "Tóm tắt: [nội dung]"
+• Upload file: PDF, DOCX, TXT
+• Paste văn bản dài để tôi tóm tắt"""
+                
+                # Use TextSummaryService with EXACT parameters
+                text_service = TextSummaryService()
+                
+                async def summarize():
+                    return await text_service.summarize_text(
+                        text=text_to_summarize,
+                        summary_type="general",
+                        max_length=300,  # Same as endpoint default
+                        language="vietnamese"
+                    )
+                
+                try:
+                    result = asyncio.run(summarize())
+                except RuntimeError as e:
+                    if "cannot be called from a running event loop" in str(e):
+                        import concurrent.futures
+                        def run_in_thread():
+                            return asyncio.run(summarize())
+                        with concurrent.futures.ThreadPoolExecutor() as executor:
+                            future = executor.submit(run_in_thread)
+                            result = future.result(timeout=30)
+                    else:
+                        raise e
+                
+                # Format response
+                if result and 'summary' in result:
+                    response = f"""📄 **Tóm tắt văn bản:**
+
+**📝 Nội dung:**
+{result['summary']}
+
+**📊 Thống kê:**"""
+                    
+                    if 'word_count' in result:
+                        word_count = result['word_count']
+                        response += f"\n• **Từ gốc:** {word_count['original']:,} từ"
+                        response += f"\n• **Từ tóm tắt:** {word_count['summary']:,} từ"
+                    
+                    if 'compression_ratio' in result:
+                        response += f"\n• **Tỷ lệ nén:** {result['compression_ratio']}"
+                    
+                    response += f"\n\n*🤖 VPBank K-MULT Text Intelligence*"
+                    return response
+                else:
+                    return "❌ **Lỗi**: Không thể tạo tóm tắt"
+                
+            except Exception as e:
+                logger.error(f"📄 [TEXT_SUMMARY_TOOL] Node error: {e}")
+                return f"❌ **Lỗi tóm tắt văn bản**: {str(e)}"
+
+    except Exception as e:
+        logger.error(f"📄 [TEXT_SUMMARY_TOOL] Tool error: {e}")
+        return f"❌ **Lỗi xử lý tóm tắt**: {str(e)}"
+
+
+@tool
+def risk_assessment_tool(query: str, file_data: Optional[Dict[str, Any]] = None) -> str:
+    """
+    Risk assessment tool - wraps /risk/assess endpoint
+    Preserves EXACT logic from risk_routes.py
+    """
+    try:
+        logger.info(f"📊 [RISK_TOOL] Processing: {query[:100]}...")
+        
+        # Import EXACT endpoint function
+        from app.mutil_agent.routes.v1.risk_routes import assess_risk_endpoint
+        from app.mutil_agent.schemas.risk_schemas import RiskAssessmentRequest
+        
+        # Extract financial data from query (simplified)
+        financial_data = _extract_risk_data_from_query(query)
+        
+        # Create request object matching EXACT endpoint schema
+        risk_request = RiskAssessmentRequest(
+            entity_id=f"entity_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+            entity_type="doanh nghiệp",
+            applicant_name=financial_data.get('applicant_name', 'Khách hàng'),
+            business_type=financial_data.get('business_type', 'general'),
+            requested_amount=financial_data.get('requested_amount', 1000000000),
+            currency=financial_data.get('currency', 'VND'),
+            loan_term=financial_data.get('loan_term', 12),
+            loan_purpose=financial_data.get('loan_purpose', 'Kinh doanh'),
+            assessment_type="comprehensive",
+            collateral_type=financial_data.get('collateral_type', 'Không tài sản đảm bảo'),
+            financials=financial_data.get('financials', {}),
+            market_data=financial_data.get('market_data', {}),
+            custom_factors=financial_data.get('custom_factors', {})
+        )
+        
+        # Call EXACT endpoint function
+        async def call_endpoint():
+            return await assess_risk_endpoint(risk_request)
+        
+        # Execute with proper async handling
+        try:
+            result = asyncio.run(call_endpoint())
+        except RuntimeError as e:
+            if "cannot be called from a running event loop" in str(e):
+                import concurrent.futures
+                def run_in_thread():
+                    return asyncio.run(call_endpoint())
+                with concurrent.futures.ThreadPoolExecutor() as executor:
+                    future = executor.submit(run_in_thread)
+                    result = future.result(timeout=30)
+            else:
+                raise e
+        
+        # Format response using EXACT endpoint result structure
+        if result and isinstance(result, dict) and result.get('status') == 'success':
+            data = result.get('data', {})
+            
+            response = f"""📊 **Phân tích rủi ro - VPBank K-MULT**
+
+**🏢 Thông tin:**
+• **Tên:** {financial_data.get('applicant_name', 'Chưa xác định')}
+• **Số tiền:** {financial_data.get('requested_amount', 0):,} VNĐ
+• **Loại hình:** {financial_data.get('business_type', 'Chưa xác định')}
+• **Mục đích:** {financial_data.get('loan_purpose', 'Kinh doanh')}
+
+**📈 Kết quả:**
+• **Điểm rủi ro:** {data.get('risk_score', 'N/A')}
+• **Mức độ:** {data.get('risk_level', 'N/A')}"""
+            
+            # Add recommendations from endpoint response
+            recommendations = data.get('recommendations', [])
+            if recommendations:
+                response += "\n\n**💡 Khuyến nghị:**"
+                for i, rec in enumerate(recommendations[:3], 1):
+                    if isinstance(rec, str):
+                        response += f"\n{i}. {rec}"
+                    elif isinstance(rec, dict):
+                        response += f"\n{i}. {rec.get('description', rec.get('recommendation', 'N/A'))}"
+            
+            # Add AI report from endpoint response
+            if data.get('ai_report'):
+                response += f"\n\n**🤖 Báo cáo AI:**\n{data['ai_report']}"
+            
+            response += f"\n\n**📜 Tuân thủ:** Basel III, SBV, VPBank"
+            response += f"\n*🤖 VPBank K-MULT Risk Intelligence*"
+            response += f"\n*⏰ {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}*"
+            
+            return response
+        else:
+            # Fallback response
+            return f"""📊 **Phân tích rủi ro - VPBank K-MULT**
+
+**📝 Yêu cầu:** {query[:200]}{'...' if len(query) > 200 else ''}
+
+**🔍 Phân tích sơ bộ:**
+• Đang xử lý dữ liệu tài chính
+• Áp dụng mô hình VPBank
+• Tuân thủ Basel III và SBV
+
+**📋 Cần thêm thông tin:**
+• Tên khách hàng/doanh nghiệp
+• Số tiền vay (VNĐ)
+• Mục đích vay
+• Thông tin tài chính
+
+*🤖 VPBank K-MULT Risk Intelligence*"""
+        
+    except Exception as e:
+        logger.error(f"📊 [RISK_TOOL] Tool error: {e}")
+        return f"❌ **Lỗi phân tích rủi ro**: {str(e)}"
+
+
+def _extract_risk_data_from_query(query: str) -> Dict[str, Any]:
+    """Extract basic risk data from query - helper function"""
+    import re
+    
+    financial_data = {
+        'applicant_name': 'Khách hàng',
+        'requested_amount': 1000000000,
+        'business_type': 'general',
+        'currency': 'VND',
+        'loan_term': 12,
+        'loan_purpose': 'Kinh doanh',
+        'collateral_type': 'Không tài sản đảm bảo',
+        'financials': {},
+        'market_data': {},
+        'custom_factors': {}
+    }
+    
+    try:
+        # Extract amount (tỷ, triệu, etc.)
+        amount_patterns = [
+            r'(\d+(?:\.\d+)?)\s*tỷ',
+            r'(\d+(?:\.\d+)?)\s*triệu',
+            r'(\d+(?:,\d+)*)\s*VN[DĐ]',
+            r'(\d+(?:,\d+)*)\s*đồng'
+        ]
+        
+        for pattern in amount_patterns:
+            match = re.search(pattern, query, re.IGNORECASE)
+            if match:
+                amount_str = match.group(1).replace(',', '')
+                amount = float(amount_str)
+                if 'tỷ' in match.group(0):
+                    amount *= 1000000000
+                elif 'triệu' in match.group(0):
+                    amount *= 1000000
+                financial_data['requested_amount'] = int(amount)
+                break
+        
+        # Extract company name
+        company_patterns = [
+            r'công ty\s+([A-Za-z0-9\s]+)',
+            r'doanh nghiệp\s+([A-Za-z0-9\s]+)',
+            r'cho\s+([A-Za-z0-9\s]+)'
+        ]
+        
+        for pattern in company_patterns:
+            match = re.search(pattern, query, re.IGNORECASE)
+            if match:
+                financial_data['applicant_name'] = match.group(1).strip()
+                break
+        
+    except Exception as e:
+        logger.error(f"Error extracting risk data: {e}")
+    
+    return financial_data
