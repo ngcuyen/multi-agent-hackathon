@@ -187,144 +187,106 @@ def text_summary_agent(query: str, file_data: Optional[Dict[str, Any]] = None) -
 @tool
 def compliance_knowledge_agent(query: str, file_data: Optional[Dict[str, Any]] = None) -> str:
     """
-    Compliance checking using DIRECT CALL to compliance/document endpoint
-    Enhanced with better error handling and validation
+    Compliance checking using DIRECT CALL to compliance_node logic
     """
     try:
         logger.info(f"🔧 [COMPLIANCE_AGENT] TOOL CALLED with query: {query[:100]}...")
         
-        # If file data is provided, use compliance/document endpoint DIRECTLY
+        # Import the actual node functions
+        from app.mutil_agent.agents.conversation_agent.nodes.compliance_node import (
+            _determine_query_type,
+            _handle_regulation_query,
+            _handle_compliance_help,
+            _handle_general_compliance_chat
+        )
+        
+        # If file data is provided, use existing compliance validation
         if file_data and file_data.get('raw_bytes'):
-            logger.info(f"🔧 [COMPLIANCE_AGENT] Processing file: {file_data.get('filename')} ({len(file_data.get('raw_bytes', b''))} bytes)")
+            logger.info(f"🔧 [COMPLIANCE_AGENT] Processing file: {file_data.get('filename')}")
             
-            # Validate file data
-            if len(file_data.get('raw_bytes', b'')) == 0:
-                return "❌ **Lỗi kiểm tra tuân thủ**: File rỗng hoặc không hợp lệ"
-            
-            # Import the EXACT endpoint function
+            # Use existing compliance validation logic from routes
             from app.mutil_agent.routes.v1.compliance_routes import validate_document_file
             from fastapi import UploadFile
             import io
             
             try:
-                # Create UploadFile object from file_data - EXACT same as endpoint expects
+                # Create UploadFile object from file_data
                 file_obj = UploadFile(
                     filename=file_data.get('filename', 'document.pdf'),
-                    file=io.BytesIO(file_data.get('raw_bytes')),
-                    size=len(file_data.get('raw_bytes', b'')),
-                    headers={"content-type": file_data.get('content_type', 'application/pdf')}
+                    file=io.BytesIO(file_data.get('raw_bytes'))
                 )
                 
-                # Reset file pointer to beginning
-                file_obj.file.seek(0)
-                
-                # Call EXACT endpoint function directly
-                async def call_compliance_endpoint():
+                # Call existing endpoint logic
+                async def call_existing_compliance():
                     return await validate_document_file(
                         file=file_obj,
                         document_type=None  # Auto-detect
                     )
-                
-                # Execute async function with proper error handling
+                # Execute async function - Simple fix with asyncio.run
                 try:
-                    result = asyncio.run(call_compliance_endpoint())
+                    result = asyncio.run(call_existing_compliance())
                 except RuntimeError as e:
                     if "cannot be called from a running event loop" in str(e):
+                        # We're in an async context, use thread executor
                         import concurrent.futures
                         
                         def run_in_thread():
-                            return asyncio.run(call_compliance_endpoint())
+                            return asyncio.run(call_existing_compliance())
                         
                         with concurrent.futures.ThreadPoolExecutor() as executor:
                             future = executor.submit(run_in_thread)
-                            result = future.result(timeout=30)  # 30 second timeout
+                            result = future.result()
                     else:
                         raise e
                 
-                # Enhanced response formatting from EXACT endpoint result
-                if result and isinstance(result, dict):
-                    data = result
-                    
-                    # Extract key information with fallbacks
-                    compliance_status = data.get('compliance_status', 'UNKNOWN')
-                    confidence_score = data.get('confidence_score', 0)
-                    document_type = data.get('document_type', 'Unknown')
-                    processing_time = data.get('processing_time', 0)
-                    
+                # Format response from existing API result
+                if result and hasattr(result, 'data'):
+                    data = result.data
                     response = f"""⚖️ **Kiểm tra tuân thủ - VPBank K-MULT**
 
-**📄 Tài liệu:** {file_data.get('filename', 'Unknown')}
-**📊 Loại tài liệu:** {document_type}
-**✅ Trạng thái tuân thủ:** {compliance_status}
-**🎯 Độ tin cậy:** {confidence_score:.1%}
+**Tài liệu:** {file_data.get('filename', 'Unknown')}
 
-**📋 Phân tích chi tiết:**"""
+**Trạng thái tuân thủ:** {data.get('compliance_status', 'UNKNOWN')}
+**Độ tin cậy:** {data.get('confidence_score', 0):.2f}
+**Loại tài liệu:** {data.get('document_type', 'Unknown')}
+
+**Phân tích:**
+{data.get('document_analysis', {}).get('document_category', {}).get('business_purpose', 'Đang phân tích tài liệu...')}
+
+**Vi phạm phát hiện:**"""
                     
-                    # Add document analysis if available
-                    doc_analysis = data.get('document_analysis', {})
-                    if doc_analysis:
-                        category = doc_analysis.get('document_category', {})
-                        if category.get('business_purpose'):
-                            response += f"\n• **Mục đích kinh doanh:** {category['business_purpose']}"
-                        if category.get('document_class'):
-                            response += f"\n• **Phân loại:** {category['document_class']}"
-                    
-                    response += "\n\n**⚠️ Vi phạm phát hiện:**"
                     violations = data.get('violations', [])
                     if violations:
-                        for i, violation in enumerate(violations[:5], 1):  # Limit to 5 violations
-                            v_type = violation.get('type', 'Unknown')
-                            v_desc = violation.get('description', 'N/A')
-                            v_severity = violation.get('severity', 'UNKNOWN')
-                            response += f"\n{i}. **{v_type}** ({v_severity}): {v_desc}"
+                        for violation in violations:
+                            response += f"\n• **{violation.get('type', 'Unknown')}**: {violation.get('description', 'N/A')} (Mức độ: {violation.get('severity', 'UNKNOWN')})"
                     else:
-                        response += "\n✅ Không phát hiện vi phạm"
+                        response += "\n• Không phát hiện vi phạm"
                     
-                    response += "\n\n**💡 Khuyến nghị:**"
+                    response += "\n\n**Khuyến nghị:**"
                     recommendations = data.get('recommendations', [])
                     if recommendations:
-                        for i, rec in enumerate(recommendations[:3], 1):  # Limit to 3 recommendations
-                            r_desc = rec.get('description', 'N/A')
-                            r_priority = rec.get('priority', 'MEDIUM')
-                            response += f"\n{i}. {r_desc} (Ưu tiên: {r_priority})"
+                        for rec in recommendations:
+                            response += f"\n• {rec.get('description', 'N/A')} (Ưu tiên: {rec.get('priority', 'MEDIUM')})"
                     else:
-                        response += "\n✅ Tài liệu tuân thủ tốt, không cần điều chỉnh"
+                        response += "\n• Tài liệu tuân thủ tốt"
                     
-                    # Add applicable regulations
-                    applicable_regs = doc_analysis.get('applicable_regulations', [])
-                    if applicable_regs:
-                        reg_names = [reg.get('regulation', 'UCP 600') for reg in applicable_regs[:3]]
-                        response += f"\n\n**📜 Quy định áp dụng:** {', '.join(reg_names)}"
-                    else:
-                        response += f"\n\n**📜 Quy định áp dụng:** UCP 600, ISBP 821"
+                    response += f"\n\n**Quy định áp dụng:** {', '.join(data.get('document_analysis', {}).get('applicable_regulations', [{}])[0].get('regulation', 'UCP 600'))}"
+                    response += f"\n**Thời gian xử lý:** {data.get('processing_time', 0):.1f}s"
                     
-                    response += f"\n**⏱️ Thời gian xử lý:** {processing_time:.1f}s"
-                    response += f"\n\n*🤖 VPBank K-MULT Compliance Engine*"
-                    
-                    logger.info("🔧 [COMPLIANCE_AGENT] Successfully processed with DIRECT endpoint call")
+                    logger.info("🔧 [COMPLIANCE_AGENT] Successfully processed with existing API")
                     return response
                 else:
-                    logger.error(f"🔧 [COMPLIANCE_AGENT] Invalid result format: {type(result)}")
-                    return "❌ **Lỗi kiểm tra tuân thủ**: Không thể xử lý tài liệu - định dạng kết quả không hợp lệ"
+                    return "❌ **Lỗi kiểm tra tuân thủ**: Không thể xử lý tài liệu"
                     
             except Exception as api_error:
-                logger.error(f"🔧 [COMPLIANCE_AGENT] Direct endpoint call error: {api_error}")
+                logger.error(f"🔧 [COMPLIANCE_AGENT] API call error: {api_error}")
                 return f"❌ **Lỗi kiểm tra tuân thủ**: {str(api_error)}"
         
         else:
             # Handle text-based compliance queries using DIRECT node logic
             try:
-                # Import the actual node functions
-                from app.mutil_agent.agents.conversation_agent.nodes.compliance_node import (
-                    _determine_query_type,
-                    _handle_regulation_query,
-                    _handle_compliance_help,
-                    _handle_general_compliance_chat
-                )
-                
                 # Use EXACT node logic for query type determination
                 query_type = _determine_query_type(query)
-                logger.info(f"🔧 [COMPLIANCE_AGENT] Query type determined: {query_type}")
                 
                 async def handle_compliance_query():
                     if query_type == "regulation_query":
@@ -334,7 +296,7 @@ def compliance_knowledge_agent(query: str, file_data: Optional[Dict[str, Any]] =
                     else:
                         return await _handle_general_compliance_chat(query)
                 
-                # Execute async function with timeout
+                # Execute async function
                 try:
                     response = asyncio.run(handle_compliance_query())
                 except RuntimeError as e:
@@ -346,7 +308,7 @@ def compliance_knowledge_agent(query: str, file_data: Optional[Dict[str, Any]] =
                         
                         with concurrent.futures.ThreadPoolExecutor() as executor:
                             future = executor.submit(run_in_thread)
-                            response = future.result(timeout=15)  # 15 second timeout
+                            response = future.result()
                     else:
                         raise e
                 
@@ -575,6 +537,7 @@ CRITICAL INSTRUCTIONS:
 - If unclear, default to compliance_knowledge_agent for banking-related queries
 
 Your response should ONLY be the tool execution result. No additional commentary.
+"""
 
 EMERGENCY PROTOCOL:
 If you cannot determine which tool to use, call compliance_knowledge_agent as default.

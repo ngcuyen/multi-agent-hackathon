@@ -374,10 +374,12 @@ const TextSummaryPage: React.FC<TextSummaryPageProps> = ({ onShowSnackbar }) => 
                       <Box variant="awsui-key-label">Model AI</Box>
                       <div>{result.model_used}</div>
                     </div>
-                    <div>
-                      <Box variant="awsui-key-label">Loại tài liệu</Box>
-                      <div>{result.document_analysis.document_category}</div>
-                    </div>
+                    {result?.document_analysis?.document_category && (
+                      <div>
+                        <Box variant="awsui-key-label">Loại tài liệu</Box>
+                        <div>{result.document_analysis.document_category}</div>
+                      </div>
+                    )}
                   </ColumnLayout>
                   <Box>
                     <Box variant="awsui-key-label">Số từ</Box>
@@ -386,7 +388,7 @@ const TextSummaryPage: React.FC<TextSummaryPageProps> = ({ onShowSnackbar }) => 
                       <div>Tóm tắt: {result.word_count.summary.toLocaleString()} từ</div>
                     </ColumnLayout>
                   </Box>
-                  {result.document_analysis.recommendations && (
+                  {result.document_analysis?.recommendations && (
 
                     <Box>
                       <Box variant="awsui-key-label">Gợi ý</Box>
