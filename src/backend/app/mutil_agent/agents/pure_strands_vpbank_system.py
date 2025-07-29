@@ -13,6 +13,7 @@ import os
 import re
 import ssl
 import urllib3
+import time
 from typing import Dict, Any, Optional, List
 from datetime import datetime
 from uuid import uuid4
@@ -108,12 +109,12 @@ def _run_async_safely(async_func):
             with concurrent.futures.ThreadPoolExecutor() as executor:
                 future = executor.submit(run_in_thread)
                 try:
-                    result = future.result(timeout=120)  # 120 second timeout for compliance operations
+                    result = future.result()  # No timeout - same as original service
                     logger.info("[ASYNC_WRAPPER] Thread executor completed successfully")
                     return result
-                except concurrent.futures.TimeoutError:
-                    logger.error("[ASYNC_WRAPPER] Thread executor timed out after 120 seconds")
-                    raise Exception("Operation timed out after 120 seconds")
+                except Exception as e:
+                    logger.error(f"[ASYNC_WRAPPER] Thread executor failed: {e}")
+                    raise e
         else:
             # No running loop, safe to use asyncio.run
             logger.info("[ASYNC_WRAPPER] Running with asyncio.run (no existing loop)")
@@ -267,12 +268,13 @@ def compliance_knowledge_agent(query: str, file_data: Optional[Dict[str, Any]] =
                 # Get file extension
                 import os
                 file_extension = os.path.splitext(filename)[1].lower()
+                file_size = len(raw_bytes)
                 
-                logger.info(f"🔧 [COMPLIANCE_AGENT] Extracting text from {filename} ({file_extension})")
+                logger.info(f"🔧 [COMPLIANCE_AGENT] Processing file: {filename} ({file_size/1024:.1f}KB)")
                 
                 # Wrap both text extraction and compliance service in async function
                 async def extract_and_validate():
-                    # Extract text using text service
+                    # Extract text using text service (no timeout - same as original)
                     extracted_text = await text_service.extract_text_from_document(
                         file_content=raw_bytes,
                         file_extension=file_extension,
@@ -284,11 +286,16 @@ def compliance_knowledge_agent(query: str, file_data: Optional[Dict[str, Any]] =
                     
                     logger.info(f"🔧 [COMPLIANCE_AGENT] Extracted {len(extracted_text)} characters from {filename}")
                     
-                    # Call compliance service directly
-                    return await compliance_service.validate_document_compliance(
+                    # Call compliance service directly (no timeout - same as original)
+                    logger.info(f"🔧 [COMPLIANCE_AGENT] Starting compliance validation")
+                    
+                    result = await compliance_service.validate_document_compliance(
                         ocr_text=extracted_text,
                         document_type=None  # Auto-detect
                     )
+                    
+                    logger.info(f"🔧 [COMPLIANCE_AGENT] Compliance validation completed")
+                    return result
                 
                 # Execute async function with safe wrapper
                 data = _run_async_safely(extract_and_validate)
@@ -537,7 +544,7 @@ ROUTING RULES (STRICT PRIORITY ORDER):
    - Banking regulation questions
 
 2. TEXT SUMMARY QUERIES → text_summary_agent  
-   - Keywords: "tóm tắt", "summarize", "summary", "analyze document", "extract", "phân tích tài liệu"
+   - Keywords: "tóm tắt", "tóm lược", "tóm gọn", "summarize", "summary", "analyze document", "extract", "phân tích tài liệu"
    - File uploads for document summarization
    - Text analysis requests
 
