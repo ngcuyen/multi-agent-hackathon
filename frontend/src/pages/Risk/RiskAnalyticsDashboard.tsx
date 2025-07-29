@@ -248,7 +248,7 @@ const RiskAnalyticsDashboard: React.FC<RiskAnalyticsDashboardProps> = ({ onShowS
   const getAlertSeverityColor = (severity: string) => {
     switch (severity) {
       case 'low': return 'blue';
-      case 'medium': return 'orange';
+      case 'medium': return 'blue';
       case 'high': return 'red';
       case 'critical': return 'red';
       default: return 'grey';

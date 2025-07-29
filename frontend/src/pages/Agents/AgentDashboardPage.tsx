@@ -321,7 +321,7 @@ const AgentDashboardPage: React.FC<AgentDashboardPageProps> = ({ onShowSnackbar 
         <Badge 
           color={
             item.priority === 'urgent' ? 'red' :
-            item.priority === 'high' ? 'orange' :
+            item.priority === 'high' ? 'red' :
             item.priority === 'medium' ? 'blue' : 'grey'
           }
         >
