@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2025-01-29T03:00:00.000Z" agent="VPBank K-MULT Agent Studio" etag="strands-architecture-export" version="24.7.17">
+  <diagram name="VPBank K-MULT Strands-Enhanced Architecture" id="vpbank-strands">
+    <mxGraphModel dx="2074" dy="1196" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="2336" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- Title -->
+        <mxCell id="title" value="VPBank K-MULT Strands-Enhanced Multi-Agent Architecture" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="327" y="20" width="1000" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- External Banking Ecosystem -->
+        <mxCell id="external-cluster" value="External Banking Ecosystem" style="swimlane;whiteSpace=wrap;html=1;fontSize=14;fontStyle=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="50" y="80" width="400" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="customers" value="Banking Customers" style="shape=actor;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="external-cluster">
+          <mxGeometry x="30" y="40" width="60" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="swift" value="SWIFT Network" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="external-cluster">
+          <mxGeometry x="130" y="40" width="80" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="regulatory" value="SBV Regulatory" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="external-cluster">
+          <mxGeometry x="250" y="40" width="80" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Edge & Security Layer -->
+        <mxCell id="security-cluster" value="Edge &amp; Security Layer" style="swimlane;whiteSpace=wrap;html=1;fontSize=14;fontStyle=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="500" y="80" width="500" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="waf" value="AWS WAF" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="security-cluster">
+          <mxGeometry x="20" y="40" width="80" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="cloudfront" value="CloudFront CDN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="security-cluster">
+          <mxGeometry x="120" y="40" width="80" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="api-gateway" value="API Gateway" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="security-cluster">
+          <mxGeometry x="220" y="40" width="80" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="alb" value="Application Load Balancer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="security-cluster">
+          <mxGeometry x="320" y="40" width="80" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Strands Orchestration Layer -->
+        <mxCell id="strands-cluster" value="Strands Agents Orchestration Layer" style="swimlane;whiteSpace=wrap;html=1;fontSize=14;fontStyle=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="50" y="250" width="950" height="200" as="geometry" />
+        </mxCell>
+        
+        <!-- Strands Master Orchestrator -->
+        <mxCell id="strands-master-cluster" value="Strands Master Orchestrator" style="swimlane;whiteSpace=wrap;html=1;fontSize=12;fontStyle=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="strands-cluster">
+          <mxGeometry x="20" y="30" width="400" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="strands-orchestrator" value="Strands Orchestrator&#xa;(Claude-3.5 Sonnet)&#xa;(2-5 instances)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="strands-master-cluster">
+          <mxGeometry x="10" y="20" width="110" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="context-manager" value="Context Manager&#xa;(Shared Memory)&#xa;(1-3 instances)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="strands-master-cluster">
+          <mxGeometry x="140" y="20" width="110" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="agent-registry" value="Agent Registry&#xa;(Service Discovery)&#xa;(1-2 instances)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="strands-master-cluster">
+          <mxGeometry x="270" y="20" width="110" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Inter-Agent Communication -->
+        <mxCell id="communication-cluster" value="Inter-Agent Communication" style="swimlane;whiteSpace=wrap;html=1;fontSize=12;fontStyle=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="strands-cluster">
+          <mxGeometry x="450" y="30" width="200" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="sqs" value="SQS&#xa;(Agent Messages)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="communication-cluster">
+          <mxGeometry x="20" y="20" width="70" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="sns" value="SNS&#xa;(Event Broadcasting)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="communication-cluster">
+          <mxGeometry x="110" y="20" width="70" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Step Functions -->
+        <mxCell id="step-functions" value="Step Functions&#xa;(Strands Workflow)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="strands-cluster">
+          <mxGeometry x="680" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Banking Agents -->
+        <mxCell id="agents-cluster" value="Strands-Enhanced Banking Agents" style="swimlane;whiteSpace=wrap;html=1;fontSize=14;fontStyle=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="50" y="500" width="1200" height="300" as="geometry" />
+        </mxCell>
+        
+        <!-- Supervisor Agents -->
+        <mxCell id="supervisor-cluster" value="Strands Supervisor Agents" style="swimlane;whiteSpace=wrap;html=1;fontSize=12;fontStyle=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="agents-cluster">
+          <mxGeometry x="20" y="30" width="280" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="supervisor" value="Supervisor Agent&#xa;(Strands-powered)&#xa;(1-3 instances)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="supervisor-cluster">
+          <mxGeometry x="10" y="20" width="120" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="workflow-coordinator" value="Workflow Coordinator&#xa;(Strands reasoning)&#xa;(1-2 instances)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="supervisor-cluster">
+          <mxGeometry x="140" y="20" width="120" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Processing Agents -->
+        <mxCell id="processing-cluster" value="Strands Processing Agents" style="swimlane;whiteSpace=wrap;html=1;fontSize=12;fontStyle=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="agents-cluster">
+          <mxGeometry x="20" y="130" width="700" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="doc-intel" value="Document Intelligence&#xa;(Strands + OCR)&#xa;(2-15 instances)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="processing-cluster">
+          <mxGeometry x="10" y="20" width="120" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="lc-processing" value="LC Processing&#xa;(Strands + UCP 600)&#xa;(1-10 instances)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="processing-cluster">
+          <mxGeometry x="140" y="20" width="120" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="credit-analysis" value="Credit Analysis&#xa;(Strands + Basel III)&#xa;(2-12 instances)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="processing-cluster">
+          <mxGeometry x="270" y="20" width="120" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="compliance" value="Compliance Engine&#xa;(Strands + SBV)&#xa;(1-8 instances)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="processing-cluster">
+          <mxGeometry x="400" y="20" width="120" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="risk-assessment" value="Risk Assessment&#xa;(Strands + ML)&#xa;(2-10 instances)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="processing-cluster">
+          <mxGeometry x="530" y="20" width="120" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Decision Layer -->
+        <mxCell id="decision-cluster" value="Strands Decision Layer" style="swimlane;whiteSpace=wrap;html=1;fontSize=12;fontStyle=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="agents-cluster">
+          <mxGeometry x="750" y="130" width="280" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="decision-synthesis" value="Decision Synthesis&#xa;(Strands + Claude 3.7)&#xa;(1-5 instances)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="decision-cluster">
+          <mxGeometry x="10" y="20" width="120" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="consensus-builder" value="Consensus Builder&#xa;(Multi-agent voting)&#xa;(1-3 instances)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="decision-cluster">
+          <mxGeometry x="140" y="20" width="120" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- AI/ML Intelligence Layer -->
+        <mxCell id="aiml-cluster" value="AI/ML Intelligence Layer" style="swimlane;whiteSpace=wrap;html=1;fontSize=14;fontStyle=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="50" y="850" width="800" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="bedrock" value="Amazon Bedrock&#xa;(Claude 3.7 Sonnet)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="aiml-cluster">
+          <mxGeometry x="20" y="40" width="110" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="strands-bedrock" value="Strands Bedrock&#xa;(Enhanced Reasoning)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="aiml-cluster">
+          <mxGeometry x="150" y="40" width="110" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="textract" value="Amazon Textract&#xa;(OCR)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="aiml-cluster">
+          <mxGeometry x="280" y="40" width="110" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="comprehend" value="Amazon Comprehend&#xa;(Vietnamese NLP)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="aiml-cluster">
+          <mxGeometry x="410" y="40" width="110" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="sagemaker" value="SageMaker&#xa;(ML Models)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="aiml-cluster">
+          <mxGeometry x="540" y="40" width="110" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="fraud-detector" value="Fraud Detector" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="aiml-cluster">
+          <mxGeometry x="670" y="40" width="110" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Data & Storage Layer -->
+        <mxCell id="data-cluster" value="Data &amp; Storage Layer" style="swimlane;whiteSpace=wrap;html=1;fontSize=14;fontStyle=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="900" y="850" width="650" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="rds" value="RDS PostgreSQL&#xa;(Multi-AZ)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="data-cluster">
+          <mxGeometry x="20" y="40" width="110" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="dynamodb" value="DynamoDB&#xa;(Session Store)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="data-cluster">
+          <mxGeometry x="150" y="40" width="110" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="agent-memory" value="Agent Memory&#xa;(Strands Context)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="data-cluster">
+          <mxGeometry x="280" y="40" width="110" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="s3-documents" value="S3 Buckets&#xa;(Documents)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="data-cluster">
+          <mxGeometry x="410" y="40" width="110" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="elasticache" value="ElastiCache&#xa;(Redis)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="data-cluster">
+          <mxGeometry x="540" y="40" width="110" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Monitoring & Security -->
+        <mxCell id="monitoring-cluster" value="Monitoring &amp; Security" style="swimlane;whiteSpace=wrap;html=1;fontSize=14;fontStyle=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="50" y="1020" width="500" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="cloudwatch" value="CloudWatch&#xa;(Logs &amp; Metrics)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="monitoring-cluster">
+          <mxGeometry x="20" y="40" width="100" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="guardduty" value="GuardDuty&#xa;(Threat Detection)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="monitoring-cluster">
+          <mxGeometry x="140" y="40" width="100" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="kms" value="AWS KMS&#xa;(Encryption)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="monitoring-cluster">
+          <mxGeometry x="260" y="40" width="100" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="iam" value="IAM Roles&#xa;(Access Control)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="monitoring-cluster">
+          <mxGeometry x="380" y="40" width="100" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Key Connections -->
+        <mxCell id="conn1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0066CC;strokeWidth=3;" edge="1" parent="1" source="customers" target="waf">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="conn2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#CC0000;strokeWidth=3;" edge="1" parent="1" source="alb" target="strands-orchestrator">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="conn3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#9900CC;strokeWidth=2;" edge="1" parent="1" source="strands-orchestrator" target="supervisor">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="conn4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#006600;strokeWidth=2;" edge="1" parent="1" source="supervisor" target="doc-intel">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="conn5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#006600;strokeWidth=2;" edge="1" parent="1" source="doc-intel" target="decision-synthesis">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="conn6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#CC0000;strokeWidth=2;" edge="1" parent="1" source="decision-synthesis" target="consensus-builder">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="conn7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#CC6600;strokeWidth=2;" edge="1" parent="1" source="decision-synthesis" target="bedrock">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="conn8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#CC6600;strokeWidth=2;" edge="1" parent="1" source="strands-orchestrator" target="strands-bedrock">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="conn9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#00CCCC;strokeWidth=2;" edge="1" parent="1" source="context-manager" target="agent-memory">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Legend -->
+        <mxCell id="legend" value="Strands Architecture Legend:&#xa;🔵 External Flow&#xa;🔴 Backend Flow&#xa;🟣 Strands Orchestration&#xa;🟢 Agent Processing&#xa;🟠 AI/ML Integration&#xa;🔵 Context Management" style="text;html=1;strokeColor=none;fillColor=#f5f5f5;align=left;verticalAlign=top;whiteSpace=wrap;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="600" y="1020" width="200" height="120" as="geometry" />
+        </mxCell>
+        
+        <!-- Key Benefits Box -->
+        <mxCell id="benefits" value="🚀 Strands Benefits:&#xa;• 50% error reduction&#xa;• 30% efficiency improvement&#xa;• 20% processing time reduction&#xa;• Multi-agent consensus&#xa;• Enhanced reasoning&#xa;• Shared context management" style="text;html=1;strokeColor=#82b366;fillColor=#d5e8d4;align=left;verticalAlign=top;whiteSpace=wrap;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="850" y="1020" width="250" height="120" as="geometry" />
+        </mxCell>
+        
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
