@@ -27,23 +27,7 @@
 
 ## 🏗️ **Complete AWS Architecture Portfolio**
 
-### 🎯 **Enterprise Architecture Overview**
-
-#### 🏢 **Enterprise Banking Architecture**
-![Enterprise Banking Architecture](./generated-diagrams/vpbank-kmult-enterprise-architecture.png)
-*Complete enterprise system: External banking ecosystem, security perimeter, multi-agent platform, AI/ML intelligence, compliance framework*
-
-#### 🧠 **Intelligent Data Pipeline**
-![Intelligent Data Pipeline](./generated-diagrams/vpbank-intelligent-data-pipeline.png)
-*AI-powered workflow: Document gateway → AI processing → Multi-agent analysis → Compliance validation → Decision output*
-
-#### 🛡️ **Comprehensive Security Architecture**
-![Comprehensive Security](./generated-diagrams/vpbank-comprehensive-security-architecture.png)
-*Banking-grade security: Multi-layer protection, CloudHSM encryption, threat detection, compliance monitoring*
-
-#### 🔄 **Enterprise HA & Disaster Recovery**
-![Enterprise HA & DR](./generated-diagrams/vpbank-enterprise-ha-dr-architecture.png)
-*Multi-region resilience: Singapore (Primary) + Tokyo (DR), RTO < 4h, RPO < 1h, automated failover*
+### 🎯 **Latest Architecture Diagrams (v3.0)**
 
 #### 🌐 **Full-Stack Architecture with S3 Frontend**
 ![Full-Stack Architecture](./docs/architecture/vpbank-kmult-fullstack-architecture.png)
@@ -60,37 +44,7 @@
 *Complete AWS infrastructure: ECS Fargate multi-agent platform, AI/ML services, data layer, security monitoring*
 📐 [Edit in Draw.io](./docs/architecture/vpbank-kmult-high-level-architecture.drawio)
 
-### 🏦 **Banking Standard Architecture**
-
-#### 🏦 **Banking Standard Architecture**
-![Banking Standard](./generated-diagrams/vpbank-banking-standard-architecture.png)
-*Enterprise banking: DMZ security, compliance validation, core banking applications*
-
-#### ⚖️ **Regulatory Compliance Architecture**
-![Regulatory Compliance](./generated-diagrams/vpbank-regulatory-compliance-architecture.png)
-*Compliance framework: SBV, Basel III, UCP 600, AML/CFT validation engines*
-
-#### 🏢 **Banking Operations Workflow**
-![Banking Operations](./generated-diagrams/vpbank-banking-operations-workflow.png)
-*End-to-end process: Customer input → Multi-agent processing → Decision output*
-
-### 📊 **Core System Architecture**
-
-#### 📊 **Complete AWS Architecture**
-![Complete AWS](./generated-diagrams/vpbank-kmult-aws-architecture.png)
-*Full system: ECS Fargate cluster, AI/ML services, data layer, security monitoring*
-
-#### 🔄 **Data Processing Pipeline**
-![Data Pipeline](./generated-diagrams/vpbank-kmult-data-pipeline.png)
-*Document workflow: OCR → NLP → Multi-agent coordination → Decision synthesis*
-
-#### 🔒 **Security & Compliance**
-![Security](./generated-diagrams/vpbank-kmult-security-architecture.png)
-*Banking security: Encryption, audit trails, compliance validators*
-
-#### 💰 **Cost & Scalability**
-![Cost Scalability](./generated-diagrams/vpbank-kmult-cost-scalability.png)
-*Auto-scaling optimization: Resource management, cost monitoring*
+📐 **Architecture Guide**: See [docs/architecture/README.md](./docs/architecture/README.md) for detailed architecture documentation and usage guide.
 
 ---
 

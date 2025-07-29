@@ -14,24 +14,30 @@ if [ ! -d "$DIAGRAMS_DIR" ]; then
     exit 1
 fi
 
-echo "📊 Available Architecture Diagrams:"
+echo "📊 Current Architecture Diagrams (v3.0 - Latest):"
 echo ""
 
-# List PNG diagrams
+# List PNG diagrams (current only)
 echo "🖼️  PNG Diagrams:"
-ls -la $DIAGRAMS_DIR/*.png 2>/dev/null | awk '{print "   " $9 " (" $5 " bytes)"}' || echo "   No PNG files found"
+ls -la $DIAGRAMS_DIR/vpbank-kmult-*.png 2>/dev/null | awk '{print "   " $9 " (" $5 " bytes)"}' || echo "   No PNG files found"
 
 echo ""
 
-# List DrawIO diagrams
+# List DrawIO diagrams (current only)
 echo "📐 Draw.io Diagrams:"
-ls -la $DIAGRAMS_DIR/*.drawio 2>/dev/null | awk '{print "   " $9 " (" $5 " bytes)"}' || echo "   No .drawio files found"
+ls -la $DIAGRAMS_DIR/vpbank-kmult-*.drawio 2>/dev/null | awk '{print "   " $9 " (" $5 " bytes)"}' || echo "   No .drawio files found"
 
 echo ""
-echo "🎯 Key Architecture Diagrams:"
+echo "🎯 Current Architecture Diagrams (3 Latest):"
 echo "   1. vpbank-kmult-fullstack-architecture.png/.drawio - Complete full-stack system"
 echo "   2. vpbank-kmult-strands-enhanced-architecture.png/.drawio - Strands multi-agent system"
 echo "   3. vpbank-kmult-high-level-architecture.png/.drawio - High-level AWS ECS Fargate"
+echo ""
+
+echo "📋 Legacy Architectures:"
+LEGACY_COUNT=$(ls -1 $DIAGRAMS_DIR/legacy-architectures/ 2>/dev/null | wc -l)
+echo "   • $LEGACY_COUNT archived diagrams in docs/architecture/legacy-architectures/"
+echo "   • Previous versions (v1.x, v2.x) available for reference"
 echo ""
 
 echo "📋 Usage Instructions:"
@@ -49,6 +55,13 @@ echo "   4. Edit as needed"
 echo "   5. File → Export as → Select desired format"
 echo ""
 
+echo "🎯 Architecture Selection Guide:"
+echo "   • Executive Presentation: Use Full-Stack Architecture"
+echo "   • Technical Deep Dive: Use Strands-Enhanced Architecture"
+echo "   • Infrastructure Planning: Use High-Level AWS Architecture"
+echo "   • Complete Reference: docs/architecture/README.md"
+echo ""
+
 echo "🏗️ Project Structure:"
 echo "   • Architecture diagrams: docs/architecture/"
 echo "   • Source code: src/"
@@ -59,3 +72,4 @@ echo "   • Deployments: deployments/"
 echo ""
 
 echo "✅ Export completed successfully!"
+echo "📐 For detailed architecture guide: cat docs/architecture/README.md"
