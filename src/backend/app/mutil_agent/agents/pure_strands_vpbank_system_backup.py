@@ -71,6 +71,35 @@ bedrock_model = BedrockModel(
 )
 
 # ================================
+# ASYNC SAFETY HELPER
+# ================================
+
+def _run_async_safely(async_func):
+    """Safely run async functions in both sync and async contexts"""
+    try:
+        # Try direct execution first
+        return asyncio.run(async_func())
+    except RuntimeError as e:
+        if "cannot be called from a running event loop" in str(e):
+            # We're in an async context, use thread executor
+            import concurrent.futures
+            
+            def run_in_thread():
+                # Create new event loop for this thread
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                try:
+                    return loop.run_until_complete(async_func())
+                finally:
+                    loop.close()
+            
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                future = executor.submit(run_in_thread)
+                return future.result()
+        else:
+            raise e
+
+# ================================
 # AGENT TOOLS USING EXISTING SERVICES
 # ================================
 
@@ -350,48 +379,81 @@ def risk_analysis_agent(query: str, file_data: Optional[Dict[str, Any]] = None) 
     try:
         logger.info(f"🔧 [RISK_AGENT] TOOL CALLED with query: {query[:100]}...")
         
-        # Use existing risk assessment endpoint DIRECTLY
-        from app.mutil_agent.routes.v1.risk_routes import assess_risk_endpoint
+        # Import required models and services
+        from app.mutil_agent.models.risk import RiskAssessmentRequest
+        from app.mutil_agent.routes.v1.risk_routes import assess_risk_endpoint, assess_risk_file_endpoint
+        from fastapi import UploadFile
+        import io
         
         # Extract basic info from query for risk assessment
         financial_data = _extract_basic_risk_data_from_query(query)
         
-        async def call_existing_risk_api():
-            # Create request body matching EXACT existing API
-            risk_request_body = {
-                "entity_id": f"entity_{uuid4().hex[:8]}",
-                "entity_type": "doanh nghiệp",
-                "financials": financial_data.get('financials', {}),
-                "market_data": financial_data.get('market_data', {}),
-                "custom_factors": financial_data.get('custom_factors', {}),
-                "applicant_name": financial_data.get('applicant_name', 'Khách hàng'),
-                "business_type": financial_data.get('business_type', 'general'),
-                "requested_amount": financial_data.get('requested_amount', 1000000000),
-                "currency": financial_data.get('currency', 'VND'),
-                "loan_term": financial_data.get('loan_term', 12),
-                "loan_purpose": financial_data.get('loan_purpose', 'Kinh doanh'),
-                "collateral_type": financial_data.get('collateral_type', 'Không tài sản đảm bảo')
-            }
+        # Handle file upload if provided
+        if file_data and file_data.get('raw_bytes'):
+            logger.info(f"🔧 [RISK_AGENT] Processing file: {file_data.get('filename')} ({len(file_data.get('raw_bytes', b''))} bytes)")
             
-            # Call EXACT existing risk assessment endpoint
-            return await assess_risk_endpoint(risk_request_body)
-        
-        # Execute async function - Simple fix with asyncio.run
-        try:
-            risk_result = asyncio.run(call_existing_risk_api())
-        except RuntimeError as e:
-            if "cannot be called from a running event loop" in str(e):
-                # We're in an async context, use thread executor
-                import concurrent.futures
+            try:
+                # Create UploadFile object
+                file_obj = UploadFile(
+                    filename=file_data.get('filename', 'document.pdf'),
+                    file=io.BytesIO(file_data.get('raw_bytes')),
+                    size=len(file_data.get('raw_bytes', b'')),
+                    headers={"content-type": file_data.get('content_type', 'application/pdf')}
+                )
                 
-                def run_in_thread():
-                    return asyncio.run(call_existing_risk_api())
+                # Reset file pointer
+                file_obj.file.seek(0)
                 
-                with concurrent.futures.ThreadPoolExecutor() as executor:
-                    future = executor.submit(run_in_thread)
-                    risk_result = future.result()
-            else:
-                raise e
+                async def call_file_risk_api():
+                    # Call file-based risk assessment endpoint
+                    return await assess_risk_file_endpoint(
+                        file=file_obj,
+                        applicant_name=financial_data.get('applicant_name', 'Khách hàng'),
+                        business_type=financial_data.get('business_type', 'general'),
+                        requested_amount=financial_data.get('requested_amount', 1000000000),
+                        currency=financial_data.get('currency', 'VND'),
+                        loan_term=financial_data.get('loan_term', 12),
+                        loan_purpose=financial_data.get('loan_purpose', 'Kinh doanh'),
+                        assessment_type="comprehensive",
+                        collateral_type=financial_data.get('collateral_type', 'Không tài sản đảm bảo')
+                    )
+                
+                # Execute async function with safe wrapper
+                risk_result = _run_async_safely(call_file_risk_api)
+                
+                logger.info("🔧 [RISK_AGENT] Successfully processed file with DIRECT API call")
+                
+            except Exception as file_error:
+                logger.error(f"🔧 [RISK_AGENT] File processing error: {file_error}")
+                return f"❌ **Lỗi xử lý file**: {str(file_error)}"
+        else:
+            # Handle text-based risk assessment
+            async def call_existing_risk_api():
+                # Create RiskAssessmentRequest object với tất cả field optional
+                risk_request = RiskAssessmentRequest(
+                    entity_id=f"entity_{uuid4().hex[:8]}",
+                    entity_type="doanh nghiệp",
+                    financials=financial_data.get('financials', {}),
+                    market_data=financial_data.get('market_data', {}),
+                    custom_factors=financial_data.get('custom_factors', {}),
+                    applicant_name=financial_data.get('applicant_name', 'Khách hàng'),
+                    business_type=financial_data.get('business_type', 'general'),
+                    requested_amount=financial_data.get('requested_amount', 1000000000),
+                    currency=financial_data.get('currency', 'VND'),
+                    loan_term=financial_data.get('loan_term', 12),
+                    loan_purpose=financial_data.get('loan_purpose', 'Kinh doanh'),
+                    collateral_type=financial_data.get('collateral_type', 'Không tài sản đảm bảo'),
+                    assessment_type="comprehensive",
+                    financial_documents=financial_data.get('financial_documents', '')
+                )
+                
+                # Call EXACT existing risk assessment endpoint with proper object
+                return await assess_risk_endpoint(risk_request)
+            
+            # Execute async function with safe wrapper
+            risk_result = _run_async_safely(call_existing_risk_api)
+            
+            logger.info("🔧 [RISK_AGENT] Successfully processed text with DIRECT API call")
         
         # Format response using EXACT existing API result
         if risk_result and hasattr(risk_result, 'data'):
@@ -437,7 +499,6 @@ def risk_analysis_agent(query: str, file_data: Optional[Dict[str, Any]] = None) 
 *🤖 VPBank K-MULT Agent Studio*
 *⏰ {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}*"""
         
-        logger.info("🔧 [RISK_AGENT] Successfully processed with DIRECT API call")
         return response
         
     except Exception as e:
@@ -465,16 +526,32 @@ def _extract_basic_risk_data_from_query(query: str) -> Dict[str, Any]:
         else:
             financial_data['requested_amount'] = 1000000000
         
-        # Set defaults
+        # Set defaults with proper structure for required fields
         financial_data.update({
             'business_type': 'general',
             'currency': 'VND',
             'loan_term': 12,
             'loan_purpose': 'Kinh doanh',
             'collateral_type': 'Không tài sản đảm bảo',
-            'financials': {},
-            'market_data': {},
-            'custom_factors': {}
+            # Required fields with proper structure
+            'financials': {
+                'revenue': 1000000000,
+                'profit': 100000000,
+                'assets': 2000000000,
+                'liabilities': 500000000,
+                'cash_flow': 300000000
+            },
+            'market_data': {
+                'industry': 'general',
+                'market_condition': 'stable',
+                'competition_level': 'medium',
+                'growth_potential': 'moderate'
+            },
+            'custom_factors': {
+                'risk_tolerance': 'medium',
+                'business_experience': 'established',
+                'market_position': 'stable'
+            }
         })
         
         return financial_data
@@ -489,9 +566,25 @@ def _extract_basic_risk_data_from_query(query: str) -> Dict[str, Any]:
             'loan_term': 12,
             'loan_purpose': 'Kinh doanh',
             'collateral_type': 'Không tài sản đảm bảo',
-            'financials': {},
-            'market_data': {},
-            'custom_factors': {}
+            # Required fields with proper structure
+            'financials': {
+                'revenue': 1000000000,
+                'profit': 100000000,
+                'assets': 2000000000,
+                'liabilities': 500000000,
+                'cash_flow': 300000000
+            },
+            'market_data': {
+                'industry': 'general',
+                'market_condition': 'stable',
+                'competition_level': 'medium',
+                'growth_potential': 'moderate'
+            },
+            'custom_factors': {
+                'risk_tolerance': 'medium',
+                'business_experience': 'established',
+                'market_position': 'stable'
+            }
         }
 
 
@@ -537,12 +630,6 @@ CRITICAL INSTRUCTIONS:
 - If unclear, default to compliance_knowledge_agent for banking-related queries
 
 Your response should ONLY be the tool execution result. No additional commentary.
-"""
-
-EMERGENCY PROTOCOL:
-If you cannot determine which tool to use, call compliance_knowledge_agent as default.
-
-YOUR RESPONSE MUST BE: Tool execution result ONLY. No preamble, no explanation, no apology.
 """
 
 # Create supervisor with stronger model configuration

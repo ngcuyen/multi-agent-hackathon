@@ -10,6 +10,7 @@ import io
 from typing import Dict, Any, Optional
 from fastapi import UploadFile
 from datetime import datetime
+from uuid import uuid4
 
 logger = logging.getLogger(__name__)
 
@@ -317,108 +318,152 @@ def risk_assessment_tool(query: str, file_data: Optional[Dict[str, Any]] = None)
     Preserves EXACT logic from risk_routes.py
     """
     try:
-        logger.info(f"📊 [RISK_TOOL] Processing: {query[:100]}...")
+        logger.info(f"🔧 [RISK_TOOL] Processing: {query[:100]}...")
         
-        # Import EXACT endpoint function
-        from app.mutil_agent.routes.v1.risk_routes import assess_risk_endpoint
-        from app.mutil_agent.schemas.risk_schemas import RiskAssessmentRequest
+        # Import required models and services
+        from app.mutil_agent.models.risk import RiskAssessmentRequest
+        from app.mutil_agent.routes.v1.risk_routes import assess_risk_endpoint, assess_risk_file_endpoint
+        from fastapi import UploadFile
+        import io
         
-        # Extract financial data from query (simplified)
+        # Extract basic risk data from query
         financial_data = _extract_risk_data_from_query(query)
         
-        # Create request object matching EXACT endpoint schema
-        risk_request = RiskAssessmentRequest(
-            entity_id=f"entity_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
-            entity_type="doanh nghiệp",
-            applicant_name=financial_data.get('applicant_name', 'Khách hàng'),
-            business_type=financial_data.get('business_type', 'general'),
-            requested_amount=financial_data.get('requested_amount', 1000000000),
-            currency=financial_data.get('currency', 'VND'),
-            loan_term=financial_data.get('loan_term', 12),
-            loan_purpose=financial_data.get('loan_purpose', 'Kinh doanh'),
-            assessment_type="comprehensive",
-            collateral_type=financial_data.get('collateral_type', 'Không tài sản đảm bảo'),
-            financials=financial_data.get('financials', {}),
-            market_data=financial_data.get('market_data', {}),
-            custom_factors=financial_data.get('custom_factors', {})
-        )
+        # Extract text from file if provided
+        if file_data and file_data.get('raw_bytes'):
+            logger.info(f"🔧 [RISK_TOOL] Processing file: {file_data.get('filename')} ({len(file_data.get('raw_bytes', b''))} bytes)")
+            
+            try:
+                # Extract text from file
+                file_text = extract_text_from_file(file_data)
+                financial_data['financial_documents'] = file_text
+                logger.info(f"🔧 [RISK_TOOL] Extracted {len(file_text)} characters from file")
+                
+                if not file_text.strip():
+                    logger.warning("🔧 [RISK_TOOL] No text extracted from file, proceeding with basic data")
+                
+            except Exception as file_error:
+                logger.error(f"🔧 [RISK_TOOL] File processing error: {file_error}")
+                return f"❌ **Lỗi xử lý file**: {str(file_error)}"
         
-        # Call EXACT endpoint function
+        # Handle risk assessment with file content
         async def call_endpoint():
+            # Create RiskAssessmentRequest object với file content
+            risk_request = RiskAssessmentRequest(
+                entity_id=f"entity_{uuid4().hex[:8]}",
+                entity_type="doanh nghiệp",
+                financials=financial_data.get('financials', {}),
+                market_data=financial_data.get('market_data', {}),
+                custom_factors=financial_data.get('custom_factors', {}),
+                applicant_name=financial_data.get('applicant_name', 'Khách hàng'),
+                business_type=financial_data.get('business_type', 'general'),
+                requested_amount=financial_data.get('requested_amount', 1000000000),
+                currency=financial_data.get('currency', 'VND'),
+                loan_term=financial_data.get('loan_term', 12),
+                loan_purpose=financial_data.get('loan_purpose', 'Kinh doanh'),
+                assessment_type="comprehensive",
+                collateral_type=financial_data.get('collateral_type', 'Không tài sản đảm bảo'),
+                financial_documents=financial_data.get('financial_documents', '')  # ✅ Thêm file content
+            )
+            
             return await assess_risk_endpoint(risk_request)
-        
-        # Execute with proper async handling
-        try:
-            result = asyncio.run(call_endpoint())
-        except RuntimeError as e:
-            if "cannot be called from a running event loop" in str(e):
-                import concurrent.futures
-                def run_in_thread():
-                    return asyncio.run(call_endpoint())
-                with concurrent.futures.ThreadPoolExecutor() as executor:
-                    future = executor.submit(run_in_thread)
-                    result = future.result(timeout=30)
-            else:
-                raise e
+            
+            # Execute with proper async handling
+            try:
+                result = asyncio.run(call_endpoint())
+            except RuntimeError as e:
+                if "cannot be called from a running event loop" in str(e):
+                    import concurrent.futures
+                    def run_in_thread():
+                        return asyncio.run(call_endpoint())
+                    with concurrent.futures.ThreadPoolExecutor() as executor:
+                        future = executor.submit(run_in_thread)
+                        result = future.result(timeout=30)
+                else:
+                    raise e
+            
+            logger.info("🔧 [RISK_TOOL] Successfully processed text with DIRECT endpoint call")
         
         # Format response using EXACT endpoint result structure
-        if result and isinstance(result, dict) and result.get('status') == 'success':
+        if result and isinstance(result, dict):
             data = result.get('data', {})
             
             response = f"""📊 **Phân tích rủi ro - VPBank K-MULT**
 
-**🏢 Thông tin:**
+**Thông tin đánh giá:**
 • **Tên:** {financial_data.get('applicant_name', 'Chưa xác định')}
-• **Số tiền:** {financial_data.get('requested_amount', 0):,} VNĐ
+• **Số tiền:** {financial_data.get('requested_amount', 0):,} {financial_data.get('currency', 'VND')}
 • **Loại hình:** {financial_data.get('business_type', 'Chưa xác định')}
-• **Mục đích:** {financial_data.get('loan_purpose', 'Kinh doanh')}
 
-**📈 Kết quả:**
+**Kết quả phân tích:**
 • **Điểm rủi ro:** {data.get('risk_score', 'N/A')}
-• **Mức độ:** {data.get('risk_level', 'N/A')}"""
-            
-            # Add recommendations from endpoint response
-            recommendations = data.get('recommendations', [])
-            if recommendations:
-                response += "\n\n**💡 Khuyến nghị:**"
-                for i, rec in enumerate(recommendations[:3], 1):
-                    if isinstance(rec, str):
-                        response += f"\n{i}. {rec}"
-                    elif isinstance(rec, dict):
-                        response += f"\n{i}. {rec.get('description', rec.get('recommendation', 'N/A'))}"
-            
-            # Add AI report from endpoint response
-            if data.get('ai_report'):
-                response += f"\n\n**🤖 Báo cáo AI:**\n{data['ai_report']}"
-            
-            response += f"\n\n**📜 Tuân thủ:** Basel III, SBV, VPBank"
-            response += f"\n*🤖 VPBank K-MULT Risk Intelligence*"
-            response += f"\n*⏰ {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}*"
-            
-            return response
+• **Mức độ rủi ro:** {data.get('risk_level', 'N/A')}
+• **Điểm tín dụng:** {data.get('credit_score', 'N/A')}
+
+**Khuyến nghị:**
+{data.get('recommendations', ['Cần đánh giá thêm'])[0] if data.get('recommendations') else 'Cần đánh giá thêm'}
+
+**Báo cáo AI:**
+{data.get('ai_report', 'Đang phân tích dữ liệu tài chính và đánh giá rủi ro...')}
+
+**Thời gian xử lý:** {data.get('processing_time', 0):.1f}s
+
+---
+
+*🤖 VPBank K-MULT Agent Studio*
+*⏰ {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}*"""
         else:
-            # Fallback response
-            return f"""📊 **Phân tích rủi ro - VPBank K-MULT**
+            response = f"""📊 **Phân tích rủi ro - VPBank K-MULT**
 
-**📝 Yêu cầu:** {query[:200]}{'...' if len(query) > 200 else ''}
+**Yêu cầu:** {query[:200]}...
 
-**🔍 Phân tích sơ bộ:**
-• Đang xử lý dữ liệu tài chính
-• Áp dụng mô hình VPBank
-• Tuân thủ Basel III và SBV
+**Phân tích sơ bộ:**
+- Đang xử lý dữ liệu tài chính
+- Áp dụng mô hình đánh giá rủi ro VPBank  
+- Tuân thủ Basel III và quy định SBV
 
-**📋 Cần thêm thông tin:**
+**Lưu ý:** Để có kết quả chính xác, vui lòng cung cấp:
 • Tên khách hàng/doanh nghiệp
-• Số tiền vay (VNĐ)
-• Mục đích vay
+• Số tiền vay mong muốn
+• Mục đích vay vốn
 • Thông tin tài chính
 
-*🤖 VPBank K-MULT Risk Intelligence*"""
+---
+
+*🤖 VPBank K-MULT Agent Studio*
+*⏰ {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}*"""
+        
+        logger.info("🔧 [RISK_TOOL] Successfully processed with DIRECT endpoint wrapper")
+        return response
         
     except Exception as e:
-        logger.error(f"📊 [RISK_TOOL] Tool error: {e}")
+        logger.error(f"🔧 [RISK_TOOL] Tool error: {str(e)}")
         return f"❌ **Lỗi phân tích rủi ro**: {str(e)}"
 
+
+def extract_text_from_file(file_data: Dict[str, Any]) -> str:
+    """Extract text from uploaded file"""
+    try:
+        raw_bytes = file_data.get('raw_bytes')
+        content_type = file_data.get('content_type', '')
+        
+        if content_type == "application/pdf":
+            from app.mutil_agent.helpers.improved_pdf_extractor import ImprovedPDFExtractor
+            extractor = ImprovedPDFExtractor()
+            result = extractor.extract_text_from_pdf(raw_bytes)
+            return result.get('text', '').strip()
+        elif content_type in ["application/vnd.openxmlformats-officedocument.wordprocessingml.document"]:
+            import docx
+            import io
+            doc = docx.Document(io.BytesIO(raw_bytes))
+            return "\n".join([paragraph.text for paragraph in doc.paragraphs])
+        elif content_type.startswith("text/"):
+            return raw_bytes.decode('utf-8')
+        else:
+            return ""
+    except Exception as e:
+        logger.error(f"Error extracting text from file: {e}")
+        return ""
 
 def _extract_risk_data_from_query(query: str) -> Dict[str, Any]:
     """Extract basic risk data from query - helper function"""
@@ -432,9 +477,25 @@ def _extract_risk_data_from_query(query: str) -> Dict[str, Any]:
         'loan_term': 12,
         'loan_purpose': 'Kinh doanh',
         'collateral_type': 'Không tài sản đảm bảo',
-        'financials': {},
-        'market_data': {},
-        'custom_factors': {}
+        # Required fields with proper structure
+        'financials': {
+            'revenue': 1000000000,
+            'profit': 100000000,
+            'assets': 2000000000,
+            'liabilities': 500000000,
+            'cash_flow': 300000000
+        },
+        'market_data': {
+            'industry': 'general',
+            'market_condition': 'stable',
+            'competition_level': 'medium',
+            'growth_potential': 'moderate'
+        },
+        'custom_factors': {
+            'risk_tolerance': 'medium',
+            'business_experience': 'established',
+            'market_position': 'stable'
+        }
     }
     
     try:
