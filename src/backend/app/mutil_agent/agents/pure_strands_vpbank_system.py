@@ -610,9 +610,189 @@ class PureStrandsVPBankSystem:
             "agent_usage": {
                 "text_summary_agent": 0,
                 "compliance_knowledge_agent": 0,
-                "risk_analysis_agent": 0
+                "risk_analysis_agent": 0,
+                "general_redirect": 0
             }
         }
+    
+    def _is_banking_related(self, query: str) -> bool:
+        """
+        Smart banking relevance detection with pre-filtering
+        Returns True if query is banking/finance related, False otherwise
+        """
+        try:
+            query_lower = query.lower().strip()
+            
+            # Empty or very short queries - allow through
+            if len(query_lower) < 3:
+                return True
+            
+            # Strong non-banking indicators (high confidence)
+            non_banking_strong = [
+                # Weather & Environment
+                'thời tiết', 'weather', 'nhiệt độ', 'temperature', 'mưa', 'rain', 'nắng', 'sunny',
+                
+                # Food & Cooking
+                'nấu ăn', 'cooking', 'recipe', 'công thức', 'món ăn', 'food', 'ăn uống',
+                'nhà hàng', 'restaurant', 'quán ăn', 'đồ ăn',
+                
+                # Travel & Tourism
+                'du lịch', 'travel', 'tour', 'khách sạn', 'hotel', 'máy bay', 'flight',
+                'vé máy bay', 'booking', 'đặt phòng', 'resort',
+                
+                # Sports & Entertainment
+                'thể thao', 'sports', 'bóng đá', 'football', 'tennis', 'basketball',
+                'phim', 'movie', 'cinema', 'âm nhạc', 'music', 'ca sĩ', 'singer',
+                'game', 'gaming', 'chơi game', 'video game',
+                
+                # Health & Medical
+                'sức khỏe', 'health', 'y tế', 'medical', 'bác sĩ', 'doctor', 'bệnh viện', 'hospital',
+                'thuốc', 'medicine', 'điều trị', 'treatment',
+                
+                # Technology (non-fintech)
+                'điện thoại', 'phone', 'smartphone', 'laptop', 'computer', 'máy tính',
+                'internet', 'wifi', 'facebook', 'instagram', 'tiktok',
+                
+                # Education (non-finance)
+                'học tập', 'study', 'trường học', 'school', 'đại học', 'university',
+                'bài tập', 'homework', 'thi cử', 'exam',
+                
+                # Personal & Lifestyle
+                'tình yêu', 'love', 'hẹn hò', 'dating', 'gia đình', 'family',
+                'mua sắm', 'shopping', 'thời trang', 'fashion', 'làm đẹp', 'beauty',
+                
+                # Stock Market (non-banking specific)
+                'giá cả cổ phiếu', 'tình hình cổ phiếu', 'thị trường chứng khoán hôm nay',
+                'cổ phiếu tăng giảm', 'biến động thị trường', 'giá cổ phiếu hôm nay',
+                
+                # Commodity Prices (non-banking)
+                'giá vàng hôm nay', 'giá vàng', 'tình hình giá vàng', 'vàng tăng giá',
+                'giá dầu', 'giá dầu hôm nay', 'giá xăng', 'giá USD', 'tỷ giá hôm nay',
+                'giá bitcoin', 'giá crypto', 'tiền điện tử'
+            ]
+            
+            # Check for strong non-banking indicators
+            for keyword in non_banking_strong:
+                if keyword in query_lower:
+                    logger.info(f"[PRE_FILTER] Non-banking keyword detected: '{keyword}' in query")
+                    return False
+            
+            # Banking/Finance keywords (comprehensive but specific to banking services)
+            banking_keywords = [
+                # Core Banking Services
+                'ngân hàng', 'bank', 'banking', 'vpbank', 'vp bank',
+                'tài khoản', 'account', 'số dư', 'balance', 'giao dịch', 'transaction',
+                'chuyển khoản', 'transfer', 'rút tiền', 'withdraw', 'gửi tiền', 'deposit',
+                
+                # Credit & Loans (Banking specific)
+                'tín dụng', 'credit', 'vay', 'loan', 'cho vay', 'lending',
+                'lãi suất', 'interest rate', 'thế chấp', 'mortgage', 'bảo lãnh', 'guarantee',
+                'khoản vay', 'loan amount', 'trả nợ', 'repayment',
+                
+                # Banking Finance (not stock market)
+                'tài chính ngân hàng', 'banking finance', 'dịch vụ tài chính', 'financial services',
+                'sản phẩm ngân hàng', 'banking products', 'tiền gửi', 'savings',
+                
+                # Investment Banking (not stock trading)
+                'ngân hàng đầu tư', 'investment banking', 'tư vấn tài chính', 'financial advisory',
+                'quản lý tài sản', 'asset management',
+                
+                # Risk & Compliance (Banking specific)
+                'rủi ro tín dụng', 'credit risk', 'đánh giá rủi ro', 'risk assessment',
+                'tuân thủ', 'compliance', 'quy định ngân hàng', 'banking regulation',
+                'kiểm tra', 'check', 'validate', 'verify', 'xác minh',
+                
+                # Trade Finance (Banking specific)
+                'lc', 'letter of credit', 'thư tín dụng', 'ucp', 'ucp 600',
+                'isbp', 'bill of lading', 'vận đơn', 'xuất nhập khẩu', 'export', 'import',
+                'tài chính thương mại', 'trade finance',
+                
+                # Document Processing (Banking context)
+                'tóm tắt tài liệu', 'document summary', 'phân tích báo cáo', 'report analysis',
+                'tài liệu ngân hàng', 'banking document', 'báo cáo tài chính', 'financial report',
+                'trích xuất', 'extract', 'xử lý tài liệu', 'document processing',
+                
+                # Regulatory Bodies
+                'sbv', 'nhnn', 'basel', 'basel iii', 'central bank', 'ngân hàng trung ương',
+                'quy định sbv', 'sbv regulation',
+                
+                # Business Banking
+                'doanh nghiệp', 'enterprise', 'công ty', 'company', 'business banking',
+                'tài chính doanh nghiệp', 'corporate finance', 'thương mại', 'commercial banking'
+            ]
+            
+            # Check for banking keywords
+            for keyword in banking_keywords:
+                if keyword in query_lower:
+                    logger.info(f"[PRE_FILTER] Banking keyword detected: '{keyword}' in query")
+                    return True
+            
+            # Check for file upload context (usually banking documents)
+            file_extensions = ['.pdf', '.docx', '.doc', '.txt', '.xlsx']
+            if any(ext in query_lower for ext in file_extensions):
+                logger.info("[PRE_FILTER] File extension detected - assuming banking document")
+                return True
+            
+            # Ambiguous cases - allow through (better false positive than negative)
+            # This ensures we don't accidentally block legitimate banking questions
+            logger.info(f"[PRE_FILTER] Ambiguous query - allowing through: '{query_lower[:50]}...'")
+            return True
+            
+        except Exception as e:
+            logger.error(f"[PRE_FILTER] Error in banking detection: {e}")
+            # On error, allow through to be safe
+            return True
+    
+    def _get_redirect_message(self, query: str = "") -> str:
+        """
+        Generate interactive redirect message based on query context
+        """
+        query_lower = query.lower().strip()
+        
+        # Detect topic and create contextual response
+        if any(keyword in query_lower for keyword in ['thời tiết', 'weather', 'mưa', 'nắng', 'nhiệt độ']):
+            topic_response = "Rất tiếc, tôi chuyên xử lý các vấn đề ngân hàng nên thông tin thời tiết nằm ngoài hiểu biết của tôi."
+            
+        elif any(keyword in query_lower for keyword in ['giá vàng', 'giá dầu', 'giá cổ phiếu', 'bitcoin', 'crypto']):
+            topic_response = "Tôi hiểu bạn quan tâm đến thông tin thị trường, nhưng tôi chuyên về dịch vụ ngân hàng nên không thể cung cấp giá cả hàng hóa hay chứng khoán."
+            
+        elif any(keyword in query_lower for keyword in ['nấu ăn', 'món ăn', 'recipe', 'cooking', 'nhà hàng']):
+            topic_response = "Tôi thấy bạn hỏi về ẩm thực! Tuy nhiên, tôi là trợ lý chuyên về ngân hàng nên không thể tư vấn về nấu ăn."
+            
+        elif any(keyword in query_lower for keyword in ['du lịch', 'travel', 'khách sạn', 'tour', 'máy bay']):
+            topic_response = "Du lịch thật thú vị! Nhưng tôi chuyên hỗ trợ các dịch vụ ngân hàng nên không thể tư vấn về du lịch."
+            
+        elif any(keyword in query_lower for keyword in ['phim', 'movie', 'âm nhạc', 'music', 'game']):
+            topic_response = "Tôi hiểu bạn quan tâm đến giải trí, nhưng chuyên môn của tôi là về ngân hàng và tài chính."
+            
+        elif any(keyword in query_lower for keyword in ['sức khỏe', 'health', 'bác sĩ', 'bệnh viện', 'thuốc']):
+            topic_response = "Sức khỏe rất quan trọng! Tuy nhiên, tôi chuyên về lĩnh vực ngân hàng nên không thể tư vấn y tế."
+            
+        elif any(keyword in query_lower for keyword in ['học tập', 'study', 'trường học', 'bài tập', 'thi cử']):
+            topic_response = "Học tập là điều tuyệt vời! Nhưng tôi chuyên hỗ trợ các vấn đề ngân hàng nên không thể giúp về học tập."
+            
+        elif any(keyword in query_lower for keyword in ['tình yêu', 'love', 'hẹn hò', 'dating', 'gia đình']):
+            topic_response = "Tôi hiểu những vấn đề cá nhân rất quan trọng, nhưng tôi chuyên về dịch vụ ngân hàng."
+            
+        else:
+            # Generic response for unrecognized topics
+            topic_response = f"Tôi thấy bạn hỏi về '{query[:50]}...'. Tuy nhiên, tôi chuyên hỗ trợ các vấn đề ngân hàng và tài chính."
+        
+        return f"""💬 **{topic_response}**
+
+🏦 **Tôi có thể giúp bạn với:**
+• 📄 **Tóm tắt tài liệu** - Phân tích báo cáo, hợp đồng, văn bản
+• ⚖️ **Kiểm tra tuân thủ** - UCP 600, quy định SBV, ISBP 821  
+• 📊 **Phân tích rủi ro** - Đánh giá tín dụng, Basel III
+• 💳 **Letter of Credit** - Xử lý thư tín dụng, tài liệu thương mại
+
+💡 **Thử hỏi tôi:**
+- "Tóm tắt báo cáo này"
+- "Kiểm tra tuân thủ tài liệu LC"  
+- "Phân tích rủi ro khoản vay 10 tỷ"
+- "UCP 600 quy định gì về vận đơn?"
+
+Bạn có câu hỏi nào về ngân hàng không? 😊"""
     
     async def process_request(
         self, 
@@ -621,14 +801,53 @@ class PureStrandsVPBankSystem:
         context: Optional[Dict[str, Any]] = None,
         uploaded_file: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
-        """Process user request with MANUAL ROUTING + DIRECT NODE INTEGRATION for reliability"""
+        """Process user request with PRE-FILTERING + MANUAL ROUTING + DIRECT NODE INTEGRATION"""
         try:
             self.processing_stats["total_requests"] += 1
             start_time = datetime.now()
             
             logger.info(f"[PURE_STRANDS] Processing request for conversation {conversation_id}")
+            logger.info(f"[DEBUG] PRE-FILTERING: About to check banking relevance for: '{user_message[:50]}...'")
             
+            # ================================
+            # PRE-FILTERING: Check if banking-related
+            # ================================
+            
+            # Skip pre-filtering if file is uploaded (assume banking document)
+            if not uploaded_file and not self._is_banking_related(user_message):
+                logger.info(f"[PRE_FILTER] Non-banking query detected: '{user_message[:100]}...'")
+                
+                processing_time = (datetime.now() - start_time).total_seconds()
+                self.processing_stats["successful_responses"] += 1
+                self.processing_stats["agent_usage"]["general_redirect"] += 1
+                
+                # Store session data
+                self.session_data[conversation_id] = {
+                    "last_message": user_message,
+                    "last_response": "general_redirect",
+                    "agent_used": "general_redirect",
+                    "timestamp": datetime.now().isoformat(),
+                    "processing_time": processing_time,
+                    "file_processed": None
+                }
+                
+                return {
+                    "status": "success",
+                    "conversation_id": conversation_id,
+                    "response": self._get_redirect_message(user_message),
+                    "agent_used": "general_redirect",
+                    "processing_time": processing_time,
+                    "timestamp": datetime.now().isoformat(),
+                    "system": "pure_strands_vpbank_pre_filter",
+                    "file_processed": None,
+                    "request_type": "non_banking_redirect"
+                }
+            
+            logger.info("[PRE_FILTER] Banking-related query confirmed - proceeding with agent routing")
+            
+            # ================================
             # ENHANCED MANUAL ROUTING - Primary approach for reliability with DIRECT NODE CALLS
+            # ================================
             message_lower = user_message.lower()
             selected_agent = None
             
@@ -834,32 +1053,53 @@ class PureStrandsVPBankSystem:
                 return "supervisor_direct"
     
     def get_system_status(self) -> Dict[str, Any]:
-        """Get system status with DIRECT NODE INTEGRATION info"""
+        """Get system status with PRE-FILTERING + DIRECT NODE INTEGRATION info"""
         return {
-            "system": "VPBank K-MULT Pure Strands with DIRECT NODE INTEGRATION",
+            "system": "VPBank K-MULT Pure Strands with PRE-FILTERING + DIRECT NODE INTEGRATION",
             "supervisor_status": "active",
+            "pre_filtering": {
+                "enabled": True,
+                "description": "Smart banking relevance detection",
+                "non_banking_handling": "Friendly redirect with capability overview",
+                "banking_keywords": "Comprehensive banking/finance vocabulary",
+                "redirect_count": self.processing_stats["agent_usage"].get("general_redirect", 0)
+            },
             "available_agents": [
                 "text_summary_agent (→ text_summary_node DIRECT)",
                 "compliance_knowledge_agent (→ compliance_node DIRECT)", 
-                "risk_analysis_agent (→ risk API DIRECT)"
+                "risk_analysis_agent (→ risk API DIRECT)",
+                "general_redirect (→ pre-filter redirect)"
             ],
             "node_integration": {
                 "text_summary_agent": "Uses text_summary_node._extract_text_from_message + TextSummaryService",
                 "compliance_knowledge_agent": "Uses compliance_node functions (_determine_query_type, _handle_regulation_query, etc.)",
-                "risk_analysis_agent": "Uses risk_routes.assess_risk_endpoint DIRECTLY"
+                "risk_analysis_agent": "Uses risk_routes.assess_risk_endpoint DIRECTLY",
+                "general_redirect": "Pre-filtering with smart banking relevance detection"
             },
+            "routing_flow": [
+                "1. Pre-filtering: Banking relevance check",
+                "2. Manual routing: Keyword-based agent selection", 
+                "3. Strands supervisor: AI-powered fallback",
+                "4. Direct node integration: Service calls"
+            ],
             "active_sessions": len(self.session_data),
             "processing_stats": self.processing_stats,
             "last_updated": datetime.now().isoformat()
         }
 
 # ================================
-# GLOBAL INSTANCE
+# GLOBAL INSTANCE - FORCE RECREATION
 # ================================
 
+# Force recreation of the system instance to ensure latest code is used
 pure_strands_vpbank_system = PureStrandsVPBankSystem()
 
 async def process_pure_strands_request(user_message: str, conversation_id: str, context: Optional[Dict] = None, uploaded_file: Optional[Dict] = None):
+    """
+    Process request through Pure Strands system with PRE-FILTERING
+    This function ensures the latest instance with pre-filtering is used
+    """
+    logger.info(f"[WRAPPER] Processing request: '{user_message[:50]}...'")
     return await pure_strands_vpbank_system.process_request(user_message, conversation_id, context, uploaded_file)
 
 def get_pure_strands_system_status():
