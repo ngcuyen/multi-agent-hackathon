@@ -22,6 +22,8 @@ import {
   BarChart,
   LineChart
 } from '@cloudscape-design/components';
+import MessageBubble from '../../components/Chat/MessageBubble';
+import ComplianceResult from '../../components/Chat/ComplianceResult';
 
 interface PureStrandsInterfaceProps {
   onShowSnackbar: (message: string, severity: 'error' | 'success' | 'info' | 'warning') => void;
@@ -77,7 +79,7 @@ const PureStrandsInterface: React.FC<PureStrandsInterfaceProps> = ({ onShowSnack
   const [systemStatus, setSystemStatus] = useState<SystemStatus | null>(null);
   const [sessionId, setSessionId] = useState<string>('');
   const [statsModalVisible, setStatsModalVisible] = useState(false);
-  
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -85,7 +87,7 @@ const PureStrandsInterface: React.FC<PureStrandsInterfaceProps> = ({ onShowSnack
   useEffect(() => {
     loadSystemStatus();
     setSessionId(`session-${Date.now()}`);
-    
+
     // Add welcome message
     const welcomeMessage: ChatMessage = {
       id: 'welcome',
@@ -144,7 +146,7 @@ const PureStrandsInterface: React.FC<PureStrandsInterfaceProps> = ({ onShowSnack
     try {
       const formData = new FormData();
       formData.append('message', currentMessage);
-      
+
       if (uploadedFile) {
         formData.append('file', uploadedFile);
       }
@@ -159,12 +161,30 @@ const PureStrandsInterface: React.FC<PureStrandsInterfaceProps> = ({ onShowSnack
       }
 
       const data = await response.json();
-      
+
+      // Check if this is a compliance response that needs special handling
+      let messageContent = data.response || data.message || 'Đã xử lý thành công';
+
+      // If response contains compliance data, try to parse and format it
+      if (typeof messageContent === 'string' && messageContent.includes('compliance_status')) {
+        try {
+          const parsed = JSON.parse(messageContent);
+          if (parsed.status === 'success' && parsed.data && parsed.data.compliance_status) {
+            // This is a compliance response - keep it as JSON string for MessageBubble to handle
+            console.log('✅ Detected compliance response in PureStrandsInterface');
+            messageContent = JSON.stringify(parsed);
+          }
+        } catch (e) {
+          // If parsing fails, use original content
+          console.log('ℹ️ Could not parse response as JSON, using as plain text');
+        }
+      }
+
       // Add assistant response
       const assistantMessage: ChatMessage = {
         id: `assistant-${Date.now()}`,
         type: 'assistant',
-        content: data.response || data.message || 'Đã xử lý thành công',
+        content: messageContent,
         timestamp: new Date(),
         processing_time: data.processing_time,
         agent_used: data.agent_used || 'Pure Strands AI'
@@ -175,7 +195,7 @@ const PureStrandsInterface: React.FC<PureStrandsInterfaceProps> = ({ onShowSnack
 
     } catch (error) {
       console.error('Error processing message:', error);
-      
+
       const errorMessage: ChatMessage = {
         id: `error-${Date.now()}`,
         type: 'system',
@@ -220,7 +240,7 @@ const PureStrandsInterface: React.FC<PureStrandsInterfaceProps> = ({ onShowSnack
     return 'grey';
   };
 
-  const agentUsageData = systemStatus?.system_info.processing_stats.agent_usage ? 
+  const agentUsageData = systemStatus?.system_info.processing_stats.agent_usage ?
     Object.entries(systemStatus.system_info.processing_stats.agent_usage).map(([agent, count]) => ({
       x: agent.replace('_agent', '').replace('_', ' '),
       y: count
@@ -302,9 +322,9 @@ const PureStrandsInterface: React.FC<PureStrandsInterfaceProps> = ({ onShowSnack
                 <SpaceBetween size="l">
                   {/* Chat Messages Area */}
                   <Container>
-                    <div style={{ 
-                      height: '500px', 
-                      overflowY: 'auto', 
+                    <div style={{
+                      height: '500px',
+                      overflowY: 'auto',
                       padding: '16px',
                       border: '1px solid #e0e0e0',
                       borderRadius: '8px',
@@ -325,10 +345,10 @@ const PureStrandsInterface: React.FC<PureStrandsInterfaceProps> = ({ onShowSnack
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                               <Badge color={
                                 message.type === 'user' ? 'blue' :
-                                message.type === 'assistant' ? 'green' : 'grey'
+                                  message.type === 'assistant' ? 'green' : 'grey'
                               }>
                                 {message.type === 'user' ? '👤 Bạn' :
-                                 message.type === 'assistant' ? '🤖 AI Assistant' : '🔧 Hệ thống'}
+                                  message.type === 'assistant' ? '🤖 AI Assistant' : '🔧 Hệ thống'}
                               </Badge>
                               {message.agent_used && (
                                 <Badge color={getAgentBadgeColor(message.agent_used)}>
@@ -345,23 +365,51 @@ const PureStrandsInterface: React.FC<PureStrandsInterfaceProps> = ({ onShowSnack
                               {message.timestamp.toLocaleTimeString('vi-VN')}
                             </span>
                           </div>
-                          
+
                           {message.file_info && (
-                            <div style={{ 
-                              marginBottom: '8px', 
-                              padding: '8px', 
-                              backgroundColor: 'rgba(0,0,0,0.05)', 
+                            <div style={{
+                              marginBottom: '8px',
+                              padding: '8px',
+                              backgroundColor: 'rgba(0,0,0,0.05)',
                               borderRadius: '4px',
                               fontSize: '0.9em'
                             }}>
-                              📎 <strong>{message.file_info.filename}</strong> 
+                              📎 <strong>{message.file_info.filename}</strong>
                               ({(message.file_info.size / 1024).toFixed(1)} KB)
                             </div>
                           )}
-                          
-                          <div style={{ whiteSpace: 'pre-wrap', lineHeight: '1.5' }}>
-                            {message.content}
-                          </div>
+
+                          {/* Render message content with compliance detection */}
+                          {(() => {
+                            // Check if this is a compliance response
+                            if (message.type === 'assistant' &&
+                              typeof message.content === 'string' &&
+                              message.content.includes('compliance_status') &&
+                              message.content.includes('document_type')) {
+
+                              try {
+                                const parsed = JSON.parse(message.content);
+                                if (parsed.status === 'success' && parsed.data && parsed.data.compliance_status) {
+                                  // Render compliance result with beautiful UI
+                                  return (
+                                    <ComplianceResult
+                                      data={parsed.data}
+                                      message={parsed.message || 'Kiểm tra tuân thủ hoàn tất'}
+                                    />
+                                  );
+                                }
+                              } catch (e) {
+                                console.log('Could not parse compliance response:', e);
+                              }
+                            }
+
+                            // Default text rendering
+                            return (
+                              <div style={{ whiteSpace: 'pre-wrap', lineHeight: '1.5' }}>
+                                {message.content}
+                              </div>
+                            );
+                          })()}
                         </div>
                       ))}
                       <div ref={messagesEndRef} />

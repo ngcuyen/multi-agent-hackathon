@@ -4,6 +4,8 @@ import { Message, Agent } from '../../types';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import ComplianceResult from './ComplianceResult';
+import AgentResult from './AgentResult';
 
 interface MessageBubbleProps {
   message: Message;
@@ -12,7 +14,29 @@ interface MessageBubbleProps {
 
 const MessageBubble: React.FC<MessageBubbleProps> = ({ message, agent }) => {
   const isUser = message.sender === 'user';
-  const isCode = message.content.includes('```');
+
+  // Debug logging for ALL messages - this should ALWAYS run
+  console.log('🚨 MessageBubble ENTRY:', {
+    messageId: message.id,
+    isUser,
+    agentName: agent.name,
+    contentType: typeof message.content,
+    contentLength: message.content.length,
+    contentStart: message.content.substring(0, 100),
+    sender: message.sender,
+    timestamp: message.timestamp
+  });
+
+  // Try to detect if this looks like compliance data
+  const looksLikeCompliance = message.content.includes('compliance_status') && 
+                              message.content.includes('document_type');
+  
+  console.log('🔍 Quick Compliance Check:', {
+    looksLikeCompliance,
+    hasComplianceStatus: message.content.includes('compliance_status'),
+    hasDocumentType: message.content.includes('document_type'),
+    hasViolations: message.content.includes('violations')
+  });
 
   const formatTimestamp = (timestamp: Date) => {
     return timestamp.toLocaleTimeString('vi-VN', { 
@@ -21,6 +45,194 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, agent }) => {
     });
   };
 
+  // Check if message contains compliance data
+  const isComplianceResponse = (content: string) => {
+    try {
+      const parsed = JSON.parse(content);
+      
+      // More detailed debug logging
+      console.log('🔍 Detailed Compliance Check:', {
+        contentPreview: content.substring(0, 200) + '...',
+        parsedKeys: Object.keys(parsed),
+        hasStatus: parsed.status === 'success',
+        hasData: !!parsed.data,
+        dataKeys: parsed.data ? Object.keys(parsed.data) : null,
+        hasComplianceStatus: !!parsed.data?.compliance_status,
+        complianceStatusValue: parsed.data?.compliance_status,
+        hasDocumentType: !!parsed.data?.document_type,
+        documentTypeValue: parsed.data?.document_type
+      });
+      
+      const result = parsed.status === 'success' && 
+             parsed.data && 
+             parsed.data.compliance_status && 
+             parsed.data.document_type;
+      
+      console.log('🔍 Compliance Result:', result);
+      
+      return result;
+    } catch (error) {
+      console.log('❌ JSON Parse Error:', error);
+      return false;
+    }
+  };
+
+  // Check if message contains structured agent response
+  const isStructuredAgentResponse = (content: string) => {
+    try {
+      const parsed = JSON.parse(content);
+      return parsed.status === 'success' && 
+             parsed.data && 
+             typeof parsed.data === 'object' &&
+             !parsed.data.compliance_status; // Not a compliance response
+    } catch {
+      return false;
+    }
+  };
+
+  // Parse compliance data from message
+  const parseComplianceData = (content: string) => {
+    try {
+      const parsed = JSON.parse(content);
+      if (parsed.status === 'success' && parsed.data) {
+        return {
+          data: parsed.data,
+          message: parsed.message || 'Kiểm tra tuân thủ hoàn tất'
+        };
+      }
+    } catch {
+      return null;
+    }
+    return null;
+  };
+
+  // Parse structured agent data from message
+  const parseAgentData = (content: string) => {
+    try {
+      const parsed = JSON.parse(content);
+      if (parsed.status === 'success' && parsed.data) {
+        return {
+          data: parsed.data,
+          message: parsed.message || 'Xử lý hoàn tất',
+          agentType: parsed.agent_type || 'unknown'
+        };
+      }
+    } catch {
+      return null;
+    }
+    return null;
+  };
+
+  // Determine agent type from agent name or message content
+  const getAgentType = (agentName: string, content: string) => {
+    const name = agentName.toLowerCase();
+    if (name.includes('compliance')) return 'compliance';
+    if (name.includes('credit')) return 'credit_analysis';
+    if (name.includes('risk')) return 'risk_assessment';
+    if (name.includes('lc') || name.includes('letter')) return 'lc_processing';
+    if (name.includes('document')) return 'document_intelligence';
+    if (name.includes('decision')) return 'decision_synthesis';
+    if (name.includes('supervisor')) return 'supervisor';
+    
+    // Try to infer from content
+    if (content.includes('compliance_status')) return 'compliance';
+    if (content.includes('credit_score')) return 'credit_analysis';
+    if (content.includes('risk_score')) return 'risk_assessment';
+    
+    return 'unknown';
+  };
+
+  // PRIORITY 1: If this is a compliance response, render the compliance component
+  if (!isUser && isComplianceResponse(message.content)) {
+    const complianceData = parseComplianceData(message.content);
+    if (complianceData) {
+      return (
+        <div
+          style={{
+            padding: '12px',
+            marginRight: '20%',
+            backgroundColor: '#f5f5f5',
+            borderRadius: '12px',
+            border: '1px solid #e9ebed',
+            marginBottom: '8px'
+          }}
+        >
+          <SpaceBetween direction="vertical" size="xs">
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Badge color="green">
+                  {agent.name}
+                </Badge>
+                <span style={{ fontSize: '12px', color: '#5f6b7a' }}>
+                  🔍 Compliance Agent
+                </span>
+              </div>
+              <span style={{ fontSize: '12px', color: '#5f6b7a' }}>
+                {formatTimestamp(message.timestamp)}
+              </span>
+            </div>
+
+            {/* Compliance Result Component */}
+            <ComplianceResult 
+              data={complianceData.data} 
+              message={complianceData.message} 
+            />
+          </SpaceBetween>
+        </div>
+      );
+    }
+  }
+
+  // PRIORITY 2: If this is a structured agent response, render the agent result component
+  if (!isUser && isStructuredAgentResponse(message.content)) {
+    const agentData = parseAgentData(message.content);
+    if (agentData) {
+      const agentType = getAgentType(agent.name, message.content);
+      
+      return (
+        <div
+          style={{
+            padding: '12px',
+            marginRight: '20%',
+            backgroundColor: '#f5f5f5',
+            borderRadius: '12px',
+            border: '1px solid #e9ebed',
+            marginBottom: '8px'
+          }}
+        >
+          <SpaceBetween direction="vertical" size="xs">
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Badge color="green">
+                  {agent.name}
+                </Badge>
+                <span style={{ fontSize: '12px', color: '#5f6b7a' }}>
+                  🤖 AI Agent
+                </span>
+              </div>
+              <span style={{ fontSize: '12px', color: '#5f6b7a' }}>
+                {formatTimestamp(message.timestamp)}
+              </span>
+            </div>
+
+            {/* Agent Result Component */}
+            <AgentResult 
+              data={agentData.data} 
+              message={agentData.message}
+              agentType={agentType}
+            />
+          </SpaceBetween>
+        </div>
+      );
+    }
+  }
+
+  // PRIORITY 3: Default message rendering (text, markdown, code)
+  const isCode = message.content.includes('```');
+  
+  // Regular message rendering
   return (
     <div
       style={{

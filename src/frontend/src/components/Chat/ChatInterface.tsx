@@ -83,11 +83,36 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
       const response = await chatAPI.sendMessage(request);
 
+      // Debug logging to see response structure
+      console.log('🔍 API Response:', {
+        status: response.status,
+        data: response.data,
+        dataType: typeof response.data,
+        responseField: response.data?.response,
+        responseType: typeof response.data?.response
+      });
+
       if (response.status === 'success' && response.data) {
+        // Check if response.data.response is a JSON string that needs parsing
+        let messageContent = response.data.response || '';
+        
+        // Try to parse if it's a JSON string
+        try {
+          const parsed = JSON.parse(messageContent);
+          if (parsed && typeof parsed === 'object') {
+            // If it's a valid JSON object, use it as the content
+            messageContent = JSON.stringify(parsed);
+            console.log('✅ Parsed JSON response successfully');
+          }
+        } catch (e) {
+          // If parsing fails, use the original string
+          console.log('ℹ️ Response is not JSON, using as plain text');
+        }
+
         // If response.data is a ConversationResponse, create a Message object
         const aiMessage: Message = {
           id: (Date.now() + 1).toString(),
-          content: response.data.response || '',
+          content: messageContent,
           sender: 'bot',
           timestamp: new Date(),
           agentId: agent.id,
