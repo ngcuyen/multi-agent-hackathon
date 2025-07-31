@@ -20,7 +20,7 @@ const Navigation: React.FC = () => {
         {
           type: "link" as const, 
           text: "System Monitor",
-          href: "/system-dashboard",
+          href: "/system",
           info: <span>🖥️</span>
         }
       ]
@@ -29,6 +29,12 @@ const Navigation: React.FC = () => {
       type: "section" as const,
       text: "Banking Operations",
       items: [
+        {
+          type: "link" as const,
+          text: "Document Processing",
+          href: "/text-summary",
+          info: <span>📄</span>
+        },
         {
           type: "link" as const,
           text: "LC Processing",
@@ -40,12 +46,6 @@ const Navigation: React.FC = () => {
           text: "Credit Assessment", 
           href: "/credit-assessment",
           info: <span>💰</span>
-        },
-        {
-          type: "link" as const,
-          text: "Document Intelligence",
-          href: "/text-summary",
-          info: <span>📄</span>
         }
       ]
     },
@@ -55,8 +55,14 @@ const Navigation: React.FC = () => {
       items: [
         {
           type: "link" as const,
+          text: "Agent Dashboard",
+          href: "/agent-dashboard",
+          info: <span>🤖</span>
+        },
+        {
+          type: "link" as const,
           text: "Pure Strands AI",
-          href: "/ai-assistant",
+          href: "/pure-strands",
           info: <span>⚡</span>
         },
         {
@@ -79,13 +85,7 @@ const Navigation: React.FC = () => {
       items: [
         {
           type: "link" as const,
-          text: "Agent Dashboard",
-          href: "/agent-dashboard",
-          info: <span>🤖</span>
-        },
-        {
-          type: "link" as const,
-          text: "Legacy Agents",
+          text: "Agent Management",
           href: "/agents",
           info: <span>🔧</span>
         },
@@ -94,13 +94,7 @@ const Navigation: React.FC = () => {
           text: "Chat Interface",
           href: "/chat",
           info: <span>💬</span>
-        }
-      ]
-    },
-    {
-      type: "section" as const,
-      text: "System",
-      items: [
+        },
         {
           type: "link" as const,
           text: "Settings",

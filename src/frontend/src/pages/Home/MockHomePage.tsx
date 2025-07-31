@@ -27,6 +27,8 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { mockApiService } from '../../services/mockApiService';
 import { mockData } from '../../data/mockData';
+import DemoGuide from '../../components/DemoGuide/DemoGuide';
+import LoadingSpinner from '../../components/Loading/LoadingSpinner';
 
 const MockHomePage: React.FC<{ onShowSnackbar: (message: string, type: string) => void }> = ({ onShowSnackbar }) => {
   const navigate = useNavigate();
@@ -46,6 +48,7 @@ const MockHomePage: React.FC<{ onShowSnackbar: (message: string, type: string) =
     description: '',
   });
   const [activeTab, setActiveTab] = useState('overview');
+  const [showDemoGuide, setShowDemoGuide] = useState(false);
 
   // Load mock data
   useEffect(() => {
@@ -211,16 +214,7 @@ const MockHomePage: React.FC<{ onShowSnackbar: (message: string, type: string) =
   ];
 
   if (loading) {
-    return (
-      <Container>
-        <SpaceBetween direction="vertical" size="l">
-          <Header variant="h1">VPBank K-MULT Agent Studio</Header>
-          <Box textAlign="center">
-            <StatusIndicator type="loading">Loading system data...</StatusIndicator>
-          </Box>
-        </SpaceBetween>
-      </Container>
-    );
+    return <LoadingSpinner message="Loading VPBank K-MULT Agent Studio..." variant="centered" size="large" />;
   }
 
   if (error) {
@@ -254,6 +248,12 @@ const MockHomePage: React.FC<{ onShowSnackbar: (message: string, type: string) =
           description="Multi-Agent AI Platform for Vietnamese Banking Process Automation"
           actions={
             <SpaceBetween direction="horizontal" size="xs">
+              <Button
+                onClick={() => setShowDemoGuide(true)}
+                iconName="status-info"
+              >
+                🎪 Demo Guide
+              </Button>
               <Button
                 variant="primary"
                 onClick={() => navigate('/agent-dashboard')}
@@ -761,6 +761,12 @@ const MockHomePage: React.FC<{ onShowSnackbar: (message: string, type: string) =
             </SpaceBetween>
           </Box>
         </Grid>
+
+        {/* Demo Guide Modal */}
+        <DemoGuide
+          visible={showDemoGuide}
+          onDismiss={() => setShowDemoGuide(false)}
+        />
 
         {/* Task Assignment Modal */}
         <Modal

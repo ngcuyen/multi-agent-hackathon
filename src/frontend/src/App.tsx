@@ -8,6 +8,9 @@ import {
 } from '@cloudscape-design/components';
 import '@cloudscape-design/global-styles/index.css';
 
+// Error Boundary
+import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
+
 // Mock Pages
 import MockHomePage from './pages/Home/MockHomePage';
 import MockTextSummaryPage from './pages/TextSummary/MockTextSummaryPage';
@@ -36,12 +39,19 @@ function App() {
 
   // Load mock agents data
   useEffect(() => {
-    // Use mock data directly
-    setAgents(mockData.agents);
-    setLoading(false);
-    
-    // Show welcome message
-    showFlashbar('VPBank K-MULT Agent Studio loaded with comprehensive mock data', 'success');
+    try {
+      // Use mock data directly
+      setAgents(mockData.agents);
+      setLoading(false);
+      
+      // Show welcome message
+      showFlashbar('🎉 VPBank K-MULT Agent Studio loaded successfully with comprehensive mock data', 'success');
+    } catch (error) {
+      console.error('Failed to load mock data:', error);
+      showFlashbar('⚠️ Error loading mock data, using fallback', 'warning');
+      setAgents([]);
+      setLoading(false);
+    }
   }, []);
 
   const showFlashbar = (message: string, type: 'success' | 'error' | 'warning' | 'info') => {
@@ -63,98 +73,119 @@ function App() {
   };
 
   return (
-    <Router>
-      <div id="app">
-        <TopNavigation
-          identity={{
-            href: "/",
-            title: "VPBank K-MULT Agent Studio",
-            logo: {
-              src: "/logo.png",
-              alt: "VPBank K-MULT"
+    <ErrorBoundary>
+      <Router>
+        <div id="app">
+          <TopNavigation
+            identity={{
+              href: "/",
+              title: "VPBank K-MULT Agent Studio",
+              logo: {
+                src: "/logo.png",
+                alt: "VPBank K-MULT"
+              }
+            }}
+            utilities={[
+              {
+                type: "button",
+                text: "🎭 Mock Demo Mode",
+                variant: "primary-button",
+                iconName: "status-positive"
+              },
+              {
+                type: "menu-dropdown",
+                text: "Help & Settings",
+                iconName: "settings",
+                items: [
+                  { id: "demo", text: "🎪 Demo Guide" },
+                  { id: "features", text: "✨ Features" },
+                  { id: "settings", text: "⚙️ Settings" },
+                  { id: "support", text: "🆘 Support" }
+                ],
+                onItemClick: ({ detail }) => {
+                  switch (detail.id) {
+                    case 'demo':
+                      showFlashbar('🎪 Demo Guide: Navigate through all sections to see the complete multi-agent banking platform', 'info');
+                      break;
+                    case 'features':
+                      showFlashbar('✨ Features: 6 Banking Agents, Vietnamese Processing, Real-time Monitoring, Export Capabilities', 'info');
+                      break;
+                    case 'settings':
+                      window.location.href = '/settings';
+                      break;
+                    case 'support':
+                      showFlashbar('🆘 Support: Multi-Agent Hackathon 2025 - Group 181', 'info');
+                      break;
+                  }
+                }
+              }
+            ]}
+          />
+          
+          <AppLayout
+            navigationOpen={navigationOpen}
+            onNavigationChange={({ detail }) => setNavigationOpen(detail.open)}
+            navigation={<Navigation />}
+            notifications={<Flashbar items={flashbarItems} />}
+            content={
+              <ErrorBoundary>
+                <Routes>
+                  <Route 
+                    path="/" 
+                    element={<MockHomePage onShowSnackbar={showFlashbar} />} 
+                  />
+                  <Route 
+                    path="/text-summary" 
+                    element={<MockTextSummaryPage onShowSnackbar={showFlashbar} />} 
+                  />
+                  <Route 
+                    path="/chat" 
+                    element={<ChatPage agents={agents} loading={loading} onShowSnackbar={showFlashbar} />} 
+                  />
+                  <Route 
+                    path="/agents" 
+                    element={<AgentsPage agents={agents} setAgents={setAgents} onShowSnackbar={showFlashbar} />} 
+                  />
+                  <Route 
+                    path="/settings" 
+                    element={<SettingsPage onShowSnackbar={showFlashbar} />} 
+                  />
+                  <Route 
+                    path="/lc-processing" 
+                    element={<LCProcessingPage onShowSnackbar={showFlashbar} />} 
+                  />
+                  <Route 
+                    path="/credit-assessment" 
+                    element={<CreditAssessmentPage onShowSnackbar={showFlashbar} />} 
+                  />
+                  <Route 
+                    path="/knowledge" 
+                    element={<KnowledgeBasePage onShowSnackbar={showFlashbar} />} 
+                  />
+                  <Route 
+                    path="/agent-dashboard" 
+                    element={<AgentDashboardPage onShowSnackbar={showFlashbar} />} 
+                  />
+                  <Route 
+                    path="/risk-analytics" 
+                    element={<RiskAnalyticsDashboard onShowSnackbar={showFlashbar} />} 
+                  />
+                  <Route 
+                    path="/pure-strands" 
+                    element={<PureStrandsInterface onShowSnackbar={showFlashbar} />} 
+                  />
+                  <Route 
+                    path="/system" 
+                    element={<SystemDashboard onShowSnackbar={showFlashbar} />} 
+                  />
+                </Routes>
+              </ErrorBoundary>
             }
-          }}
-          utilities={[
-            {
-              type: "button",
-              text: "Mock Demo Mode",
-              variant: "primary-button",
-              iconName: "status-positive"
-            },
-            {
-              type: "menu-dropdown",
-              text: "Settings",
-              iconName: "settings",
-              items: [
-                { id: "settings", text: "Preferences" },
-                { id: "support", text: "Support" },
-                { id: "signout", text: "Sign out" }
-              ]
-            }
-          ]}
-        />
-        
-        <AppLayout
-          navigationOpen={navigationOpen}
-          onNavigationChange={({ detail }) => setNavigationOpen(detail.open)}
-          navigation={<Navigation />}
-          notifications={<Flashbar items={flashbarItems} />}
-          content={
-            <Routes>
-              <Route 
-                path="/" 
-                element={<MockHomePage onShowSnackbar={showFlashbar} />} 
-              />
-              <Route 
-                path="/text-summary" 
-                element={<MockTextSummaryPage onShowSnackbar={showFlashbar} />} 
-              />
-              <Route 
-                path="/chat" 
-                element={<ChatPage onShowSnackbar={showFlashbar} />} 
-              />
-              <Route 
-                path="/agents" 
-                element={<AgentsPage agents={agents} loading={loading} onShowSnackbar={showFlashbar} />} 
-              />
-              <Route 
-                path="/settings" 
-                element={<SettingsPage onShowSnackbar={showFlashbar} />} 
-              />
-              <Route 
-                path="/lc-processing" 
-                element={<LCProcessingPage onShowSnackbar={showFlashbar} />} 
-              />
-              <Route 
-                path="/credit-assessment" 
-                element={<CreditAssessmentPage onShowSnackbar={showFlashbar} />} 
-              />
-              <Route 
-                path="/knowledge" 
-                element={<KnowledgeBasePage onShowSnackbar={showFlashbar} />} 
-              />
-              <Route 
-                path="/agent-dashboard" 
-                element={<AgentDashboardPage onShowSnackbar={showFlashbar} />} 
-              />
-              <Route 
-                path="/risk-analytics" 
-                element={<RiskAnalyticsDashboard onShowSnackbar={showFlashbar} />} 
-              />
-              <Route 
-                path="/pure-strands" 
-                element={<PureStrandsInterface onShowSnackbar={showFlashbar} />} 
-              />
-              <Route 
-                path="/system" 
-                element={<SystemDashboard onShowSnackbar={showFlashbar} />} 
-              />
-            </Routes>
-          }
-          toolsHide
-        />
-      </div>
-    </Router>
+            toolsHide
+          />
+        </div>
+      </Router>
+    </ErrorBoundary>
   );
 }
 
