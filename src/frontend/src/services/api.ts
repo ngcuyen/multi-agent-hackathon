@@ -1,10 +1,10 @@
 // API Service for Multi-Agent AI Risk Assessment System
-// Updated to match actual backend endpoints
+// Updated to match actual backend endpoints and nginx proxy
 
-// Use proxy for both development and production
-export const API_BASE_URL = `http://localhost:8080`; // Always use relative URL to leverage proxy
-export const API_PREFIX = '/mutil_agent/api/v1'; // Backend API path
-export const PUBLIC_PREFIX = '/mutil_agent/public/api/v1'; // Backend public API path
+// Use nginx proxy paths for development, direct URL for production
+export const API_BASE_URL = process.env.NODE_ENV === 'development' ? '' : 'http://localhost:8080';
+export const API_PREFIX = process.env.NODE_ENV === 'development' ? '/api/v1' : '/mutil_agent/api/v1';
+export const PUBLIC_PREFIX = process.env.NODE_ENV === 'development' ? '/public/api/v1' : '/mutil_agent/public/api/v1';
 
 // Types matching backend schemas
 export interface ApiResponse<T = any> {
