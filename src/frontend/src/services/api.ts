@@ -221,48 +221,540 @@ export const chatAPI = {
   startConversation: (userId: string) => apiClient.startConversation(userId),
   sendMessage: (request: ConversationRequest) => apiClient.sendMessage(request),
   streamChat: (request: ConversationRequest) => apiClient.streamChat(request),
-  // Legacy methods for compatibility
-  getChatSessions: async () => ({ success: true, data: [] }),
-  getMessages: async (sessionId: string) => ({ success: true, data: [] }),
+  
+  // Real conversation API calls
+  getChatSessions: async (userId: string) => {
+    try {
+      const response = await fetch(`/api/v1/conversation/sessions?user_id=${userId}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      return { success: true, data: data.sessions || [] };
+    } catch (error) {
+      console.error('Failed to fetch chat sessions:', error);
+      return { success: false, data: [], error: error.message };
+    }
+  },
+  
+  getMessages: async (sessionId: string) => {
+    try {
+      const response = await fetch(`/api/v1/conversation/messages?session_id=${sessionId}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      return { success: true, data: data.messages || [] };
+    } catch (error) {
+      console.error('Failed to fetch messages:', error);
+      return { success: false, data: [], error: error.message };
+    }
+  },
+
+  // Chat with specific agent
+  chatWithAgent: async (agentId: string, message: string, sessionId?: string) => {
+    try {
+      const response = await fetch('/api/v1/conversation/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_id: 'current-user',
+          message: message,
+          conversation_id: sessionId || `agent-${agentId}-${Date.now()}`,
+          agent_id: agentId
+        }),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      return { success: true, data };
+    } catch (error) {
+      console.error('Failed to chat with agent:', error);
+      return { success: false, data: null, error: error.message };
+    }
+  }
 };
 
 export const agentAPI = {
-  // Mock agent API for now - backend doesn't have agent management yet
-  getAgents: async () => ({
-    success: true,
-    data: [
-      {
-        id: 'risk-assessment-agent',
-        name: 'Risk Assessment Agent',
-        description: 'Chuyên gia phân tích và đánh giá rủi ro doanh nghiệp',
-        status: 'active' as const,
-        model: 'claude-3-sonnet',
-        temperature: 0.7,
-        maxTokens: 8192,
-        capabilities: ['Risk Analysis', 'Document Processing', 'Vietnamese Support'],
-        systemPrompt: 'Bạn là một chuyên gia phân tích rủi ro doanh nghiệp...',
-        createdAt: new Date(),
-      },
-      {
-        id: 'document-processor',
-        name: 'Document Processor',
-        description: 'Chuyên xử lý và tóm tắt tài liệu',
-        status: 'active' as const,
-        model: 'claude-3-sonnet',
-        temperature: 0.5,
-        maxTokens: 8192,
-        capabilities: ['Document Summarization', 'Text Analysis', 'Multi-language'],
-        systemPrompt: 'Bạn là một chuyên gia xử lý tài liệu...',
-        createdAt: new Date(),
-      },
-    ]
-  }),
-  createAgent: async (agentData: any) => ({ success: true, data: { id: 'new-agent' } }),
-  updateAgent: async (id: string, agentData: any) => ({ success: true }),
-  deleteAgent: async (id: string) => ({ success: true }),
+  // Real agent API calls
+  getAgents: async () => {
+    try {
+      const response = await fetch('/api/v1/agents/status');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      return {
+        success: true,
+        data: data.agents?.map((agent: any) => ({
+          id: agent.agent_id,
+          name: agent.name,
+          description: agent.description,
+          status: agent.status,
+          model: 'claude-3.5-sonnet',
+          temperature: 0.7,
+          maxTokens: 8192,
+          capabilities: agent.capabilities || [],
+          systemPrompt: `You are ${agent.name.toLowerCase()} responsible for ${agent.description.toLowerCase()}.`,
+          createdAt: new Date(),
+          loadPercentage: agent.load_percentage,
+          currentTask: agent.current_task,
+          lastActivity: agent.last_activity
+        })) || []
+      };
+    } catch (error) {
+      console.error('Failed to fetch agents:', error);
+      return { success: false, data: [], error: error.message };
+    }
+  },
+
+  getAgentStatus: async (agentId?: string) => {
+    try {
+      const url = agentId ? `/api/v1/agents/status/${agentId}` : '/api/v1/agents/status';
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      return { success: true, data };
+    } catch (error) {
+      console.error('Failed to fetch agent status:', error);
+      return { success: false, data: null, error: error.message };
+    }
+  },
+
+  coordinateAgents: async (taskType: string, priority: string = 'medium') => {
+    try {
+      const response = await fetch('/api/v1/agents/coordinate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          task_type: taskType,
+          priority: priority
+        }),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      return { success: true, data };
+    } catch (error) {
+      console.error('Failed to coordinate agents:', error);
+      return { success: false, data: null, error: error.message };
+    }
+  },
+
+  assignTask: async (agentId: string, task: any) => {
+    try {
+      const response = await fetch('/api/v1/agents/assign', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          agent_id: agentId,
+          task: task
+        }),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      return { success: true, data };
+    } catch (error) {
+      console.error('Failed to assign task:', error);
+      return { success: false, data: null, error: error.message };
+    }
+  },
+
+  // Note: Agent CRUD operations not implemented in backend yet
+  createAgent: async (agentData: any) => {
+    console.warn('Agent creation not implemented in backend yet');
+    return { success: false, error: 'Agent creation not implemented in backend' };
+  },
+  
+  updateAgent: async (id: string, agentData: any) => {
+    console.warn('Agent update not implemented in backend yet');
+    return { success: false, error: 'Agent update not implemented in backend' };
+  },
+  
+  deleteAgent: async (id: string) => {
+    console.warn('Agent deletion not implemented in backend yet');
+    return { success: false, error: 'Agent deletion not implemented in backend' };
+  },
 };
 
-export default apiClient;
+// System Health API
+export const systemAPI = {
+  getSystemHealth: async () => {
+    try {
+      const response = await fetch('/public/api/v1/health-check/health');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      return { success: true, data };
+    } catch (error) {
+      console.error('Failed to fetch system health:', error);
+      return { success: false, data: null, error: error.message };
+    }
+  },
+
+  getDetailedHealth: async () => {
+    try {
+      const response = await fetch('/api/v1/health/health/detailed');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      return { success: true, data };
+    } catch (error) {
+      console.error('Failed to fetch detailed health:', error);
+      return { success: false, data: null, error: error.message };
+    }
+  },
+
+  getServiceHealth: async (service: string) => {
+    try {
+      const response = await fetch(`/api/v1/health/health/${service}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      return { success: true, data };
+    } catch (error) {
+      console.error(`Failed to fetch ${service} health:`, error);
+      return { success: false, data: null, error: error.message };
+    }
+  }
+};
+
+// Knowledge Base API
+export const knowledgeAPI = {
+  searchDocuments: async (query: string) => {
+    try {
+      const response = await fetch('/api/v1/knowledge/search', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ query }),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      return { success: true, data };
+    } catch (error) {
+      console.error('Failed to search documents:', error);
+      return { success: false, data: null, error: error.message };
+    }
+  },
+
+  queryKnowledgeBase: async (query: string) => {
+    try {
+      const response = await fetch('/api/v1/knowledge/query', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ query }),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      return { success: true, data };
+    } catch (error) {
+      console.error('Failed to query knowledge base:', error);
+      return { success: false, data: null, error: error.message };
+    }
+  },
+
+  getDocuments: async () => {
+    try {
+      const response = await fetch('/api/v1/knowledge/documents');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      return { success: true, data };
+    } catch (error) {
+      console.error('Failed to fetch documents:', error);
+      return { success: false, data: null, error: error.message };
+    }
+  },
+
+  uploadDocument: async (file: File, metadata?: any) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      if (metadata) {
+        Object.keys(metadata).forEach(key => {
+          if (metadata[key] !== undefined && metadata[key] !== null) {
+            formData.append(key, metadata[key]);
+          }
+        });
+      }
+
+      const response = await fetch('/api/v1/knowledge/documents/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      return { success: true, data };
+    } catch (error) {
+      console.error('Failed to upload document:', error);
+      return { success: false, data: null, error: error.message };
+    }
+  },
+
+  getCategories: async () => {
+    try {
+      const response = await fetch('/api/v1/knowledge/categories');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      return { success: true, data };
+    } catch (error) {
+      console.error('Failed to fetch categories:', error);
+      return { success: false, data: null, error: error.message };
+    }
+  },
+
+  getStats: async () => {
+    try {
+      const response = await fetch('/api/v1/knowledge/stats');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      return { success: true, data };
+    } catch (error) {
+      console.error('Failed to fetch knowledge base stats:', error);
+      return { success: false, data: null, error: error.message };
+    }
+  }
+};
+
+// Risk Assessment API
+export const riskAPI = {
+  assessRisk: async (entityData: any) => {
+    try {
+      const response = await fetch('/api/v1/risk/assess', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(entityData),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      return { success: true, data };
+    } catch (error) {
+      console.error('Failed to assess risk:', error);
+      return { success: false, data: null, error: error.message };
+    }
+  },
+
+  assessRiskFromFile: async (file: File, metadata?: any) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      if (metadata) {
+        Object.keys(metadata).forEach(key => {
+          if (metadata[key] !== undefined && metadata[key] !== null) {
+            formData.append(key, metadata[key]);
+          }
+        });
+      }
+
+      const response = await fetch('/api/v1/risk/assess-file', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      return { success: true, data };
+    } catch (error) {
+      console.error('Failed to assess risk from file:', error);
+      return { success: false, data: null, error: error.message };
+    }
+  },
+
+  getMarketData: async () => {
+    try {
+      const response = await fetch('/api/v1/risk/market-data');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      return { success: true, data };
+    } catch (error) {
+      console.error('Failed to fetch market data:', error);
+      return { success: false, data: null, error: error.message };
+    }
+  },
+
+  monitorEntity: async (entityId: string) => {
+    try {
+      const response = await fetch(`/api/v1/risk/monitor/${entityId}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      return { success: true, data };
+    } catch (error) {
+      console.error('Failed to monitor entity:', error);
+      return { success: false, data: null, error: error.message };
+    }
+  },
+
+  getRiskHistory: async (entityId: string) => {
+    try {
+      const response = await fetch(`/api/v1/risk/score/history/${entityId}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      return { success: true, data };
+    } catch (error) {
+      console.error('Failed to fetch risk history:', error);
+      return { success: false, data: null, error: error.message };
+    }
+  }
+};
+
+// Strands Multi-Agent API
+export const strandsAPI = {
+  processWithStrands: async (query: string, sessionId?: string) => {
+    try {
+      const response = await fetch('/api/v1/strands/supervisor/process', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: query,
+          session_id: sessionId || `session-${Date.now()}`
+        }),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      return { success: true, data };
+    } catch (error) {
+      console.error('Failed to process with Strands:', error);
+      return { success: false, data: null, error: error.message };
+    }
+  },
+
+  processFileWithStrands: async (file: File, message?: string, sessionId?: string) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      if (message) formData.append('message', message);
+      if (sessionId) formData.append('session_id', sessionId);
+
+      const response = await fetch('/api/v1/strands/supervisor/process-with-file', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      return { success: true, data };
+    } catch (error) {
+      console.error('Failed to process file with Strands:', error);
+      return { success: false, data: null, error: error.message };
+    }
+  },
+
+  getStrandsAgentStatus: async () => {
+    try {
+      const response = await fetch('/api/v1/strands/agents/status');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      return { success: true, data };
+    } catch (error) {
+      console.error('Failed to fetch Strands agent status:', error);
+      return { success: false, data: null, error: error.message };
+    }
+  },
+
+  getAvailableTools: async () => {
+    try {
+      const response = await fetch('/api/v1/strands/tools/list');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      return { success: true, data };
+    } catch (error) {
+      console.error('Failed to fetch available tools:', error);
+      return { success: false, data: null, error: error.message };
+    }
+  },
+
+  processPureStrands: async (message: string, sessionId?: string) => {
+    try {
+      const response = await fetch('/api/pure-strands/process', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: message,
+          session_id: sessionId || `pure-session-${Date.now()}`
+        }),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      return { success: true, data };
+    } catch (error) {
+      console.error('Failed to process with Pure Strands:', error);
+      return { success: false, data: null, error: error.message };
+    }
+  },
+
+  getPureStrandsStatus: async () => {
+    try {
+      const response = await fetch('/api/pure-strands/status');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      return { success: true, data };
+    } catch (error) {
+      console.error('Failed to fetch Pure Strands status:', error);
+      return { success: false, data: null, error: error.message };
+    }
+  }
+};
 
 // Compliance API exports
 export const complianceAPI = {
@@ -329,281 +821,5 @@ export const complianceAPI = {
 };
 
 // Knowledge Base API exports
-export const knowledgeAPI = {
-  searchDocuments: async (query: string, category?: string, limit?: number) => {
-    const response = await fetch(`${API_BASE_URL}${API_PREFIX}/knowledge/search`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ query, category, limit }),
-    });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  },
-
-  getCategories: async () => {
-    const response = await fetch(`${API_BASE_URL}${API_PREFIX}/knowledge/categories`);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  },
-
-  getStats: async () => {
-    const response = await fetch(`${API_BASE_URL}${API_PREFIX}/knowledge/stats`);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  },
-
-  uploadDocuments: async (files: File[], category: string, tags: string, description: string) => {
-    const formData = new FormData();
-    files.forEach(file => {
-      formData.append('files', file);
-    });
-    formData.append('category', category);
-    formData.append('tags', tags);
-    formData.append('description', description);
-
-    const response = await fetch(`${API_BASE_URL}${API_PREFIX}/knowledge/documents/upload`, {
-      method: 'POST',
-      body: formData,
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  }
-};
-
-// Agent Management API exports
-export const agentManagementAPI = {
-  getAgentsList: async () => {
-    const response = await fetch(`${API_BASE_URL}${API_PREFIX}/agents/list`);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  },
-
-  getAgentsHealth: async () => {
-    const response = await fetch(`${API_BASE_URL}${API_PREFIX}/agents/health`);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  },
-
-  assignTask: async (taskData: any) => {
-    const response = await fetch(`${API_BASE_URL}${API_PREFIX}/agents/assign`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(taskData),
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  },
-
-  coordinateAgents: async (coordinationData: any) => {
-    const response = await fetch(`${API_BASE_URL}${API_PREFIX}/agents/coordinate`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(coordinationData),
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  }
-};
-
-// Risk Analytics API exports
-export const riskAnalyticsAPI = {
-  getMarketData: async () => {
-    const response = await fetch(`${API_BASE_URL}${API_PREFIX}/risk/market-data`);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  },
-
-  getRiskHistory: async (entityId: string) => {
-    const response = await fetch(`${API_BASE_URL}${API_PREFIX}/risk/score/history/${entityId}`);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  },
-
-  monitorEntity: async (entityId: string) => {
-    const response = await fetch(`${API_BASE_URL}${API_PREFIX}/risk/monitor/${entityId}`);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  },
-
-  configureAlert: async (alertData: any) => {
-    const response = await fetch(`${API_BASE_URL}${API_PREFIX}/risk/alert/webhook`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(alertData),
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  }
-};
-
-// Pure Strands API exports
-export const pureStrandsAPI = {
-  processMessage: async (message: string, file?: File) => {
-    const formData = new FormData();
-    formData.append('message', message);
-    
-    if (file) {
-      formData.append('file', file);
-    }
-
-    const response = await fetch(`${API_BASE_URL}${API_PREFIX}/pure-strands/process`, {
-      method: 'POST',
-      body: formData,
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  },
-
-  getStatus: async () => {
-    const response = await fetch(`${API_BASE_URL}${API_PREFIX}/pure-strands/status`);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  }
-};
-
-// System Health API exports
-export const systemHealthAPI = {
-  getSystemHealth: async () => {
-    const response = await fetch(`${API_BASE_URL}${API_PREFIX}/health/health`);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  },
-
-  getDetailedHealth: async () => {
-    const response = await fetch(`${API_BASE_URL}${API_PREFIX}/health/health/detailed`);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  },
-
-  getAgentsHealth: async () => {
-    const response = await fetch(`${API_BASE_URL}${API_PREFIX}/health/health/agents`);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  },
-
-  getComplianceHealth: async () => {
-    const response = await fetch(`${API_BASE_URL}${API_PREFIX}/health/health/compliance`);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  },
-
-  getRiskHealth: async () => {
-    const response = await fetch(`${API_BASE_URL}${API_PREFIX}/health/health/risk`);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  },
-
-  getTextHealth: async () => {
-    const response = await fetch(`${API_BASE_URL}${API_PREFIX}/health/health/text`);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  },
-
-  getKnowledgeHealth: async () => {
-    const response = await fetch(`${API_BASE_URL}${API_PREFIX}/health/health/knowledge`);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  },
-
-  getDocumentHealth: async () => {
-    const response = await fetch(`${API_BASE_URL}${API_PREFIX}/health/health/document`);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  }
-};
+export default apiClient;

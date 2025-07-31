@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Container,
   Header,
@@ -14,6 +14,7 @@ import {
   Link
 } from '@cloudscape-design/components';
 import { useNavigate } from 'react-router-dom';
+import { systemAPI, agentAPI } from '../../services/api';
 
 interface Agent {
   id: string;
@@ -23,6 +24,9 @@ interface Agent {
   capabilities: string[];
   accuracy?: string;
   processingTime?: string;
+  loadPercentage?: number;
+  currentTask?: string;
+  lastActivity?: string;
 }
 
 interface HomePageProps {
@@ -30,278 +34,323 @@ interface HomePageProps {
   loading: boolean;
 }
 
-const HomePage: React.FC<HomePageProps> = ({ agents, loading }) => {
+const HomePage: React.FC<HomePageProps> = ({ agents: propAgents, loading: propLoading }) => {
   const navigate = useNavigate();
+  const [systemHealth, setSystemHealth] = useState<any>(null);
+  const [agentStats, setAgentStats] = useState<any>(null);
+  const [realTimeAgents, setRealTimeAgents] = useState<Agent[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const bankingAgents = [
+  // Load real system data
+  useEffect(() => {
+    const loadSystemData = async () => {
+      try {
+        setLoading(true);
+        
+        // Load system health
+        const healthResponse = await systemAPI.getSystemHealth();
+        if (healthResponse.success) {
+          setSystemHealth(healthResponse.data);
+        }
+
+        // Load real-time agent data
+        const agentResponse = await agentAPI.getAgents();
+        if (agentResponse.success) {
+          setRealTimeAgents(agentResponse.data);
+          
+          // Calculate agent statistics
+          const activeAgents = agentResponse.data.filter((agent: Agent) => agent.status === 'active').length;
+          const totalAgents = agentResponse.data.length;
+          const avgLoad = agentResponse.data.reduce((sum: number, agent: Agent) => 
+            sum + (agent.loadPercentage || 0), 0) / totalAgents;
+          
+          setAgentStats({
+            total: totalAgents,
+            active: activeAgents,
+            averageLoad: avgLoad.toFixed(1),
+            processing: agentResponse.data.filter((agent: Agent) => agent.currentTask).length
+          });
+        }
+        
+      } catch (error) {
+        console.error('Failed to load system data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadSystemData();
+    
+    // Refresh data every 30 seconds
+    const interval = setInterval(loadSystemData, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Use real-time data if available, otherwise fall back to props
+  const displayAgents = realTimeAgents.length > 0 ? realTimeAgents : propAgents;
+  const isLoading = loading || propLoading;
+
+  // System metrics based on real data
+  const systemMetrics = [
     {
-      id: 'supervisor',
-      name: 'Supervisor Agent',
-      description: 'Orchestrates workflow and coordinates other agents',
-      status: 'active' as const,
-      capabilities: ['Workflow Management', 'Agent Coordination', 'Task Distribution'],
-      accuracy: '99.8%',
-      processingTime: '< 1 min'
+      label: 'System Status',
+      value: systemHealth?.status || 'Unknown',
+      type: systemHealth?.status === 'healthy' ? 'success' : 'error'
     },
     {
-      id: 'document-intelligence',
-      name: 'Document Intelligence Agent',
-      description: 'Advanced OCR with deep Vietnamese NLP capabilities',
-      status: 'active' as const,
-      capabilities: ['OCR Processing', 'Vietnamese NLP', 'Document Classification'],
-      accuracy: '99.5%',
-      processingTime: '2-5 min'
+      label: 'Active Agents',
+      value: `${agentStats?.active || 0}/${agentStats?.total || 0}`,
+      type: agentStats?.active === agentStats?.total ? 'success' : 'warning'
     },
     {
-      id: 'risk-assessment',
-      name: 'Risk Assessment Agent',
-      description: 'Automated financial analysis and predictive risk modeling',
-      status: 'active' as const,
-      capabilities: ['Financial Analysis', 'Risk Modeling', 'Credit Scoring'],
-      accuracy: '95.2%',
-      processingTime: '3-8 min'
+      label: 'Average Load',
+      value: `${agentStats?.averageLoad || '0.0'}%`,
+      type: parseFloat(agentStats?.averageLoad || '0') < 70 ? 'success' : 'warning'
     },
     {
-      id: 'compliance-validation',
-      name: 'Compliance Validation Agent',
-      description: 'Validates against UCP 600, ISBP 821, and SBV regulations',
-      status: 'active' as const,
-      capabilities: ['UCP 600 Validation', 'ISBP 821 Compliance', 'SBV Regulations'],
-      accuracy: '98.7%',
-      processingTime: '1-3 min'
-    },
-    {
-      id: 'decision-synthesis',
-      name: 'Decision Synthesis Agent',
-      description: 'Generates evidence-based recommendations with confidence scores',
-      status: 'active' as const,
-      capabilities: ['Decision Making', 'Confidence Scoring', 'Report Generation'],
-      accuracy: '97.3%',
-      processingTime: '2-4 min'
-    },
-    {
-      id: 'process-automation',
-      name: 'Process Automation Agent',
-      description: 'End-to-end automation for banking workflows',
-      status: 'active' as const,
-      capabilities: ['LC Processing', 'Credit Proposals', 'Workflow Automation'],
-      accuracy: '96.8%',
-      processingTime: '5-15 min'
+      label: 'Processing Tasks',
+      value: agentStats?.processing || 0,
+      type: 'info'
     }
   ];
 
-  const performanceMetrics = [
-    { label: 'Processing Time Reduction', value: '60-80%', trend: 'positive' },
-    { label: 'Operational Cost Reduction', value: '40-50%', trend: 'positive' },
-    { label: 'Error Rate Reduction', value: '< 1%', trend: 'positive' },
-    { label: 'Documents Processed Today', value: '1,247', trend: 'neutral' }
-  ];
-
-  const quickActions = [
-    {
-      title: 'Letter of Credit Processing',
-      description: 'Process LC documents with automated validation',
-      action: () => navigate('/lc-processing'),
-      icon: '📄',
-      badge: 'New'
-    },
-    {
-      title: 'Credit Proposal Assessment',
-      description: 'Automated credit risk analysis and recommendations',
-      action: () => navigate('/credit-assessment'),
-      icon: '💰',
-      badge: 'Popular'
-    },
-    {
-      title: 'Document Intelligence',
-      description: 'OCR and Vietnamese NLP document processing',
-      action: () => navigate('/text-summary'),
-      icon: '🔍',
-      badge: null
-    },
-    {
-      title: 'Risk Dashboard',
-      description: 'Real-time risk monitoring and analytics',
-      action: () => navigate('/risk-dashboard'),
-      icon: '📊',
-      badge: 'Beta'
-    }
-  ];
+  if (isLoading) {
+    return (
+      <Container>
+        <SpaceBetween direction="vertical" size="l">
+          <Header variant="h1">VPBank K-MULT Agent Studio</Header>
+          <Box textAlign="center">
+            <ProgressBar
+              status="in-progress"
+              value={50}
+              label="Loading system data..."
+            />
+          </Box>
+        </SpaceBetween>
+      </Container>
+    );
+  }
 
   return (
     <Container>
       <SpaceBetween direction="vertical" size="l">
-        {/* Header */}
+        {/* Header Section */}
         <Header
           variant="h1"
-          description="Multi-Agent AI for Banking Process Automation"
+          description="Multi-Agent AI Platform for Vietnamese Banking Process Automation"
           actions={
             <SpaceBetween direction="horizontal" size="xs">
-              <Button variant="primary" onClick={() => navigate('/agents')}>
-                Manage Agents
+              <Button
+                variant="primary"
+                onClick={() => navigate('/agent-dashboard')}
+              >
+                View Agent Dashboard
               </Button>
-              <Button onClick={() => navigate('/settings')}>
-                Settings
+              <Button
+                onClick={() => navigate('/text-summary')}
+              >
+                Process Documents
               </Button>
             </SpaceBetween>
           }
         >
-          🏦 VPBank K-MULT Agent Studio
+          VPBank K-MULT Agent Studio
         </Header>
 
-        {/* Performance Metrics */}
-        <Box>
-          <Header variant="h2">Performance Overview</Header>
-          <ColumnLayout columns={4}>
-            {performanceMetrics.map((metric, index) => (
-              <Box key={index} padding="m">
-                <SpaceBetween direction="vertical" size="xs">
-                  <Box fontSize="heading-s" color="text-status-success">
-                    {metric.value}
-                  </Box>
-                  <Box fontSize="body-s" color="text-body-secondary">
-                    {metric.label}
-                  </Box>
-                  {metric.trend === 'positive' && (
-                    <StatusIndicator type="success">Improved</StatusIndicator>
-                  )}
-                </SpaceBetween>
+        {/* System Metrics */}
+        <ColumnLayout columns={4} variant="text-grid">
+          {systemMetrics.map((metric, index) => (
+            <div key={index}>
+              <Box variant="awsui-key-label">{metric.label}</Box>
+              <StatusIndicator type={metric.type as any}>
+                {metric.value}
+              </StatusIndicator>
+            </div>
+          ))}
+        </ColumnLayout>
+
+        {/* Real-time Agent Status */}
+        <Cards
+          cardDefinition={{
+            header: (item: Agent) => (
+              <Link href="#" fontSize="heading-m">
+                {item.name}
+              </Link>
+            ),
+            sections: [
+              {
+                id: "description",
+                content: (item: Agent) => item.description
+              },
+              {
+                id: "status",
+                header: "Status",
+                content: (item: Agent) => (
+                  <StatusIndicator type={item.status === 'active' ? 'success' : 'error'}>
+                    {item.status}
+                  </StatusIndicator>
+                )
+              },
+              {
+                id: "load",
+                header: "Current Load",
+                content: (item: Agent) => (
+                  <div>
+                    <ProgressBar
+                      value={item.loadPercentage || 0}
+                      label={`${item.loadPercentage || 0}%`}
+                      status={item.loadPercentage && item.loadPercentage > 80 ? 'error' : 'success'}
+                    />
+                  </div>
+                )
+              },
+              {
+                id: "task",
+                header: "Current Task",
+                content: (item: Agent) => (
+                  <Badge color={item.currentTask ? 'blue' : 'grey'}>
+                    {item.currentTask || 'Idle'}
+                  </Badge>
+                )
+              },
+              {
+                id: "capabilities",
+                header: "Capabilities",
+                content: (item: Agent) => (
+                  <SpaceBetween direction="horizontal" size="xs">
+                    {item.capabilities?.slice(0, 3).map((capability, idx) => (
+                      <Badge key={idx} color="green">
+                        {capability}
+                      </Badge>
+                    ))}
+                    {item.capabilities?.length > 3 && (
+                      <Badge color="grey">+{item.capabilities.length - 3} more</Badge>
+                    )}
+                  </SpaceBetween>
+                )
+              }
+            ]
+          }}
+          cardsPerRow={[
+            { cards: 1 },
+            { minWidth: 500, cards: 2 },
+            { minWidth: 800, cards: 3 }
+          ]}
+          items={displayAgents}
+          loadingText="Loading agents..."
+          empty={
+            <Box textAlign="center" color="inherit">
+              <b>No agents available</b>
+              <Box
+                padding={{ bottom: "s" }}
+                variant="p"
+                color="inherit"
+              >
+                No agents are currently configured.
               </Box>
-            ))}
-          </ColumnLayout>
-        </Box>
+            </Box>
+          }
+          header={
+            <Header
+              counter={`(${displayAgents.length})`}
+              actions={
+                <Button
+                  variant="primary"
+                  onClick={() => navigate('/agents')}
+                >
+                  Manage Agents
+                </Button>
+              }
+            >
+              Banking Agents
+            </Header>
+          }
+        />
 
         {/* Quick Actions */}
-        <Box>
-          <Header variant="h2">Quick Actions</Header>
-          <Grid gridDefinition={[{ colspan: 6 }, { colspan: 6 }, { colspan: 6 }, { colspan: 6 }]}>
-            {quickActions.map((action, index) => (
-              <Box key={index} padding="s">
-                <Box
-                  padding="m"
-                  
-                  
-                >
-                  <SpaceBetween direction="vertical" size="s">
-                    <SpaceBetween direction="horizontal" size="xs" alignItems="center">
-                      <Box fontSize="heading-m">{action.icon}</Box>
-                      {action.badge && (
-                        <Badge color={action.badge === 'New' ? 'green' : action.badge === 'Popular' ? 'blue' : 'grey'}>
-                          {action.badge}
-                        </Badge>
-                      )}
-                    </SpaceBetween>
-                    <Box fontSize="heading-s">{action.title}</Box>
-                    <Box fontSize="body-s" color="text-body-secondary">
-                      {action.description}
-                    </Box>
-                    <Button variant="primary" onClick={action.action} fullWidth>
-                      Get Started
-                    </Button>
-                  </SpaceBetween>
-                </Box>
+        <Grid
+          gridDefinition={[
+            { colspan: { default: 12, xs: 6, s: 4 } },
+            { colspan: { default: 12, xs: 6, s: 4 } },
+            { colspan: { default: 12, xs: 12, s: 4 } }
+          ]}
+        >
+          <Box padding="l" className="awsui-util-border-radius-medium" style={{ backgroundColor: '#f2f3f3' }}>
+            <SpaceBetween direction="vertical" size="s">
+              <Header variant="h3">Document Processing</Header>
+              <Box variant="p">
+                Process Vietnamese banking documents with advanced OCR and NLP capabilities.
               </Box>
-            ))}
-          </Grid>
-        </Box>
-
-        {/* Agent Status */}
-        <Box>
-          <Header 
-            variant="h2"
-            actions={
-              <Button onClick={() => navigate('/agents')}>
-                View All Agents
+              <Button
+                variant="primary"
+                onClick={() => navigate('/text-summary')}
+              >
+                Start Processing
               </Button>
-            }
-          >
-            AI Agents Status
-          </Header>
-          <Cards
-            cardDefinition={{
-              header: item => (
-                <SpaceBetween direction="horizontal" size="xs" alignItems="center">
-                  <Link href="#" fontSize="heading-s">{item.name}</Link>
-                  <StatusIndicator type={item.status === 'active' ? 'success' : 'pending'}>
-                    {item.status === 'active' ? 'Active' : 'Inactive'}
-                  </StatusIndicator>
-                </SpaceBetween>
-              ),
-              sections: [
-                {
-                  id: "description",
-                  content: item => item.description
-                },
-                {
-                  id: "metrics",
-                  content: item => (
-                    <ColumnLayout columns={2}>
-                      <SpaceBetween direction="vertical" size="xs">
-                        <Box fontSize="body-s" color="text-body-secondary">Accuracy</Box>
-                        <Box fontSize="heading-s" color="text-status-success">{item.accuracy}</Box>
-                      </SpaceBetween>
-                      <SpaceBetween direction="vertical" size="xs">
-                        <Box fontSize="body-s" color="text-body-secondary">Processing Time</Box>
-                        <Box fontSize="heading-s">{item.processingTime}</Box>
-                      </SpaceBetween>
-                    </ColumnLayout>
-                  )
-                },
-                {
-                  id: "capabilities",
-                  content: item => (
-                    <SpaceBetween direction="horizontal" size="xs">
-                      {item.capabilities.slice(0, 3).map((capability, index) => (
-                        <Badge key={index} color="blue">{capability}</Badge>
-                      ))}
-                    </SpaceBetween>
-                  )
-                }
-              ]
-            }}
-            cardsPerRow={[
-              { cards: 1 },
-              { minWidth: 500, cards: 2 },
-              { minWidth: 800, cards: 3 }
-            ]}
-            items={bankingAgents.slice(0, 6)}
-            loading={loading}
-            loadingText="Loading agents..."
-            empty={
-              <Box textAlign="center" color="inherit">
-                <Box variant="strong" textAlign="center" color="inherit">
-                  No agents available
-                </Box>
-                <Box variant="p" padding={{ bottom: "s" }} color="inherit">
-                  Configure your AI agents to get started.
-                </Box>
-                <Button onClick={() => navigate('/agents')}>Create Agent</Button>
-              </Box>
-            }
-          />
-        </Box>
+            </SpaceBetween>
+          </Box>
 
-        {/* System Status */}
-        <Box>
-          <Header variant="h2">System Status</Header>
-          <ColumnLayout columns={3}>
+          <Box padding="l" className="awsui-util-border-radius-medium" style={{ backgroundColor: '#f2f3f3' }}>
             <SpaceBetween direction="vertical" size="s">
-              <Box fontSize="body-s" color="text-body-secondary">AWS Bedrock</Box>
-              <StatusIndicator type="success">Operational</StatusIndicator>
-              <ProgressBar value={98} additionalInfo="Claude 3.7 Sonnet" />
+              <Header variant="h3">LC Processing</Header>
+              <Box variant="p">
+                Validate Letter of Credit documents against UCP 600 and ISBP 821 standards.
+              </Box>
+              <Button
+                variant="primary"
+                onClick={() => navigate('/lc-processing')}
+              >
+                Process LC
+              </Button>
             </SpaceBetween>
+          </Box>
+
+          <Box padding="l" className="awsui-util-border-radius-medium" style={{ backgroundColor: '#f2f3f3' }}>
             <SpaceBetween direction="vertical" size="s">
-              <Box fontSize="body-s" color="text-body-secondary">Document Processing</Box>
-              <StatusIndicator type="success">Operational</StatusIndicator>
-              <ProgressBar value={95} additionalInfo="OCR & NLP Services" />
+              <Header variant="h3">Risk Assessment</Header>
+              <Box variant="p">
+                Automated credit risk analysis and scoring for Vietnamese banking.
+              </Box>
+              <Button
+                variant="primary"
+                onClick={() => navigate('/credit-assessment')}
+              >
+                Assess Risk
+              </Button>
             </SpaceBetween>
-            <SpaceBetween direction="vertical" size="s">
-              <Box fontSize="body-s" color="text-body-secondary">Database</Box>
-              <StatusIndicator type="success">Operational</StatusIndicator>
-              <ProgressBar value={99} additionalInfo="DynamoDB & MongoDB" />
-            </SpaceBetween>
-          </ColumnLayout>
+          </Box>
+        </Grid>
+
+        {/* System Information */}
+        <Box variant="awsui-key-label">
+          System Information
         </Box>
+        <ColumnLayout columns={3} variant="text-grid">
+          <div>
+            <Box variant="awsui-key-label">Service Version</Box>
+            <div>{systemHealth?.version || '2.0.0'}</div>
+          </div>
+          <div>
+            <Box variant="awsui-key-label">Last Updated</Box>
+            <div>{new Date().toLocaleString()}</div>
+          </div>
+          <div>
+            <Box variant="awsui-key-label">Features</Box>
+            <div>
+              {systemHealth?.features ? (
+                <SpaceBetween direction="horizontal" size="xs">
+                  {Object.entries(systemHealth.features).map(([key, value]) => (
+                    <Badge key={key} color={value ? 'green' : 'red'}>
+                      {key.replace('_', ' ')}
+                    </Badge>
+                  ))}
+                </SpaceBetween>
+              ) : (
+                'Multi-Agent, Vietnamese NLP, Banking Compliance'
+              )}
+            </div>
+          </div>
+        </ColumnLayout>
       </SpaceBetween>
     </Container>
   );

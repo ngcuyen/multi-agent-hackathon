@@ -27,7 +27,7 @@ const ChatPage: React.FC<ChatPageProps> = ({ agents, loading, onShowSnackbar }) 
 
   const loadChatSessions = useCallback(async () => {
     try {
-      const response = await chatAPI.getChatSessions();
+      const response = await chatAPI.getChatSessions('current-user');
       if (response.success && response.data) {
         setChatSessions(response.data);
       }

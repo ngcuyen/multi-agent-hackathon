@@ -109,7 +109,7 @@ const AgentsPage: React.FC<AgentsPageProps> = ({ agents, setAgents, onShowSnackb
       } else {
         // Create new agent
         const response = await agentAPI.createAgent(formData);
-        if (response.success && response.data) {
+        if (response.success) {
           onShowSnackbar('Agent created successfully', 'success');
           // Add new agent to the list
           const newAgent: Agent = {

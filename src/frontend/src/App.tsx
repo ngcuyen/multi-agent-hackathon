@@ -34,80 +34,72 @@ function App() {
   const [agents, setAgents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Mock agents data for VPBank K-MULT
+  // Load real agents data from backend API
   useEffect(() => {
-    const mockAgents = [
-      {
-        id: 'supervisor',
-        name: 'Supervisor Agent',
-        description: 'Orchestrates workflow and coordinates other agents',
-        status: 'active' as const,
-        model: 'claude-3-sonnet',
-        temperature: 0.7,
-        maxTokens: 8192,
-        capabilities: ['Workflow Management', 'Agent Coordination', 'Task Distribution'],
-        systemPrompt: 'You are a supervisor agent responsible for coordinating multi-agent workflows.',
-        createdAt: new Date(),
-        updatedAt: new Date()
-      },
-      {
-        id: 'document-intelligence',
-        name: 'Document Intelligence Agent',
-        description: 'Advanced OCR with deep Vietnamese NLP capabilities',
-        status: 'active' as const,
-        model: 'claude-3-sonnet',
-        temperature: 0.5,
-        maxTokens: 8192,
-        capabilities: ['OCR Processing', 'Vietnamese NLP', 'Document Classification'],
-        systemPrompt: 'You are a document intelligence agent specialized in OCR and Vietnamese NLP.',
-        createdAt: new Date(),
-        updatedAt: new Date()
-      },
-      {
-        id: 'risk-assessment',
-        name: 'Risk Assessment Agent',
-        description: 'Automated financial analysis and predictive risk modeling',
-        status: 'active' as const,
-        model: 'claude-3-sonnet',
-        temperature: 0.3,
-        maxTokens: 8192,
-        capabilities: ['Financial Analysis', 'Risk Modeling', 'Credit Scoring'],
-        systemPrompt: 'You are a risk assessment agent specialized in financial analysis and risk modeling.',
-        createdAt: new Date(),
-        updatedAt: new Date()
-      },
-      {
-        id: 'compliance-validation',
-        name: 'Compliance Validation Agent',
-        description: 'Validates against UCP 600, ISBP 821, and SBV regulations',
-        status: 'active' as const,
-        model: 'claude-3-sonnet',
-        temperature: 0.2,
-        maxTokens: 8192,
-        capabilities: ['UCP 600 Validation', 'ISBP 821 Compliance', 'SBV Regulations'],
-        systemPrompt: 'You are a compliance validation agent specialized in banking regulations.',
-        createdAt: new Date(),
-        updatedAt: new Date()
-      },
-      {
-        id: 'decision-synthesis',
-        name: 'Decision Synthesis Agent',
-        description: 'Generates evidence-based recommendations with confidence scores',
-        status: 'active' as const,
-        model: 'claude-3-sonnet',
-        temperature: 0.4,
-        maxTokens: 8192,
-        capabilities: ['Decision Making', 'Confidence Scoring', 'Report Generation'],
-        systemPrompt: 'You are a decision synthesis agent that generates evidence-based recommendations.',
-        createdAt: new Date(),
-        updatedAt: new Date()
+    const loadRealAgents = async () => {
+      try {
+        setLoading(true);
+        
+        // Call real backend API
+        const response = await fetch('/api/v1/agents/status');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        // Transform backend agent data to frontend format
+        const transformedAgents = data.agents?.map((agent: any) => ({
+          id: agent.agent_id,
+          name: agent.name,
+          description: agent.description,
+          status: agent.status,
+          model: 'claude-3.5-sonnet',
+          temperature: 0.7,
+          maxTokens: 8192,
+          capabilities: agent.capabilities || [],
+          systemPrompt: `You are ${agent.name.toLowerCase()} responsible for ${agent.description.toLowerCase()}.`,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          loadPercentage: agent.load_percentage,
+          currentTask: agent.current_task,
+          lastActivity: agent.last_activity
+        })) || [];
+        
+        setAgents(transformedAgents);
+        console.log('✅ Loaded real agents from backend:', transformedAgents.length);
+        
+      } catch (error) {
+        console.error('❌ Failed to load real agents, using fallback:', error);
+        
+        // Fallback to basic agent structure if API fails
+        const fallbackAgents = [
+          {
+            id: 'supervisor',
+            name: 'Supervisor Agent',
+            description: 'Orchestrates workflow and coordinates other agents',
+            status: 'active' as const,
+            model: 'claude-3.5-sonnet',
+            temperature: 0.7,
+            maxTokens: 8192,
+            capabilities: ['Workflow Management', 'Agent Coordination', 'Task Distribution'],
+            systemPrompt: 'You are a supervisor agent responsible for coordinating multi-agent workflows.',
+            createdAt: new Date(),
+            updatedAt: new Date()
+          }
+        ];
+        setAgents(fallbackAgents);
+      } finally {
+        setLoading(false);
       }
-    ];
+    };
+
+    loadRealAgents();
     
-    setTimeout(() => {
-      setAgents(mockAgents);
-      setLoading(false);
-    }, 1000);
+    // Set up periodic refresh of agent data every 30 seconds
+    const interval = setInterval(loadRealAgents, 30000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   const showFlashbar = (message: string, type: 'success' | 'error' | 'warning' | 'info') => {
