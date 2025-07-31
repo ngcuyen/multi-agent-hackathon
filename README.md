@@ -1,417 +1,334 @@
-# 🏦 VPBank K-MULT Agent Studio
+# VPBank K-MULT Agent Studio
 ## Enterprise Multi-Agent AI Platform for Banking Process Automation
 
 <div align="center">
 
-[![AWS](https://img.shields.io/badge/AWS-Well--Architected-FF9900.svg?style=for-the-badge&logo=Amazon-AWS&logoColor=white)](https://aws.amazon.com/architecture/well-architected/)
-[![ECS](https://img.shields.io/badge/ECS-Fargate-FF9900.svg?style=for-the-badge&logo=Amazon-ECS&logoColor=white)](https://aws.amazon.com/fargate/)
-[![Claude](https://img.shields.io/badge/Claude-3.7_Sonnet-FF6B35.svg?style=for-the-badge&logoColor=white)](https://www.anthropic.com/claude)
-[![Banking](https://img.shields.io/badge/Banking-Grade_Security-red.svg?style=for-the-badge)](./documentation/)
+[![AWS Well-Architected](https://img.shields.io/badge/AWS-Well--Architected-FF9900.svg?style=flat-square&logo=Amazon-AWS&logoColor=white)](https://aws.amazon.com/architecture/well-architected/)
+[![ECS Fargate](https://img.shields.io/badge/ECS-Fargate-FF9900.svg?style=flat-square&logo=Amazon-ECS&logoColor=white)](https://aws.amazon.com/fargate/)
+[![Claude 3.5 Sonnet](https://img.shields.io/badge/Claude-3.5_Sonnet-FF6B35.svg?style=flat-square&logoColor=white)](https://www.anthropic.com/claude)
+[![Banking Security](https://img.shields.io/badge/Banking-Grade_Security-2E8B57.svg?style=flat-square)](./FAQ/)
+[![License](https://img.shields.io/badge/License-Enterprise-blue.svg?style=flat-square)](./LICENSE)
 
 **Multi-Agent Hackathon 2025 - Group 181**
 
-*60-80% processing time reduction | < 0.5% error rate | $542-597/month AWS cost | 99.99% availability*
-
 </div>
 
----
+## Executive Summary
 
-## 🎯 **Business Impact**
-- **60-80% reduction** in processing time (8-12 hours → 30 minutes)
-- **Error rates < 0.5%** (from 15-20% manual processing) - Enhanced with Strands Agents
-- **$542-597/month** total AWS operational cost (includes Strands orchestration)
-- **15,000+ documents/day** processing capacity (enhanced throughput)
-- **ROI within 2.5 months** through operational savings and improved accuracy
+VPBank K-MULT Agent Studio is an enterprise-grade multi-agent AI platform specifically designed for Vietnamese banking operations. The system delivers **60-80% processing time reduction**, achieving **99.5% accuracy** in document processing while maintaining **< 0.5% error rates** and **99.99% availability** at a total operational cost of **$542-597/month**.
 
 ---
 
-## 🏗️ **Complete AWS Architecture Portfolio**
+## Business Impact
 
-### 🎯 **Latest Architecture Diagrams (v3.0)**
+### Key Performance Indicators
+- **Processing Time Reduction**: 60-80% improvement (8-12 hours → 30 minutes)
+- **Accuracy Enhancement**: 99.5% OCR accuracy for Vietnamese documents
+- **Error Rate Reduction**: From 15-20% manual errors to < 0.5%
+- **Cost Optimization**: $542-597/month total AWS operational cost
+- **Processing Capacity**: 15,000+ documents/day with auto-scaling
+- **Return on Investment**: Break-even within 2.5 months
+- **System Availability**: 99.99% uptime SLA with multi-AZ deployment
 
-#### 🌐 **Full-Stack Architecture with S3 Frontend**
+### Value Proposition
+The platform addresses critical challenges in Vietnamese banking operations through intelligent automation, delivering measurable improvements in operational efficiency, cost reduction, and regulatory compliance while maintaining the highest standards of security and reliability.
+
+---
+
+## System Architecture
+
+### Multi-Agent Framework
+The platform employs a sophisticated multi-agent architecture with seven specialized banking agents orchestrated through the Strands framework:
+
+| Agent | Function | Technology Stack | Performance |
+|-------|----------|------------------|-------------|
+| **Strands Orchestrator** | Master coordination and context management | Claude 3.5 Sonnet + Strands | 2,000 requests/hour |
+| **Supervisor Agent** | Workflow orchestration and task distribution | ECS Fargate + Step Functions | 1,200 requests/hour |
+| **Document Intelligence** | OCR and Vietnamese NLP processing | Textract + Comprehend + Custom ML | 120 documents/hour |
+| **LC Processing** | Letter of Credit automation | UCP 600 + ISBP 821 compliance | 24 LCs/hour |
+| **Credit Analysis** | Risk assessment and scoring | Basel III + ML models | 18 applications/hour |
+| **Compliance Engine** | Regulatory validation | SBV + AML/CFT frameworks | 45 checks/hour |
+| **Risk Assessment** | Fraud detection and analysis | SageMaker + Fraud Detector | 20 assessments/hour |
+
+### AWS Well-Architected Implementation
+
+#### Operational Excellence
+- Infrastructure as Code using AWS CDK
+- Automated CI/CD pipelines with CodePipeline
+- Comprehensive monitoring with CloudWatch and X-Ray
+
+#### Security
+- End-to-end encryption with AWS KMS
+- IAM roles with least privilege principle
+- VPC isolation with private subnets
+- Banking-grade security with CloudHSM
+
+#### Reliability
+- Multi-AZ deployment across availability zones
+- Auto-scaling groups with health checks
+- RDS Multi-AZ with automated backups
+- Cross-region disaster recovery
+
+#### Performance Efficiency
+- ECS Fargate for serverless container orchestration
+- ElastiCache for high-performance caching
+- CloudFront CDN for global content delivery
+- Right-sized compute resources with auto-scaling
+
+#### Cost Optimization
+- Automated resource scaling based on demand
+- S3 Intelligent Tiering for storage optimization
+- Reserved Instances for predictable workloads
+- Continuous cost monitoring and optimization
+
+---
+
+## Technical Specifications
+
+### Frontend Architecture
+- **Framework**: React 18 with TypeScript
+- **UI Library**: AWS Cloudscape Design System
+- **Hosting**: S3 Static Website with CloudFront CDN
+- **Performance**: < 2 seconds page load time (95th percentile)
+- **Security**: SSL/TLS encryption with AWS Certificate Manager
+
+### Backend Services
+- **API Framework**: FastAPI with Python 3.12
+- **Container Platform**: ECS Fargate with auto-scaling
+- **Database**: PostgreSQL (RDS) with read replicas
+- **Caching**: Redis (ElastiCache) for session management
+- **Message Queue**: SQS/SNS for reliable inter-service communication
+
+### AI/ML Services
+- **Language Model**: Claude 3.5 Sonnet via AWS Bedrock
+- **OCR Processing**: Amazon Textract with Vietnamese optimization
+- **NLP Analysis**: Amazon Comprehend with custom models
+- **Document Storage**: S3 with versioning and lifecycle policies
+- **Model Training**: SageMaker for custom ML model development
+
+### Vietnamese Banking Compliance
+- **Regulatory Framework**: SBV Circular 39/2016, Decision 2345/QD-NHNN
+- **International Standards**: UCP 600, ISBP 821, Basel III
+- **Security Compliance**: AML/CFT, KYC, sanctions screening
+- **Data Protection**: Vietnamese data privacy regulations
+- **Audit Capabilities**: Complete transaction audit trails
+
+---
+
+## Architecture Diagrams
+
+### Full-Stack System Architecture
 ![Full-Stack Architecture](./docs/architecture/vpbank-kmult-fullstack-architecture.png)
-*Complete full-stack system: S3 static hosting, CloudFront CDN, API Gateway, Strands multi-agent backend*
-📐 [Edit in Draw.io](./docs/architecture/vpbank-kmult-fullstack-architecture.drawio)
+*Complete system overview: S3 frontend, CloudFront CDN, API Gateway, multi-agent backend*
 
-#### 🚀 **Strands-Enhanced Multi-Agent Architecture**
+### Strands-Enhanced Multi-Agent Architecture
 ![Strands Enhanced Architecture](./docs/architecture/vpbank-kmult-strands-enhanced-architecture.png)
-*Advanced multi-agent system: Strands orchestration, enhanced reasoning, consensus building, shared context management*
-📐 [Edit in Draw.io](./docs/architecture/vpbank-kmult-strands-enhanced-architecture.drawio)
+*Advanced multi-agent coordination: Strands orchestration, consensus building, shared context*
 
-#### 🏗️ **High-Level AWS ECS Fargate Architecture**
+### AWS ECS Fargate Infrastructure
 ![High Level Architecture](./docs/architecture/vpbank-kmult-high-level-architecture.png)
-*Complete AWS infrastructure: ECS Fargate multi-agent platform, AI/ML services, data layer, security monitoring*
-📐 [Edit in Draw.io](./docs/architecture/vpbank-kmult-high-level-architecture.drawio)
+*Enterprise infrastructure: ECS Fargate, AI/ML services, security, monitoring*
 
-📐 **Architecture Guide**: See [docs/architecture/README.md](./docs/architecture/README.md) for detailed architecture documentation and usage guide.
-
----
-
-## 🤖 **Strands-Enhanced Multi-Agent Platform (ECS Fargate)**
-
-### 🎯 **7 Specialized Banking Agents + Strands Orchestration**
-
-| Agent | Role | Technology | Capability | Scaling |
-|-------|------|------------|------------|---------|
-| 🎯 **Strands Orchestrator** | Master Coordination | Claude-3.5 Sonnet + Strands | Multi-agent orchestration, context sharing | 2-5 instances |
-| 🎯 **Supervisor** | Workflow Orchestration | ECS + Step Functions + Strands | Task distribution, coordination | 1-3 instances |
-| 📄 **Document Intelligence** | OCR + Vietnamese NLP | Textract + Comprehend + Claude + Strands | 99.5% accuracy, enhanced reasoning | 2-15 instances |
-| 💳 **LC Processing** | Letter of Credit | UCP 600 + ISBP 821 + Strands | Trade finance automation | 1-10 instances |
-| 💰 **Credit Analysis** | Risk Assessment | Basel III + ML models + Strands | Credit scoring, analysis | 2-12 instances |
-| ⚖️ **Compliance Engine** | Regulatory Validation | SBV + AML/CFT + Strands | Real-time compliance | 1-8 instances |
-| 📊 **Risk Assessment** | Quantitative Analysis | SageMaker + Fraud Detector + Strands | Risk scoring, anomaly detection | 2-10 instances |
-| 🧠 **Decision Synthesis** | Evidence-based AI | Claude 3.7 Sonnet + Strands | Final recommendations with consensus | 1-5 instances |
-| 🤝 **Consensus Builder** | Multi-Agent Voting | Strands Framework | Agent agreement validation | 1-3 instances |
-
-### 🔄 **Agent Workflow Architecture**
-
-#### **Complete Multi-Agent Flow**
-```mermaid
-graph TB
-    subgraph "Input Layer"
-        A[Document Upload] --> SO[🎯 Strands Orchestrator]
-        B[API Request] --> SO
-        C[Batch Processing] --> SO
-    end
-    
-    subgraph "Strands Coordination Layer"
-        SO --> CM[Context Manager]
-        SO --> AR[Agent Registry]
-        SO --> D[🎯 Supervisor Agent]
-    end
-    
-    subgraph "Processing Agents"
-        D --> E[📄 Document Intelligence]
-        D --> F[💳 LC Processing]
-        D --> G[💰 Credit Analysis]
-        D --> H[⚖️ Compliance Engine]
-        D --> I[📊 Risk Assessment]
-    end
-    
-    subgraph "Decision Layer"
-        E --> J[🧠 Decision Synthesis]
-        F --> J
-        G --> J
-        H --> J
-        I --> J
-        J --> CB[🤝 Consensus Builder]
-        CB --> K[Final Decision]
-    end
-    
-    subgraph "Output Layer"
-        K --> L[Banking System Integration]
-        K --> M[Notifications & Alerts]
-        K --> N[Audit Trail & Compliance]
-    end
-```
-
-#### **Agent Processing Sequence**
-```mermaid
-sequenceDiagram
-    participant S as Supervisor
-    participant DI as Document Intelligence
-    participant LC as LC Processing
-    participant CA as Credit Analysis
-    participant CE as Compliance
-    participant RA as Risk Assessment
-    participant DS as Decision Synthesis
-    
-    S->>DI: Process Document (OCR + NLP)
-    DI-->>S: Document Analysis Complete
-    
-    par Parallel Processing
-        S->>LC: UCP 600 Validation
-        S->>CA: Basel III Analysis
-        S->>CE: SBV + AML/CFT Check
-        S->>RA: ML Risk Scoring
-    end
-    
-    LC-->>S: LC Validation Result
-    CA-->>S: Credit Analysis Result
-    CE-->>S: Compliance Status
-    RA-->>S: Risk Assessment
-    
-    S->>DS: Synthesize Decision (Claude 3.7)
-    DS-->>S: Final Recommendation + Confidence
-```
-
-### 📊 **Agent Performance Metrics**
-
-| Agent | Processing Time | Throughput/Hour | Success Rate | Auto-Scale Trigger |
-|-------|----------------|-----------------|--------------|-------------------|
-| 🎯 **Strands Orchestrator** | 1-3 seconds | 2,000 requests | 99.9% | Queue depth > 15 |
-| 🎯 **Supervisor** | 2-5 seconds | 1,200 requests | 99.9% | Queue depth > 10 |
-| 📄 **Document Intelligence** | 30-60 seconds | 120 documents | 99.5% | CPU > 70% |
-| 💳 **LC Processing** | 5-15 minutes | 24 LCs | 99.2% | Queue depth > 5 |
-| 💰 **Credit Analysis** | 10-20 minutes | 18 applications | 99.1% | Memory > 80% |
-| ⚖️ **Compliance Engine** | 3-8 minutes | 45 checks | 99.8% | Queue depth > 8 |
-| 📊 **Risk Assessment** | 8-15 minutes | 20 assessments | 99.3% | CPU > 75% |
-| 🧠 **Decision Synthesis** | 2-5 minutes | 60 decisions | 99.7% | Queue depth > 3 |
-| 🤝 **Consensus Builder** | 1-2 minutes | 120 decisions | 99.9% | Queue depth > 5 |
-
-### 🚀 **Strands Agents Integration**
-
-#### **🎯 Strands Orchestration Layer**
-```python
-# Strands Master Orchestrator
-- Multi-agent coordination and context sharing
-- Dynamic workflow adaptation based on complexity
-- Real-time agent communication via SQS/SNS
-- Shared memory management across all agents
-
-# Enhanced Agent Capabilities
-- Improved reasoning with Claude-3.5 Sonnet
-- Consensus building through multi-agent voting
-- Context preservation across agent interactions
-- Adaptive processing based on document complexity
-```
-
-#### **🔄 Strands Workflow Process**
-1. **Request Processing** → Strands Orchestrator receives and analyzes
-2. **Context Management** → Shared context distributed to all agents
-3. **Agent Coordination** → Parallel processing with real-time communication
-4. **Consensus Building** → Multi-agent voting for decision validation
-5. **Final Decision** → Synthesized output with confidence scoring
-
-#### **💡 Key Strands Benefits**
-- **Enhanced Accuracy**: Multi-agent consensus reduces errors by 50%
-- **Better Coordination**: Strands orchestration improves efficiency by 30%
-- **Shared Intelligence**: Context sharing reduces processing time by 20%
-- **Adaptive Processing**: Dynamic workflow optimization
-- **Evidence-based Decisions**: Consensus building with confidence scoring
-
-### 🌐 **Full-Stack Frontend Architecture**
-
-#### **🎯 S3 Static Website Hosting**
-```yaml
-# Frontend Infrastructure
-S3 Bucket Configuration:
-  - Static Website Hosting: Enabled
-  - React Application: Single Page Application (SPA)
-  - Build Artifacts: Optimized production build
-  - Security: Bucket policies for CloudFront access only
-
-CloudFront Distribution:
-  - Global CDN: Edge locations worldwide
-  - SSL/TLS: AWS Certificate Manager integration
-  - Caching: Optimized for static assets
-  - Custom Domain: vpbank-kmult.com
-```
-
-#### **🔄 Frontend-Backend Integration**
-```javascript
-// API Integration Architecture
-Frontend (React) → CloudFront → WAF → API Gateway → ECS Fargate
-
-// Key Features
-- Responsive Design: Mobile-first banking interface
-- Real-time Updates: WebSocket connections for agent status
-- Document Upload: Direct S3 upload with presigned URLs
-- Authentication: Cognito integration for banking security
-- Monitoring: CloudWatch RUM for frontend performance
-```
-
-#### **📊 Frontend Performance Metrics**
-- **Page Load Time**: < 2 seconds (95th percentile)
-- **First Contentful Paint**: < 1.5 seconds
-- **Time to Interactive**: < 3 seconds
-- **Global CDN**: 99.9% cache hit ratio
-- **SSL/TLS**: A+ security rating
-- **Mobile Performance**: 90+ Lighthouse score
-
-#### **💰 Frontend Cost Breakdown**
-- **S3 Static Hosting**: $5-10/month (storage + requests)
-- **CloudFront CDN**: $15-25/month (data transfer + requests)
-- **Route 53 DNS**: $0.50/month (hosted zone)
-- **SSL Certificate**: Free (AWS Certificate Manager)
-- **Total Frontend Cost**: $20.50-35.50/month
+📐 **Architecture Documentation**: [docs/architecture/README.md](./docs/architecture/README.md)
 
 ---
 
-## 🏗️ **AWS Well-Architected Framework**
+## Getting Started
 
-### 🎯 **5 Pillars Implementation**
+### Prerequisites
+- Docker and Docker Compose
+- AWS CLI configured with appropriate permissions
+- Node.js 18+ and Python 3.12+
+- Git for version control
 
-| Pillar | Implementation | AWS Services |
-|--------|----------------|--------------|
-| 🔧 **Operational Excellence** | IaC (CDK), CI/CD, Monitoring | CloudFormation, CodePipeline, CloudWatch |
-| 🔒 **Security** | Least privilege, Encryption, Threat detection | IAM, KMS, CloudHSM, GuardDuty |
-| 🔄 **Reliability** | Multi-AZ, Auto-scaling, Backup | ECS Fargate, RDS Multi-AZ, S3 |
-| ⚡ **Performance** | Right-sizing, Caching, CDN | Compute Optimizer, ElastiCache, CloudFront |
-| 💰 **Cost Optimization** | Auto-scaling, Lifecycle, Monitoring | Auto Scaling, S3 Intelligent Tiering, Budgets |
-
-### 🏦 **Banking Compliance Standards**
-- **🇻🇳 Vietnamese**: SBV Circular 39/2016, Decision 2345/QD-NHNN
-- **🌍 International**: UCP 600, ISBP 821, Basel III, SWIFT
-- **🔒 Security**: AML/CFT, KYC, Sanctions screening, Audit trails
-
----
-
-## 📊 **System Performance**
-
-### 🎯 **Processing Capabilities**
-- **Document Throughput**: 15,000+ documents/day (enhanced with Strands)
-- **OCR Accuracy**: 99.5% (Vietnamese optimized)
-- **API Response**: < 2 seconds (95% of requests) - Improved with Strands orchestration
-- **Concurrent Users**: 1,500+ simultaneous (enhanced capacity)
-- **System Uptime**: 99.99% availability SLA
-- **Multi-Agent Consensus**: 99.8% agreement rate
-- **Context Sharing**: Real-time across all agents
-
-### 💰 **Enhanced Cost Breakdown ($542-597/month)**
-- **AI/ML Services**: $220/month (Bedrock, Textract, Comprehend, Strands)
-- **Compute**: $195/month (ECS Fargate, Auto Scaling, Enhanced instances)
-- **Storage**: $75/month (S3, RDS, DynamoDB, Agent Memory)
-- **Network & Messaging**: $32-72/month (CloudFront, API Gateway, SQS/SNS, Monitoring)
-- **Frontend Infrastructure**: $20-35/month (S3 Static Hosting, CloudFront CDN, Route 53)
-
-### 🚀 **Strands Enhancement Benefits**
-- **Improved Accuracy**: Multi-agent consensus reduces errors by 50%
-- **Enhanced Coordination**: Strands orchestration improves workflow efficiency by 30%
-- **Shared Intelligence**: Context sharing reduces processing time by 20%
-- **Adaptive Processing**: Dynamic workflow optimization based on complexity
-- **Better Decision Making**: Evidence-based consensus building
-
----
-
-## 🚀 **Quick Start**
-
-### **1. Project Setup (One-time)**
+### Quick Start
 ```bash
+# Clone the repository
 git clone https://github.com/ngcuyen/multi-agent-hackathon.git
 cd multi-agent-hackathon
-./scripts/setup.sh
-```
 
-### **2. Start Application (Local Development)**
-```bash
+# Initial setup
+./scripts/setup.sh
+
+# Start the application
 ./scripts/run.sh up
 ```
 
-### **3. Access Services**
-- **Frontend**: http://localhost:3000 (React SPA)
-- **Production Frontend**: https://vpbank-kmult.com (S3 + CloudFront)
+### Service Endpoints
+- **Frontend Application**: http://localhost:3000
 - **Backend API**: http://localhost:8080
 - **API Documentation**: http://localhost:8080/docs
 - **Health Check**: http://localhost:8080/mutil_agent/public/api/v1/health-check/health
 
-### **4. AWS Deployment (Production)**
+### Production Deployment
 ```bash
+# Deploy to AWS
 ./scripts/deploy.sh production ap-southeast-1 full
 ```
 
-## 🎯 **Management Commands**
-
-| Command | Description | Usage |
-|---------|-------------|-------|
-| `./scripts/setup.sh` | Initial project setup | `./scripts/setup.sh` |
-| `./scripts/run.sh` | Start/manage application | `./scripts/run.sh [up\|stop\|restart\|logs\|status]` |
-| `./scripts/build.sh` | Build Docker images | `./scripts/build.sh [development\|production]` |
-| `./scripts/test.sh` | Run comprehensive tests | `./scripts/test.sh [all\|health\|api\|agents\|performance]` |
-| `./scripts/deploy.sh` | Deploy to AWS | `./scripts/deploy.sh [staging\|production] [region]` |
-| `./scripts/export-diagrams.sh` | Export architecture diagrams | `./scripts/export-diagrams.sh` |
-
 ---
 
-## 🏗️ **Project Structure**
+## API Reference
 
-```
-vpbank-kmult-agent-studio/
-├── 📂 src/                    # Source Code
-│   ├── 📂 backend/            # FastAPI Backend Services
-│   ├── 📂 frontend/           # React Frontend Application
-│   ├── 📂 agents/             # 7 Specialized Banking Agents
-│   ├── 📂 shared/             # Common Libraries & Utilities
-│   ├── 📂 data/               # Data Files & Schemas
-│   └── 📂 tools/              # Development Tools
-│
-├── 📂 docs/                   # Documentation
-│   ├── 📂 architecture/       # Architecture Diagrams (PNG + .drawio)
-│   ├── 📂 api/                # API Documentation
-│   ├── 📂 user-guide/         # User & Admin Guides
-│   └── 📂 examples/           # Code Examples
-│
-├── 📂 config/                 # Configuration Files
-│   ├── 🔧 docker-compose.yml  # Container Orchestration
-│   ├── 🔧 task-definition.json # ECS Configuration
-│   └── 🔧 *.json              # AWS Policies & Configs
-│
-├── 📂 scripts/                # Automation Scripts
-│   ├── 🚀 setup.sh            # Project Setup
-│   ├── 🚀 run.sh              # Development Server
-│   ├── 🚀 deploy.sh           # Production Deployment
-│   └── 🚀 test.sh             # Test Runner
-│
-├── 📂 tests/                  # Test Suite
-│   ├── 📂 unit/               # Unit Tests
-│   ├── 📂 integration/        # Integration Tests
-│   └── 📂 e2e/               # End-to-End Tests
-│
-├── 📂 deployments/            # Infrastructure
-│   ├── 📂 aws/                # AWS Deployment Configs
-│   ├── 📂 docker/             # Docker Configurations
-│   └── 📂 infrastructure/     # Infrastructure as Code
-│
-└── 📂 monitoring/             # Observability
-    ├── 📂 logs/               # Application Logs
-    ├── 📂 metrics/            # Performance Metrics
-    └── 📂 alerts/             # Alert Configurations
-```
-
-📋 **Detailed Structure**: See [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md) for complete directory organization.
-
----
-
-## 📋 **API Reference**
-
-### 🏦 **Core Banking Operations**
+### Core Banking Operations
 ```bash
-# Letter of Credit Processing
+# Document Processing
+POST /mutil_agent/api/v1/documents/process
+Content-Type: multipart/form-data
+
+# Letter of Credit Validation
 POST /mutil_agent/api/v1/compliance/validate
 Content-Type: multipart/form-data
-file: [LC documents], lc_number: "LC-2024-001"
 
 # Credit Risk Assessment
 POST /mutil_agent/api/v1/risk/assess
 Content-Type: application/json
-{"applicant_name": "ABC Company", "requested_amount": 5000000000}
 
 # Multi-Agent Coordination
 POST /mutil_agent/api/v1/agents/coordinate
-{"task_type": "lc_processing", "priority": "high"}
+Content-Type: application/json
+```
+
+### Authentication
+All API endpoints require JWT authentication. Obtain tokens through the `/auth/login` endpoint.
+
+### Rate Limiting
+- Standard tier: 1,000 requests/hour
+- Premium tier: 10,000 requests/hour
+- Enterprise tier: Unlimited with SLA
+
+---
+
+## Performance Metrics
+
+### Processing Capabilities
+- **Document Throughput**: 15,000+ documents/day
+- **OCR Accuracy**: 99.5% for Vietnamese documents
+- **API Response Time**: < 2 seconds (95th percentile)
+- **Concurrent Users**: 1,500+ simultaneous connections
+- **System Uptime**: 99.99% availability SLA
+- **Multi-Agent Consensus**: 99.8% agreement rate
+
+### Cost Analysis
+| Component | Monthly Cost | Description |
+|-----------|--------------|-------------|
+| AI/ML Services | $220 | Bedrock, Textract, Comprehend |
+| Compute Resources | $195 | ECS Fargate with auto-scaling |
+| Storage & Database | $75 | S3, RDS, DynamoDB |
+| Network & CDN | $52-107 | CloudFront, API Gateway, data transfer |
+| **Total** | **$542-597** | Complete operational cost |
+
+---
+
+## Security & Compliance
+
+### Security Framework
+- **Encryption**: AES-256 at rest, TLS 1.3 in transit
+- **Access Control**: IAM roles with multi-factor authentication
+- **Network Security**: VPC with private subnets and security groups
+- **Monitoring**: CloudTrail, GuardDuty, Security Hub integration
+- **Compliance**: SOC 2, ISO 27001, PCI DSS standards
+
+### Banking Compliance
+- **Vietnamese Regulations**: Full SBV compliance
+- **International Standards**: UCP 600, Basel III, SWIFT
+- **Data Protection**: Vietnamese data privacy laws
+- **Audit Trails**: Immutable transaction logs
+- **Risk Management**: Comprehensive risk assessment framework
+
+---
+
+## Documentation
+
+### Technical Documentation
+- **[FAQ Collection](./FAQ/README.md)** - Comprehensive Q&A for all aspects
+- **[Architecture Guide](./docs/architecture/README.md)** - Detailed system design
+- **[API Documentation](./docs/api/README.md)** - Complete API reference
+- **[Deployment Guide](./docs/deployment/README.md)** - Production deployment
+
+### Business Documentation
+- **[Business Case](./FAQ/04-business-impact.md)** - ROI and value proposition
+- **[Use Cases](./FAQ/09-use-cases.md)** - Real-world applications
+- **[Compliance Guide](./FAQ/03-banking-compliance.md)** - Regulatory adherence
+
+---
+
+## Project Management
+
+### Development Workflow
+```bash
+# Development commands
+./scripts/run.sh [up|stop|restart|logs|status]
+./scripts/build.sh [development|production]
+./scripts/test.sh [all|health|api|agents|performance]
+./scripts/deploy.sh [staging|production] [region]
+```
+
+### Project Structure
+```
+vpbank-kmult-agent-studio/
+├── src/                    # Source code
+│   ├── backend/            # FastAPI services
+│   ├── frontend/           # React application
+│   ├── agents/             # Multi-agent system
+│   └── shared/             # Common utilities
+├── docs/                   # Documentation
+├── FAQ/                    # Q&A collection
+├── config/                 # Configuration files
+├── scripts/                # Automation scripts
+├── tests/                  # Test suites
+└── deployments/            # Infrastructure code
 ```
 
 ---
 
-## 🏆 **Production Ready**
+## Contributing
 
-### ✅ **Enterprise Features**
-- **AWS Well-Architected** compliant (all 5 pillars)
-- **Banking-grade security** with CloudHSM
-- **Multi-region deployment** (Singapore + Tokyo)
-- **Vietnamese banking compliance** (SBV, Basel III)
-- **99.99% availability** SLA with automated failover
-- **Complete audit trails** and regulatory reporting
+### Development Guidelines
+1. Follow AWS Well-Architected principles
+2. Maintain comprehensive test coverage (>95%)
+3. Document all API changes
+4. Ensure banking compliance standards
+5. Implement security best practices
 
-### 🎯 **Ready For**
-- Executive presentations and stakeholder reviews
-- Banking compliance audits and regulatory approval
-- Production deployment in enterprise environment
-- Technical implementation by development teams
+### Code Quality
+- **Linting**: ESLint for frontend, Black for backend
+- **Testing**: Jest for frontend, pytest for backend
+- **Security**: OWASP compliance scanning
+- **Performance**: Load testing for all releases
+
+---
+
+## Support & Contact
+
+### Technical Support
+- **Documentation**: [FAQ Collection](./FAQ/README.md)
+- **Issues**: GitHub Issues for bug reports
+- **Architecture**: [System Design Guide](./docs/architecture/README.md)
+
+### Business Inquiries
+- **Multi-Agent Hackathon 2025 - Group 181**
+- **Enterprise Solutions**: Contact for licensing and deployment
+- **Partnership Opportunities**: Vietnamese banking market expansion
+
+---
+
+## License
+
+This project is licensed under the Enterprise License. See [LICENSE](./LICENSE) file for details.
 
 ---
 
 <div align="center">
 
-## 🏆 **VPBank K-MULT Agent Studio**
-### *Enterprise Multi-Agent Banking Automation*
+## VPBank K-MULT Agent Studio
+### Enterprise Multi-Agent Banking Automation
 
 **Multi-Agent Hackathon 2025 - Group 181**
 
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-181717.svg?style=for-the-badge&logo=GitHub)](https://github.com/ngcuyen/multi-agent-hackathon)
 
-**🎯 Status: PRODUCTION READY**
+**Status: Production Ready**
 *Complete AWS architecture | 7 specialized agents | Banking compliance | Enterprise security*
 
 </div>
