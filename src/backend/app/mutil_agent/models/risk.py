@@ -2,20 +2,21 @@ from pydantic import BaseModel, Field
 from typing import Dict, List, Optional
 
 class RiskAssessmentRequest(BaseModel):
-    entity_id: str = Field(..., description="ID của đối tượng đánh giá")
-    entity_type: str = Field(..., description="Loại đối tượng (cá nhân/doanh nghiệp)")
-    financials: Dict = Field(..., description="Thông tin tài chính")
-    market_data: Dict = Field(..., description="Dữ liệu thị trường")
+    entity_id: Optional[str] = Field(default=None, description="ID của đối tượng đánh giá")
+    entity_type: Optional[str] = Field(default=None, description="Loại đối tượng (cá nhân/doanh nghiệp)")
+    financials: Optional[Dict] = Field(default=None, description="Thông tin tài chính")
+    market_data: Optional[Dict] = Field(default=None, description="Dữ liệu thị trường")
     custom_factors: Optional[Dict] = Field(default=None, description="Yếu tố tùy chỉnh")
     # Credit assessment fields (mở rộng)
     applicant_name: Optional[str] = Field(default=None, description="Tên người/công ty vay")
     business_type: Optional[str] = Field(default=None, description="Loại hình kinh doanh")
     requested_amount: Optional[float] = Field(default=None, description="Số tiền vay")
-    currency: Optional[str] = Field(default=None, description="Loại tiền")
-    loan_term: Optional[int] = Field(default=None, description="Kỳ hạn vay (tháng)")
+    currency: Optional[str] = Field(default=None, description="Đơn vị tiền tệ")
+    loan_term: Optional[int] = Field(default=None, description="Thời hạn vay (tháng)")
     loan_purpose: Optional[str] = Field(default=None, description="Mục đích vay")
     collateral_type: Optional[str] = Field(default=None, description="Loại tài sản đảm bảo")
     assessment_type: Optional[str] = Field(default=None, description="Loại đánh giá")
+    financial_documents: Optional[str] = Field(default=None, description="Nội dung tài liệu tài chính")
     # ... có thể bổ sung trường khác nếu cần
 
 class Threat(BaseModel):

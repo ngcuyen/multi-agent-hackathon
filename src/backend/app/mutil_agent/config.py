@@ -40,23 +40,38 @@ MODEL_MAPPING = {
 }
 
 # Amazon Bedrock Configuration
-BEDROCK_RT = boto3.client(
-    "bedrock-runtime",
-    region_name=AWS_BEDROCK_REGION,
-    aws_access_key_id=AWS_ACCESS_KEY_ID,
-    aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
-    aws_session_token=AWS_SESSION_TOKEN,  # Add session token for temporary credentials
-    endpoint_url=os.getenv("BEDROCK_ENDPOINT_URL", None),
-    verify=VERIFY_HTTPS,  # Add SSL verification setting
-)
+bedrock_endpoint_url = os.getenv("BEDROCK_ENDPOINT_URL")
+if bedrock_endpoint_url and bedrock_endpoint_url.strip():
+    BEDROCK_RT = boto3.client(
+        "bedrock-runtime",
+        region_name=AWS_BEDROCK_REGION,
+        aws_access_key_id=AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+        aws_session_token=AWS_SESSION_TOKEN,  # Add session token for temporary credentials
+        endpoint_url=bedrock_endpoint_url,
+        verify=VERIFY_HTTPS,  # Add SSL verification setting
+    )
+else:
+    BEDROCK_RT = boto3.client(
+        "bedrock-runtime",
+        region_name=AWS_BEDROCK_REGION,
+        aws_access_key_id=AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+        aws_session_token=AWS_SESSION_TOKEN,  # Add session token for temporary credentials
+        verify=VERIFY_HTTPS,  # Add SSL verification setting
+    )
 
-BEDROCK_KNOWLEDGEBASE = boto3.client(
-    "bedrock-agent-runtime",
-    region_name=AWS_KNOWLEDGEBASE_REGION,
-    aws_access_key_id=AWS_KNOWLEDGEBASE_ACCESS_KEY_ID,
-    aws_secret_access_key=AWS_KNOWLEDGEBASE_SECRET_ACCESS_KEY,
-    verify=VERIFY_HTTPS,
-)
+# Only create BEDROCK_KNOWLEDGEBASE client if region is provided
+if AWS_KNOWLEDGEBASE_REGION and AWS_KNOWLEDGEBASE_REGION.strip():
+    BEDROCK_KNOWLEDGEBASE = boto3.client(
+        "bedrock-agent-runtime",
+        region_name=AWS_KNOWLEDGEBASE_REGION,
+        aws_access_key_id=AWS_KNOWLEDGEBASE_ACCESS_KEY_ID,
+        aws_secret_access_key=AWS_KNOWLEDGEBASE_SECRET_ACCESS_KEY,
+        verify=VERIFY_HTTPS,
+    )
+else:
+    BEDROCK_KNOWLEDGEBASE = None
 LLM_MAX_TOKENS = os.getenv("LLM_MAX_TOKENS")
 LLM_TOP_P = os.getenv("LLM_TOP_P")
 LLM_TEMPERATURE = os.getenv("LLM_TEMPERATURE")

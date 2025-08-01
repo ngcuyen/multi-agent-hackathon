@@ -111,6 +111,14 @@ Hồ sơ khách hàng: (đúng format như bên dưới, có gạch đầu dòng
 - Yếu tố khác: {json.dumps(request.custom_factors, ensure_ascii=False)}
 - Điểm tín dụng CIC: {credit_score} (phải chú thích: dựa trên dữ liệu từ CIC tra cứu bằng CCCD của khách hàng)
 - Nhận xét điểm tín dụng: {rank_comment}
+
+{f"**TÀI LIỆU TÀI CHÍNH ĐÍNH KÈM:**\n{request.financial_documents}\n" if request.financial_documents else ""}
+
+**HƯỚNG DẪN PHÂN TÍCH:**
+1. Nếu có tài liệu tài chính đính kèm, hãy sử dụng thông tin từ tài liệu để phân tích
+2. Kết hợp thông tin từ tài liệu với dữ liệu cơ bản để đưa ra đánh giá toàn diện
+3. Trích xuất các chỉ số tài chính quan trọng từ tài liệu (nếu có)
+4. Ưu tiên thông tin từ tài liệu đính kèm hơn dữ liệu mặc định
 """
 
     ai_text = await call_claude_sonnet(prompt)

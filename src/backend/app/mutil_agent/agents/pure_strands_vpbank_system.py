@@ -399,34 +399,71 @@ def risk_analysis_agent(query: str, file_data: Optional[Dict[str, Any]] = None) 
     try:
         logger.info(f"🔧 [RISK_AGENT] TOOL CALLED with query: {query[:100]}...")
         
-        # Use existing risk assessment endpoint DIRECTLY
-        from app.mutil_agent.routes.v1.risk_routes import assess_risk_endpoint
+        # Import required models and services
+        from app.mutil_agent.models.risk import RiskAssessmentRequest
+        from app.mutil_agent.routes.v1.risk_routes import assess_risk_endpoint, assess_risk_file_endpoint
+        from fastapi import UploadFile
+        import io
         
         # Extract basic info from query for risk assessment
         financial_data = _extract_basic_risk_data_from_query(query)
         
-        async def call_existing_risk_api():
-            # Create request body matching EXACT existing API
-            risk_request_body = {
-                "entity_id": f"entity_{uuid4().hex[:8]}",
-                "entity_type": "doanh nghiệp",
-                "financials": financial_data.get('financials', {}),
-                "market_data": financial_data.get('market_data', {}),
-                "custom_factors": financial_data.get('custom_factors', {}),
-                "applicant_name": financial_data.get('applicant_name', 'Khách hàng'),
-                "business_type": financial_data.get('business_type', 'general'),
-                "requested_amount": financial_data.get('requested_amount', 1000000000),
-                "currency": financial_data.get('currency', 'VND'),
-                "loan_term": financial_data.get('loan_term', 12),
-                "loan_purpose": financial_data.get('loan_purpose', 'Kinh doanh'),
-                "collateral_type": financial_data.get('collateral_type', 'Không tài sản đảm bảo')
-            }
+        # Extract text from file if provided
+        if file_data and file_data.get('raw_bytes'):
+            logger.info(f"🔧 [RISK_AGENT] Processing file: {file_data.get('filename')} ({len(file_data.get('raw_bytes', b''))} bytes)")
             
-            # Call EXACT existing risk assessment endpoint
-            return await assess_risk_endpoint(risk_request_body)
+            try:
+                # Extract text from file using the same logic as endpoint wrapper
+                raw_bytes = file_data.get('raw_bytes')
+                content_type = file_data.get('content_type', '')
+                
+                file_text = ""
+                if content_type == "application/pdf":
+                    from app.mutil_agent.helpers.improved_pdf_extractor import ImprovedPDFExtractor
+                    extractor = ImprovedPDFExtractor()
+                    result = extractor.extract_text_from_pdf(raw_bytes)
+                    file_text = result.get('text', '').strip()
+                elif content_type in ["application/vnd.openxmlformats-officedocument.wordprocessingml.document"]:
+                    import docx
+                    import io
+                    doc = docx.Document(io.BytesIO(raw_bytes))
+                    file_text = "\n".join([paragraph.text for paragraph in doc.paragraphs])
+                elif content_type.startswith("text/"):
+                    file_text = raw_bytes.decode('utf-8')
+                
+                financial_data['financial_documents'] = file_text
+                logger.info(f"🔧 [RISK_AGENT] Extracted {len(file_text)} characters from file")
+                
+                if not file_text.strip():
+                    logger.warning("🔧 [RISK_AGENT] No text extracted from file, proceeding with basic data")
+                
+            except Exception as file_error:
+                logger.error(f"🔧 [RISK_AGENT] File processing error: {file_error}")
+                return f"❌ **Lỗi xử lý file**: {str(file_error)}"
+        
+        # Call risk assessment with file content
+        async def call_risk_api():
+            from app.mutil_agent.models.risk import RiskAssessmentRequest
+            from app.mutil_agent.services.risk_service import assess_risk
+            
+            risk_request = RiskAssessmentRequest(
+                applicant_name=financial_data.get('applicant_name', 'Khách hàng'),
+                business_type=financial_data.get('business_type', 'general'),
+                requested_amount=financial_data.get('requested_amount', 1000000000),
+                currency=financial_data.get('currency', 'VND'),
+                loan_term=financial_data.get('loan_term', 12),
+                loan_purpose=financial_data.get('loan_purpose', 'Kinh doanh'),
+                assessment_type="comprehensive",
+                collateral_type=financial_data.get('collateral_type', 'Không tài sản đảm bảo'),
+                financial_documents=financial_data.get('financial_documents', '')  # ✅ Thêm file content
+            )
+            
+            return await assess_risk(risk_request)
         
         # Execute async function with safe wrapper
-        risk_result = _run_async_safely(call_existing_risk_api)
+        risk_result = _run_async_safely(call_risk_api)
+        
+        logger.info("🔧 [RISK_AGENT] Successfully processed with DIRECT service call")
         
         # Format response using EXACT existing API result
         if risk_result and hasattr(risk_result, 'data'):
@@ -472,7 +509,52 @@ def risk_analysis_agent(query: str, file_data: Optional[Dict[str, Any]] = None) 
 *🤖 VPBank K-MULT Agent Studio*
 *⏰ {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}*"""
         
-        logger.info("🔧 [RISK_AGENT] Successfully processed with DIRECT API call")
+        return response
+        
+        # Format response using EXACT existing API result
+        if risk_result and hasattr(risk_result, 'data'):
+            data = risk_result.data
+            response = f"""📊 **Phân tích rủi ro - VPBank K-MULT**
+
+**Thông tin đánh giá:**
+• Tên khách hàng: {financial_data.get('applicant_name', 'Chưa xác định')}
+• Số tiền yêu cầu: {financial_data.get('requested_amount', 0):,} VNĐ
+• Loại hình kinh doanh: {financial_data.get('business_type', 'Chưa xác định')}
+
+**Kết quả phân tích:**
+• Điểm rủi ro: {data.get('risk_score', 'N/A')}
+• Mức độ rủi ro: {data.get('risk_level', 'N/A')}
+• Khuyến nghị: {data.get('recommendations', ['Cần đánh giá thêm'])[0] if data.get('recommendations') else 'Cần đánh giá thêm'}
+
+**Báo cáo AI:**
+{data.get('ai_report', 'Đang phân tích dữ liệu tài chính và đánh giá rủi ro...')}
+
+---
+
+*🤖 VPBank K-MULT Agent Studio*
+*⏰ {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}*"""
+        else:
+            # Fallback response
+            response = f"""📊 **Phân tích rủi ro - VPBank K-MULT**
+
+**Yêu cầu:** {query[:200]}...
+
+**Phân tích sơ bộ:**
+- Đang xử lý dữ liệu tài chính
+- Áp dụng mô hình đánh giá rủi ro VPBank  
+- Tuân thủ Basel III và quy định SBV
+
+**Lưu ý:** Để có kết quả chính xác, vui lòng cung cấp:
+• Tên khách hàng/doanh nghiệp
+• Số tiền vay mong muốn
+• Mục đích vay vốn
+• Thông tin tài chính
+
+---
+
+*🤖 VPBank K-MULT Agent Studio*
+*⏰ {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}*"""
+        
         return response
         
     except Exception as e:
@@ -500,16 +582,32 @@ def _extract_basic_risk_data_from_query(query: str) -> Dict[str, Any]:
         else:
             financial_data['requested_amount'] = 1000000000
         
-        # Set defaults
+        # Set defaults with proper structure for required fields
         financial_data.update({
             'business_type': 'general',
             'currency': 'VND',
             'loan_term': 12,
             'loan_purpose': 'Kinh doanh',
             'collateral_type': 'Không tài sản đảm bảo',
-            'financials': {},
-            'market_data': {},
-            'custom_factors': {}
+            # Required fields with proper structure
+            'financials': {
+                'revenue': 1000000000,
+                'profit': 100000000,
+                'assets': 2000000000,
+                'liabilities': 500000000,
+                'cash_flow': 300000000
+            },
+            'market_data': {
+                'industry': 'general',
+                'market_condition': 'stable',
+                'competition_level': 'medium',
+                'growth_potential': 'moderate'
+            },
+            'custom_factors': {
+                'risk_tolerance': 'medium',
+                'business_experience': 'established',
+                'market_position': 'stable'
+            }
         })
         
         return financial_data
@@ -524,9 +622,25 @@ def _extract_basic_risk_data_from_query(query: str) -> Dict[str, Any]:
             'loan_term': 12,
             'loan_purpose': 'Kinh doanh',
             'collateral_type': 'Không tài sản đảm bảo',
-            'financials': {},
-            'market_data': {},
-            'custom_factors': {}
+            # Required fields with proper structure
+            'financials': {
+                'revenue': 1000000000,
+                'profit': 100000000,
+                'assets': 2000000000,
+                'liabilities': 500000000,
+                'cash_flow': 300000000
+            },
+            'market_data': {
+                'industry': 'general',
+                'market_condition': 'stable',
+                'competition_level': 'medium',
+                'growth_potential': 'moderate'
+            },
+            'custom_factors': {
+                'risk_tolerance': 'medium',
+                'business_experience': 'established',
+                'market_position': 'stable'
+            }
         }
 
 
