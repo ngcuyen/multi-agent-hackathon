@@ -13,6 +13,24 @@
 
 </div>
 
+
+## Team Members
+
+- *Uyen Le* - Leader  
+  [LinkedIn](https://www.linkedin.com/in/lephamngocuyen/)
+
+- *Khoa Ho* - Deputy Leader  
+  [LinkedIn](https://www.linkedin.com/in/khoa-d-ho/)
+
+- *Thao Phan* - Project Manager  
+  [LinkedIn](https://www.linkedin.com/in/phanthithanhthao/)
+
+- *Mai Nguyen* - Gen AI Engineer  
+  [LinkedIn](https://www.linkedin.com/in/nnquynhmai/)
+
+- *Linh Nguyen* - Gen AI Engineer  
+  [LinkedIn](https://www.linkedin.com/in/linhnhat/)  
+
 ## Executive Summary
 
 VPBank K-MULT Agent Studio is an enterprise-grade multi-agent AI platform specifically designed for Vietnamese banking operations. The system delivers **60-80% processing time reduction**, achieving **99.5% accuracy** in document processing while maintaining **< 0.5% error rates** and **99.99% availability** at a total operational cost of **$542-597/month**.
